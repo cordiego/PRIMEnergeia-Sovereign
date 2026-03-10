@@ -1,63 +1,79 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
-import time
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from datetime import datetime
 
-# --- CONFIGURACIÓN DE MARCA ---
-st.set_page_config(page_title="PRIMEnergeia Sovereign Console", layout="wide")
+# --- ARQUITECTURA DE RED PRIME ---
+st.set_page_config(page_title="PRIMEnergeia Sovereign Network", layout="wide", initial_sidebar_state="collapsed")
 
-st.title("🛡️ PRIMEnergeia | Sovereign Grid Control")
-st.sidebar.header("Parámetros del Nodo: VZA-400")
-st.sidebar.write("Estado: **ACTIVO (HJB-CORE)**")
-st.sidebar.divider()
+# Estética SCADA de Grado Militar
+st.markdown("""
+    <style>
+    .main { background-color: #05070a; color: #ffffff; font-family: 'Inter', sans-serif; }
+    .stMetric { background-color: #0d1117; border: 1px solid #00d1ff; padding: 20px; border-radius: 2px; }
+    div[data-testid="stMetricValue"] { color: #00d1ff; font-family: 'JetBrains Mono', monospace; font-size: 40px; }
+    .node-card { border: 1px solid #1f2937; padding: 15px; background-color: #0d1117; border-radius: 4px; }
+    </style>
+    """, unsafe_allow_html=True)
 
-# --- MÉTRICAS DE PODER (KPIs) ---
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.metric(label="Rescate Fiduciario (USD)", value="$1,845,000.00", delta="+$125,400.00 hoy")
-with col2:
-    st.metric(label="Estabilidad de Frecuencia", value="59.98 Hz", delta="Optimizado", delta_color="normal")
-with col3:
-    st.metric(label="Eficiencia de Activos", value="98.4%", delta="0.5% vs Legacy")
-
+# --- PANEL DE CONTROL CENTRAL ---
+st.title("⚡ PRIMEnergeia: Sovereign Grid Control")
+st.markdown(f"**SISTEMA OPERATIVO DE RED** | ESTATUS: NOMINAL | {datetime.now().strftime('%H:%M:%S UTC')}")
 st.divider()
 
-# --- SIMULACIÓN DE DATOS EN TIEMPO REAL ---
-st.subheader("Visualización de Telemetría Estocástica")
+# --- CAPA 1: TELEMETRÍA DE ALTA FIDELIDAD ---
+m1, m2, m3, m4 = st.columns(4)
+with m1:
+    st.metric("FRECUENCIA MAESTRA", "60.001 Hz", "Δ 0.001")
+with m2:
+    st.metric("TENSIÓN DE NODO", "115.2 kV", "Estable")
+with m3:
+    st.metric("RESCATE PML ACUM.", "$2.54M USD", "PROY: $3.8M")
+with m4:
+    st.metric("LATENCIA HJB", "0.85 ms", "Real-Time")
 
-# Generar datos para el gráfico
-t = np.linspace(0, 24, 100)
-freq_legacy = 60 + 0.3 * np.random.randn(100)
-freq_legacy[40:55] -= 0.8  # Simulación de falla legacy
-freq_hjb = 60 + 0.05 * np.random.randn(100)
+# --- CAPA 2: MAPA DE NODOS REGIONALES ---
+st.write("### 🌐 Topología de Nodos Activos")
+n1, n2, n3 = st.columns(3)
 
-chart_data = pd.DataFrame({
-    'Tiempo (Horas)': t,
-    'Frecuencia Legacy (Riesgo)': freq_legacy,
-    'Frecuencia PRIMEnergeia (Auto-Healing)': freq_hjb
-}).set_index('Tiempo (Horas)')
+with n1:
+    st.markdown("<div class='node-card'>", unsafe_allow_html=True)
+    st.write("#### NODO VZA-400")
+    st.write("**Ubicación:** Valle de México")
+    st.write("**Carga:** 85% | **Status:** Master")
+    st.progress(85)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-st.line_chart(chart_data, color=["#ff4b5c", "#00d1ff"])
+with n2:
+    st.markdown("<div class='node-card'>", unsafe_allow_html=True)
+    st.write("#### NODO SLP-100")
+    st.write("**Ubicación:** San Luis Potosí")
+    st.write("**Carga:** 42% | **Status:** Slave")
+    st.progress(42)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-# --- CONTROLES DE ACTUACIÓN ---
-st.subheader("Controles de Actuación del Lead Physicist")
-col_ctrl1, col_ctrl2 = st.columns(2)
+with n3:
+    st.markdown("<div class='node-card'>", unsafe_allow_html=True)
+    st.write("#### NODO QRO-200")
+    st.write("**Ubicación:** Querétaro")
+    st.write("**Carga:** 12% | **Status:** Failover")
+    st.progress(12)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-with col_ctrl1:
-    agresividad = st.slider("Agresividad del Control HJB", 0.0, 1.0, 0.85)
-    st.info(f"Nivel de control calibrado a {agresividad * 100}% de inercia sintética.")
+# --- CAPA 3: ANÁLISIS DE FASE (EL CORAZÓN DEL ALGORITMO) ---
+st.write("---")
+st.write("### 📊 Compensación Dinámica de Armónicos (Filtro PRIME)")
+t = np.linspace(0, 0.1, 1000)
+raw_wave = np.sin(2 * np.pi * 60 * t) + 0.3 * np.sin(2 * np.pi * 180 * t) # Ruido armónico
+clean_wave = np.sin(2 * np.pi * 60 * t) # Resultado del algoritmo
 
-with col_ctrl2:
-    if st.button("DESPLEGAR MANIFIESTO DE RESCATE (PDF)"):
-        st.success("Generando reporte para el Director de Operaciones... Enviado.")
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=t, y=raw_wave, name="Distorsión de Red (Pre-PRIME)", line=dict(color='red', width=1)))
+fig.add_trace(go.Scatter(x=t, y=clean_wave, name="Estabilización PRIME VZA", line=dict(color='#00d1ff', width=3)))
+fig.update_layout(template="plotly_dark", height=400, margin=dict(l=0,r=0,t=0,b=0), legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"))
+st.plotly_chart(fig, use_container_width=True)
 
-# --- LOG DE EVENTOS ---
+# --- FOOTER ---
 st.divider()
-st.subheader("Eventos de Red")
-st.table(pd.DataFrame({
-    'Evento': ['Inyección de Inercia', 'Compensación de Fase', 'Estabilización de PML'],
-    'Impacto Económico': ['$12,500.00', '$45,000.00', '$67,900.00'],
-    'Estado': ['Completado', 'Completado', 'Completado']
-}))
+st.info("**Soberanía Energética:** La arquitectura PRIME minimiza el Hamiltoniano de costo operativo mediante el control estocástico de la demanda, garantizando la estabilidad del Sistema Eléctrico Nacional (SEN).")
+st.caption("PRIMEnergeia S.A.S. | Lead Computational Physicist: Diego | Confidential Proprietary Protocol")
