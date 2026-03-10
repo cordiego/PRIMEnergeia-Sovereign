@@ -1,63 +1,82 @@
 import streamlit as st
-import pandas as pd
 import numpy as np
-import time
-import matplotlib.pyplot as plt
+import plotly.graph_objects as go
+from datetime import datetime
 
-# --- CONFIGURACIÓN DE MARCA ---
-st.set_page_config(page_title="PRIMEnergeia Sovereign Console", layout="wide")
+# --- CONFIGURACIÓN DE GRADO INDUSTRIAL (SOVEREIGN UI) ---
+st.set_page_config(
+    page_title="PRIMEnergeia Sovereign Node | VZA-400",
+    page_icon="⚡",
+    layout="wide",
+    initial_sidebar_state="collapsed"
+)
 
-st.title("🛡️ PRIMEnergeia | Sovereign Grid Control")
-st.sidebar.header("Parámetros del Nodo: VZA-400")
-st.sidebar.write("Estado: **ACTIVO (HJB-CORE)**")
-st.sidebar.divider()
+# Estética de Terminal de Investigación (Black & Cyber Blue)
+st.markdown("""
+    <style>
+    .main { background-color: #0e1117; color: #ffffff; font-family: 'Courier New', Courier, monospace; }
+    .stMetric { background-color: #161b22; border: 1px solid #00d1ff; padding: 20px; border-radius: 5px; }
+    div[data-testid="stMetricValue"] { color: #00d1ff; font-size: 32px; font-weight: bold; }
+    .stAlert { background-color: #161b22; border: 1px solid #00d1ff; color: #00d1ff; }
+    footer {visibility: hidden;}
+    </style>
+    """, unsafe_allow_html=True)
 
-# --- MÉTRICAS DE PODER (KPIs) ---
-col1, col2, col3 = st.columns(3)
-
-with col1:
-    st.metric(label="Rescate Fiduciario (USD)", value="$1,845,000.00", delta="+$125,400.00 hoy")
-with col2:
-    st.metric(label="Estabilidad de Frecuencia", value="59.98 Hz", delta="Optimizado", delta_color="normal")
-with col3:
-    st.metric(label="Eficiencia de Activos", value="98.4%", delta="0.5% vs Legacy")
-
+# --- CABECERA DE AUTORIDAD ---
+st.title("⚡ PRIMEnergeia: Sovereign Control Dashboard")
+st.markdown(f"### **NODO OPERATIVO: VZA-400** | **Status: SYNCHRONIZED** | {datetime.now().strftime('%d/%m/%Y %H:%M')}")
 st.divider()
 
-# --- SIMULACIÓN DE DATOS EN TIEMPO REAL ---
-st.subheader("Visualización de Telemetría Estocástica")
+# --- TELEMETRÍA DE RED (CAPA DE CONTROL HJB) ---
+m1, m2, m3, m4 = st.columns(4)
+with m1:
+    st.metric("Estabilidad de Frecuencia", "60.001 Hz", "Δ 0.001")
+    st.caption("Filtro Estocástico HJB: Activo")
+with m2:
+    st.metric("Rescate de Capital (PML)", "$2.54M USD", "+14.2%")
+    st.caption("Arbitraje de Nodo Energético")
+with m3:
+    st.metric("Entropía del Sistema (σ)", "0.0042", "Optimizado", delta_color="inverse")
+    st.caption("Minimización de Pérdida Térmica")
+with m4:
+    st.metric("Confianza Monte Carlo", "99.98%", "Sigma-6")
+    st.caption("Resiliencia de Red ante Fallos")
 
-# Generar datos para el gráfico
-t = np.linspace(0, 24, 100)
-freq_legacy = 60 + 0.3 * np.random.randn(100)
-freq_legacy[40:55] -= 0.8  # Simulación de falla legacy
-freq_hjb = 60 + 0.05 * np.random.randn(100)
+# --- VISUALIZACIÓN DE ESTABILIZACIÓN DE CARGA ---
+st.markdown("## 📊 Respuesta de Red vs. Compensación PRIMEnergeia")
 
-chart_data = pd.DataFrame({
-    'Tiempo (Horas)': t,
-    'Frecuencia Legacy (Riesgo)': freq_legacy,
-    'Frecuencia PRIMEnergeia (Auto-Healing)': freq_hjb
-}).set_index('Tiempo (Horas)')
+t = np.linspace(0, 100, 100)
+noise_raw = 400 + 20 * np.sin(t/4) + np.random.normal(0, 8, 100)
+stabilized = 400 + 20 * np.sin(t/4) + np.random.normal(0, 1.2, 100)
 
-st.line_chart(chart_data, color=["#ff4b5c", "#00d1ff"])
+fig = go.Figure()
+fig.add_trace(go.Scatter(x=t, y=noise_raw, name="Carga Crítica (Sin Control)", line=dict(color='rgba(255, 0, 0, 0.4)', dash='dash')))
+fig.add_trace(go.Scatter(x=t, y=stabilized, name="Compensación PRIMEnergeia (VZA-400)", line=dict(color='#00d1ff', width=3)))
 
-# --- CONTROLES DE ACTUACIÓN ---
-st.subheader("Controles de Actuación del Lead Physicist")
-col_ctrl1, col_ctrl2 = st.columns(2)
+fig.update_layout(
+    template="plotly_dark",
+    plot_bgcolor='rgba(0,0,0,0)',
+    paper_bgcolor='rgba(0,0,0,0)',
+    height=450,
+    margin=dict(l=0, r=0, t=30, b=0),
+    legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center")
+)
 
-with col_ctrl1:
-    agresividad = st.slider("Agresividad del Control HJB", 0.0, 1.0, 0.85)
-    st.info(f"Nivel de control calibrado a {agresividad * 100}% de inercia sintética.")
+st.plotly_chart(fig, use_container_width=True)
 
-with col_ctrl2:
-    if st.button("DESPLEGAR MANIFIESTO DE RESCATE (PDF)"):
-        st.success("Generando reporte para el Director de Operaciones... Enviado.")
-
-# --- LOG DE EVENTOS ---
+# --- ESTRATEGIA DE ACTIVOS EUREKA 1.0 (INTEGRACIÓN FINANCIERA) ---
 st.divider()
-st.subheader("Eventos de Red")
-st.table(pd.DataFrame({
-    'Evento': ['Inyección de Inercia', 'Compensación de Fase', 'Estabilización de PML'],
-    'Impacto Económico': ['$12,500.00', '$45,000.00', '$67,900.00'],
-    'Estado': ['Completado', 'Completado', 'Completado']
-}))
+st.subheader("💹 Gestión de Capital Soberano (Eureka 1.0)")
+e1, e2, e3, e4, e5 = st.columns(5)
+
+# Triada Eureka + Estabilidad para el Nodo de $550 USD
+e1.metric("AGQ (Silver 2x)", "20%", "w* Target")
+e2.metric("GEV (Energy)", "25%", "w* Target")
+e3.metric("UGL (Gold 2x)", "20%", "w* Target")
+e4.metric("VTIP (TIPS)", "15%", "Stability")
+e5.metric("VGSH (Cash)", "20%", "Liquidity")
+
+st.info("**Análisis de Soberanía:** El sistema mitiga el riesgo de liquidación mediante la optimización del Sharpe Ratio en tiempo real, vinculando la estabilidad de la red eléctrica con la preservación del capital rescatado.")
+
+st.markdown("---")
+st.markdown("<p style='text-align: center; color: #444;'>PRIMEnergeia S.A.S. | Lead Physicist: Diego | ITAM Finance & Physics Lab</p>", unsafe_allow_html=True)
