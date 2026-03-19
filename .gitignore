@@ -1,6 +1,44 @@
+# Python
 __pycache__/
 *.pyc
-.DS_Store
+*.pyo
 *.egg-info/
+dist/
+build/
+
+# Virtual environments
 venv/
+.venv/
+.virtualenvs/
+
+# Databases (local state, not tracked)
+*.db
+
+# Binary outputs (PDFs, images)
+*.pdf
+*.png
+*.jpg
+*.jpeg
+
+# Sensitive / confidential data
+client_data.csv
+PMU_*.csv
+state_vector.*
+
+# IDE & OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment
 .env
+*.env
+
+# Logs
+*.log
+
+# Torch model checkpoints
+*.pt
+*.pth
