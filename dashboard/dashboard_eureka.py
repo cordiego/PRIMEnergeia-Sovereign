@@ -317,7 +317,8 @@ k2.metric("REGIME", regime, f"VIX {'<18' if regime == 'RISK-ON' else '18-28' if 
 k3.metric("PORTFOLIO", f"{data['total_return']:+.2f}%", f"vs SPY {data['spy_return']:+.1f}%")
 k4.metric("MAX DRAWDOWN", f"{data['max_dd']:.2f}%", "Peak-to-Trough")
 k5.metric("SHARPE RATIO", f"{data['sharpe']:.3f}", "Annualized")
-k6.metric("ROLLING VOL", f"{data['rolling_vol_20'].iloc[-1]*100:.1f}%" if not np.isnan(data['rolling_vol_20'].iloc[-1]) else "N/A", "20d Ann.")
+rv20_last = data['rolling_vol_20'].iloc[-1]
+k6.metric("ROLLING VOL", f"{float(rv20_last)*100:.1f}%" if pd.notna(rv20_last) else "N/A", "20d Ann.")
 k7.metric("α vs SPY", f"{data['alpha']:+.2f}%", "Excess Return")
 
 st.markdown("")
@@ -645,7 +646,7 @@ with tab4:
         return "color: #6b7fa3"
 
     st.dataframe(
-        df_reb.style.applymap(style_action, subset=["Action"]),
+        df_reb.style.map(style_action, subset=["Action"]),
         use_container_width=True, hide_index=True, height=280
     )
 
@@ -811,7 +812,7 @@ with tab6:
         return colors.get(val, "color: white")
 
     st.dataframe(
-        df_audit.style.applymap(color_severity, subset=["Severity"]),
+        df_audit.style.map(color_severity, subset=["Severity"]),
         use_container_width=True, height=600, hide_index=True
     )
 
