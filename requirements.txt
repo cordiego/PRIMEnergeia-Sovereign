@@ -6,3 +6,4 @@ matplotlib
 fpdf
 scipy
 torch
+yfinance
