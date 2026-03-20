@@ -284,7 +284,7 @@ with tab1:
     t_axis = np.linspace(0, 6, state["n_steps"])
 
     fig_phys = make_subplots(
-        rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.06,
+        rows=3, cols=1, shared_xaxes=True, vertical_spacing=0.12,
         subplot_titles=("Grid Frequency — Swing Equation Solution", "Rate of Change of Frequency (RoCoF)", "Synthetic Inertia Injection u(t)"),
         row_heights=[0.4, 0.3, 0.3]
     )
@@ -304,9 +304,9 @@ with tab1:
     fig_phys.add_trace(go.Scatter(x=t_axis, y=state["inertia_injection"], name="u_inertia(t)",
         line=dict(color="#00ff88", width=2), fill='tozeroy', fillcolor='rgba(0,255,136,0.1)'), row=3, col=1)
 
-    fig_phys.update_layout(template="plotly_dark", height=700, showlegend=False,
+    fig_phys.update_layout(template="plotly_dark", height=750, showlegend=False,
         paper_bgcolor="#050810", plot_bgcolor="#0a0f1a",
-        margin=dict(l=60, r=20, t=40, b=40),
+        margin=dict(l=60, r=20, t=80, b=40),
         font=dict(family="JetBrains Mono", size=11, color="#6b7fa3"))
     fig_phys.update_xaxes(title_text="Time (s)", row=3, col=1, gridcolor="#1a2744")
     fig_phys.update_yaxes(gridcolor="#1a2744")
@@ -334,7 +334,7 @@ with tab2:
     """, unsafe_allow_html=True)
 
     fig_hjb = make_subplots(
-        rows=2, cols=2, vertical_spacing=0.12, horizontal_spacing=0.08,
+        rows=2, cols=2, vertical_spacing=0.18, horizontal_spacing=0.08,
         subplot_titles=(
             "Value Function V(x) — Cost-to-Go",
             "Policy Gradient ∇V(x)",
@@ -359,9 +359,9 @@ with tab2:
     fig_hjb.add_trace(go.Scatter(x=sg, y=state["H_field"], name="H(x,u*)",
         line=dict(color="#fbc02d", width=2), fill='tozeroy', fillcolor='rgba(251,192,45,0.06)'), row=2, col=2)
 
-    fig_hjb.update_layout(template="plotly_dark", height=650, showlegend=False,
+    fig_hjb.update_layout(template="plotly_dark", height=750, showlegend=False,
         paper_bgcolor="#050810", plot_bgcolor="#0a0f1a",
-        margin=dict(l=60, r=20, t=40, b=40),
+        margin=dict(l=60, r=20, t=80, b=40),
         font=dict(family="JetBrains Mono", size=11, color="#6b7fa3"))
     fig_hjb.update_xaxes(title_text="Frequency (Hz)", gridcolor="#1a2744")
     fig_hjb.update_yaxes(gridcolor="#1a2744")
@@ -411,7 +411,7 @@ with tab3:
     st.markdown("")
 
     fig_fin = make_subplots(
-        rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.08,
+        rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.18,
         subplot_titles=("Injection Profile: Optimal vs Actual (MW)", "Cumulative Capital Recovery (USD)")
     )
 
@@ -426,10 +426,10 @@ with tab3:
     fig_fin.add_trace(go.Scatter(x=h, y=state["capital_cumulative"], name="Capital Rescued",
         line=dict(color="#fbc02d", width=3), fill='tozeroy', fillcolor='rgba(251,192,45,0.08)'), row=2, col=1)
 
-    fig_fin.update_layout(template="plotly_dark", height=550, showlegend=True,
+    fig_fin.update_layout(template="plotly_dark", height=750, showlegend=True,
         paper_bgcolor="#050810", plot_bgcolor="#0a0f1a",
-        margin=dict(l=60, r=20, t=40, b=40),
-        legend=dict(orientation="h", y=1.08, x=0.5, xanchor="center", font=dict(size=11)),
+        margin=dict(l=60, r=20, t=100, b=40),
+        legend=dict(orientation="h", y=1.18, x=0.5, xanchor="center", font=dict(size=11)),
         font=dict(family="JetBrains Mono", size=11, color="#6b7fa3"))
     fig_fin.update_xaxes(title_text="Hour of Day", gridcolor="#1a2744")
     fig_fin.update_yaxes(gridcolor="#1a2744")
