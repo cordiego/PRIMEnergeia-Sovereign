@@ -245,13 +245,14 @@ st.divider()
 # ============================================================
 #  PRIMARY KPI BAR
 # ============================================================
-k1, k2, k3, k4, k5, k6 = st.columns(6)
+k1, k2, k3, k4, k5, k6, k7 = st.columns(7)
 k1.metric("FRECUENCIA", f"{f:.4f} Hz", f"Δ {f - 60.0:+.4f}")
 k2.metric("RoCoF", f"{state['rocof']:+.5f} Hz/s", "Swing Eq.")
 k3.metric("TENSIÓN Φ-A", f"{state['v_a']:.2f} kV", "Nominal")
 k4.metric("THD", f"{state['thd']:.2f} %", f"{'✓ Código Red' if state['thd'] < 5 else '⚠ Excede'}")
 k5.metric("COS φ", f"{state['pf']:.4f}", "Unity Target")
-k6.metric("RESCATE ACUM.", f"${state['capital_total']:,.0f}", "USD / día")
+k6.metric("HOUR OF DAY", now.strftime("%H:%M"), "Live")
+k7.metric("RESCATE ACUM.", f"${state['capital_total']:,.0f}", "USD / día")
 
 st.markdown("")
 
@@ -434,6 +435,10 @@ with tab3:
     fig_fin.update_xaxes(title_text="Hour of Day", gridcolor="#1a2744")
     fig_fin.update_yaxes(gridcolor="#1a2744")
 
+    # Live Hour Marker
+    curr_h = now.hour + now.minute/60.0
+    fig_fin.add_vline(x=curr_h, line_dash="dash", line_color="#00d1ff", opacity=0.7, annotation_text="LIVE", annotation_position="top left")
+
     st.plotly_chart(fig_fin, use_container_width=True)
 
     # PML Market
@@ -448,6 +453,10 @@ with tab3:
         font=dict(family="JetBrains Mono", size=11, color="#6b7fa3"))
     fig_pml.update_xaxes(gridcolor="#1a2744")
     fig_pml.update_yaxes(gridcolor="#1a2744")
+
+    # Live Hour Marker
+    curr_h = now.hour + now.minute/60.0
+    fig_pml.add_vline(x=curr_h, line_dash="dash", line_color="#00d1ff", opacity=0.7, annotation_text="LIVE", annotation_position="top left")
     st.plotly_chart(fig_pml, use_container_width=True)
 
 
