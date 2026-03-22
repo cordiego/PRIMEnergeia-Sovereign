@@ -48,20 +48,40 @@ V_t + min_u { L(x, u) + ∇V · f(x, u) } = 0
 
 ---
 
-## Network — 10 Active Nodes
+## Network — 30 Active Nodes (Full SEN Coverage)
 
-| Node | Location | Region |
-|------|----------|--------|
-| **05-VZA-400** | Valle de México | **Master** |
-| 01-QRO-230 | Querétaro | Central |
-| 03-GDL-400 | Guadalajara | Occidente |
-| 04-MTY-400 | Monterrey | Noreste |
-| 06-SLP-400 | San Luis Potosí | Central |
-| 07-HER-230 | Hermosillo | Sonora Hub |
-| 07-NAV-230 | Navojoa | Sonora |
-| 07-CUM-115 | Ciudad Obregón | Sonora |
-| 08-ENS-230 | Ensenada | Baja California |
-| 08-MXL-230 | Mexicali | Baja California |
+| Node | Location | Region | Voltage |
+|------|----------|--------|---------|
+| **05-VZA-400** | Valle de México | **Central (Master)** | 400 kV |
+| 01-QRO-230 | Querétaro | Central | 230 kV |
+| 01-TUL-400 | Tula, Hidalgo | Central | 400 kV |
+| 06-SLP-400 | San Luis Potosí | Central | 400 kV |
+| 02-PUE-400 | Puebla | Oriental | 400 kV |
+| 02-VER-230 | Veracruz | Oriental | 230 kV |
+| 02-OAX-230 | Oaxaca | Oriental | 230 kV |
+| 02-TEH-400 | Tehuantepec | Oriental | 400 kV |
+| 03-GDL-400 | Guadalajara | Occidental | 400 kV |
+| 03-MAN-400 | Manzanillo | Occidental | 400 kV |
+| 03-AGS-230 | Aguascalientes | Occidental | 230 kV |
+| 03-COL-115 | Colima | Occidental | 115 kV |
+| 04-MTY-400 | Monterrey | Noreste | 400 kV |
+| 04-TAM-230 | Tampico | Noreste | 230 kV |
+| 04-SAL-400 | Saltillo | Noreste | 400 kV |
+| 05-CHI-400 | Chihuahua | Norte | 400 kV |
+| 05-LAG-230 | Gómez Palacio | Norte | 230 kV |
+| 05-DGO-230 | Durango | Norte | 230 kV |
+| 05-JRZ-230 | Cd. Juárez | Norte | 230 kV |
+| 07-HER-230 | Hermosillo | Noroeste | 230 kV |
+| 07-NAV-230 | Navojoa | Noroeste | 230 kV |
+| 07-CUM-115 | Cd. Obregón | Noroeste | 115 kV |
+| 07-GUY-230 | Guaymas | Noroeste | 230 kV |
+| 07-CUL-230 | Culiacán | Noroeste | 230 kV |
+| 08-MXL-230 | Mexicali | Baja California | 230 kV |
+| 08-ENS-230 | Ensenada | Baja California | 230 kV |
+| 08-TIJ-230 | Tijuana | Baja California | 230 kV |
+| 09-LAP-115 | La Paz | Baja California Sur | 115 kV |
+| 10-MER-230 | Mérida | Peninsular | 230 kV |
+| 10-CAN-230 | Cancún | Peninsular | 230 kV |
 
 ---
 

@@ -184,24 +184,58 @@ def generate_simulation_state():
 
     # --- Capital Recovery Computation ---
     optimal_mw = 100.0 * np.maximum(0, np.sin((hours - 6) * np.pi / 12))
-    actual_mw = optimal_mw * np.where(pml_prices > 120, 0.78, 0.93)
-    actual_mw *= np.random.normal(1.0, 0.012, len(hours))
+    # Legacy control system loses 15-25% of optimal injection
+    legacy_loss = np.random.uniform(0.75, 0.85, len(hours))
+    actual_mw = optimal_mw * legacy_loss
+    # PML spikes cause additional curtailment (legacy can't track market)
+    actual_mw *= np.where(pml_prices > 120, np.random.uniform(0.60, 0.75, len(hours)), 1.0)
+    actual_mw *= np.random.normal(1.0, 0.015, len(hours))
+    actual_mw = np.maximum(0, actual_mw)
     delta_mw = np.maximum(0, optimal_mw - actual_mw)
     capital_per_interval = delta_mw * pml_prices * 0.25
     capital_cumulative = np.cumsum(capital_per_interval)
 
     # --- Node Network Status ---
     nodes = [
-        {"id": "05-VZA-400", "loc": "Valle de México", "load": np.random.randint(78, 92), "status": "MASTER", "f": 60.0 + np.random.normal(0, 0.008)},
-        {"id": "04-MTY-400", "loc": "Monterrey", "load": np.random.randint(60, 85), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.010)},
-        {"id": "03-GDL-400", "loc": "Guadalajara", "load": np.random.randint(55, 80), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.009)},
-        {"id": "07-HER-230", "loc": "Hermosillo", "load": np.random.randint(50, 75), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.015)},
-        {"id": "01-QRO-230", "loc": "Querétaro", "load": np.random.randint(40, 70), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.011)},
-        {"id": "06-SLP-400", "loc": "San Luis Potosí", "load": np.random.randint(35, 65), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.012)},
-        {"id": "08-MXL-230", "loc": "Mexicali", "load": np.random.randint(45, 72), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.014)},
-        {"id": "08-ENS-230", "loc": "Ensenada", "load": np.random.randint(30, 60), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.013)},
-        {"id": "07-NAV-230", "loc": "Navojoa", "load": np.random.randint(25, 55), "status": "STANDBY", "f": 60.0 + np.random.normal(0, 0.016)},
-        {"id": "07-CUM-115", "loc": "Cd. Obregón", "load": np.random.randint(15, 45), "status": "STANDBY", "f": 60.0 + np.random.normal(0, 0.018)},
+        # — Central —
+        {"id": "05-VZA-400", "loc": "Valle de México", "region": "Central", "cap": 100, "load": np.random.randint(78, 92), "status": "MASTER", "f": 60.0 + np.random.normal(0, 0.008)},
+        {"id": "01-QRO-230", "loc": "Querétaro", "region": "Central", "cap": 80, "load": np.random.randint(50, 75), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.011)},
+        {"id": "01-TUL-400", "loc": "Tula, Hidalgo", "region": "Central", "cap": 100, "load": np.random.randint(55, 80), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.009)},
+        {"id": "06-SLP-400", "loc": "San Luis Potosí", "region": "Central", "cap": 100, "load": np.random.randint(40, 70), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.012)},
+        # — Oriental —
+        {"id": "02-PUE-400", "loc": "Puebla", "region": "Oriental", "cap": 100, "load": np.random.randint(55, 82), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.010)},
+        {"id": "02-VER-230", "loc": "Veracruz", "region": "Oriental", "cap": 80, "load": np.random.randint(45, 72), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.011)},
+        {"id": "02-OAX-230", "loc": "Oaxaca", "region": "Oriental", "cap": 80, "load": np.random.randint(40, 68), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.013)},
+        {"id": "02-TEH-400", "loc": "Tehuantepec", "region": "Oriental", "cap": 100, "load": np.random.randint(50, 78), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.014)},
+        # — Occidental —
+        {"id": "03-GDL-400", "loc": "Guadalajara", "region": "Occidental", "cap": 100, "load": np.random.randint(58, 82), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.009)},
+        {"id": "03-MAN-400", "loc": "Manzanillo", "region": "Occidental", "cap": 100, "load": np.random.randint(45, 72), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.010)},
+        {"id": "03-AGS-230", "loc": "Aguascalientes", "region": "Occidental", "cap": 80, "load": np.random.randint(40, 68), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.011)},
+        {"id": "03-COL-115", "loc": "Colima", "region": "Occidental", "cap": 40, "load": np.random.randint(25, 55), "status": "STANDBY", "f": 60.0 + np.random.normal(0, 0.015)},
+        # — Noreste —
+        {"id": "04-MTY-400", "loc": "Monterrey", "region": "Noreste", "cap": 100, "load": np.random.randint(62, 88), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.010)},
+        {"id": "04-TAM-230", "loc": "Tampico", "region": "Noreste", "cap": 80, "load": np.random.randint(42, 70), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.012)},
+        {"id": "04-SAL-400", "loc": "Saltillo", "region": "Noreste", "cap": 100, "load": np.random.randint(48, 75), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.011)},
+        # — Norte —
+        {"id": "05-CHI-400", "loc": "Chihuahua", "region": "Norte", "cap": 100, "load": np.random.randint(50, 78), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.012)},
+        {"id": "05-LAG-230", "loc": "Gómez Palacio", "region": "Norte", "cap": 80, "load": np.random.randint(40, 68), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.013)},
+        {"id": "05-DGO-230", "loc": "Durango", "region": "Norte", "cap": 60, "load": np.random.randint(30, 58), "status": "STANDBY", "f": 60.0 + np.random.normal(0, 0.015)},
+        {"id": "05-JRZ-230", "loc": "Cd. Juárez", "region": "Norte", "cap": 80, "load": np.random.randint(45, 72), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.014)},
+        # — Noroeste —
+        {"id": "07-HER-230", "loc": "Hermosillo", "region": "Noroeste", "cap": 80, "load": np.random.randint(52, 78), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.015)},
+        {"id": "07-NAV-230", "loc": "Navojoa", "region": "Noroeste", "cap": 60, "load": np.random.randint(28, 55), "status": "STANDBY", "f": 60.0 + np.random.normal(0, 0.016)},
+        {"id": "07-CUM-115", "loc": "Cd. Obregón", "region": "Noroeste", "cap": 40, "load": np.random.randint(18, 48), "status": "STANDBY", "f": 60.0 + np.random.normal(0, 0.018)},
+        {"id": "07-GUY-230", "loc": "Guaymas", "region": "Noroeste", "cap": 60, "load": np.random.randint(30, 58), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.016)},
+        {"id": "07-CUL-230", "loc": "Culiacán", "region": "Noroeste", "cap": 80, "load": np.random.randint(40, 68), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.013)},
+        # — Baja California —
+        {"id": "08-MXL-230", "loc": "Mexicali", "region": "Baja California", "cap": 80, "load": np.random.randint(48, 75), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.014)},
+        {"id": "08-ENS-230", "loc": "Ensenada", "region": "Baja California", "cap": 80, "load": np.random.randint(35, 62), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.013)},
+        {"id": "08-TIJ-230", "loc": "Tijuana", "region": "Baja California", "cap": 80, "load": np.random.randint(50, 78), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.012)},
+        # — Baja California Sur —
+        {"id": "09-LAP-115", "loc": "La Paz", "region": "BCS", "cap": 40, "load": np.random.randint(20, 50), "status": "STANDBY", "f": 60.0 + np.random.normal(0, 0.020)},
+        # — Peninsular —
+        {"id": "10-MER-230", "loc": "Mérida", "region": "Peninsular", "cap": 80, "load": np.random.randint(45, 72), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.012)},
+        {"id": "10-CAN-230", "loc": "Cancún", "region": "Peninsular", "cap": 80, "load": np.random.randint(50, 78), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.013)},
     ]
 
     return {
@@ -535,29 +569,39 @@ with tab4:
 #  TAB 5: NETWORK TOPOLOGY — Multi-Node Grid
 # ═══════════════════════════════════════════════
 with tab5:
-    st.markdown("<div class='section-header'>NATIONAL GRID — 10-NODE SOVEREIGN NETWORK</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>NATIONAL GRID — 30-NODE SOVEREIGN NETWORK (SEN)</div>", unsafe_allow_html=True)
 
-    for i in range(0, len(state["nodes"]), 2):
-        cols = st.columns(2)
-        for j, col in enumerate(cols):
-            if i + j < len(state["nodes"]):
-                node = state["nodes"][i + j]
-                status_color = "#00ff88" if node["status"] in ["MASTER", "ONLINE"] else "#fbc02d"
-                freq_delta = node["f"] - 60.0
-                with col:
-                    st.markdown(f"""
-                    <div style='background: linear-gradient(135deg, #0d1520, #111b2a); border: 1px solid #1a2744;
-                                border-left: 4px solid {status_color}; border-radius: 8px; padding: 16px 20px; margin-bottom: 12px;'>
-                        <div style='display:flex; justify-content:space-between; align-items:center;'>
-                            <div>
-                                <span style='font-family:JetBrains Mono; font-size:16px; font-weight:700; color:#e0e6ed;'>{node["id"]}</span>
-                                <span style='font-size:12px; color:{status_color}; margin-left:12px; font-weight:700;'>● {node["status"]}</span>
+    # Group nodes by region
+    from collections import OrderedDict
+    regions = OrderedDict()
+    for node in state["nodes"]:
+        r = node.get("region", "Unknown")
+        regions.setdefault(r, []).append(node)
+
+    for region_name, region_nodes in regions.items():
+        st.markdown(f"<p style='font-family:JetBrains Mono; font-size:11px; color:#00d1ff; letter-spacing:2px; margin:16px 0 8px 0;'>▸ {region_name.upper()}</p>", unsafe_allow_html=True)
+        for i in range(0, len(region_nodes), 3):
+            cols = st.columns(3)
+            for j, col in enumerate(cols):
+                if i + j < len(region_nodes):
+                    node = region_nodes[i + j]
+                    status_color = "#00ff88" if node["status"] in ["MASTER", "ONLINE"] else "#fbc02d"
+                    freq_delta = node["f"] - 60.0
+                    cap = node.get("cap", "—")
+                    with col:
+                        st.markdown(f"""
+                        <div style='background: linear-gradient(135deg, #0d1520, #111b2a); border: 1px solid #1a2744;
+                                    border-left: 4px solid {status_color}; border-radius: 8px; padding: 14px 16px; margin-bottom: 10px;'>
+                            <div style='display:flex; justify-content:space-between; align-items:center;'>
+                                <div>
+                                    <span style='font-family:JetBrains Mono; font-size:14px; font-weight:700; color:#e0e6ed;'>{node["id"]}</span>
+                                    <span style='font-size:10px; color:{status_color}; margin-left:8px; font-weight:700;'>● {node["status"]}</span>
+                                </div>
+                                <span style='font-family:JetBrains Mono; font-size:16px; color:#00d1ff;'>{node["f"]:.3f} Hz</span>
                             </div>
-                            <span style='font-family:JetBrains Mono; font-size:20px; color:#00d1ff;'>{node["f"]:.3f} Hz</span>
+                            <div style='font-size:11px; color:#6b7fa3; margin-top:5px;'>{node["loc"]} &nbsp;|&nbsp; {cap} MW &nbsp;|&nbsp; Load: {node["load"]}% &nbsp;|&nbsp; Δf: {freq_delta:+.4f} Hz</div>
                         </div>
-                        <div style='font-size:12px; color:#6b7fa3; margin-top:6px;'>{node["loc"]} &nbsp;|&nbsp; Load: {node["load"]}% &nbsp;|&nbsp; Δf: {freq_delta:+.4f} Hz</div>
-                    </div>
-                    """, unsafe_allow_html=True)
+                        """, unsafe_allow_html=True)
 
     # Aggregate stats
     st.markdown("")
@@ -568,7 +612,8 @@ with tab5:
     ns1.metric("ACTIVE NODES", f"{active_nodes} / {len(state['nodes'])}", "Operational")
     ns2.metric("AVG FREQUENCY", f"{avg_freq:.4f} Hz", f"Δ {avg_freq-60:+.4f}")
     ns3.metric("AVG LOAD", f"{avg_load:.0f} %", "Network")
-    ns4.metric("TOTAL CAPACITY", "820 MW", "10-Node Aggregate")
+    total_cap = sum(n.get("cap", 0) for n in state["nodes"])
+    ns4.metric("TOTAL CAPACITY", f"{total_cap:,} MW", "30-Node Aggregate")
 
 
 # ═══════════════════════════════════════════════

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-EUREKA SOVEREIGN — Daily Trade Signal Generator
-================================================
-Runs daily via GitHub Actions. Fetches live prices, computes
-VIX-regime-based target weights, compares to your current holdings,
-and outputs exact BUY/SELL share counts.
+EUREKA SOVEREIGN — Daily Portfolio % Change + Trade Signal Generator
+====================================================================
+Runs daily via GitHub Actions at 3:45 PM ET (15 min before close).
+Fetches live prices, computes VIX-regime target percentages,
+calculates Eureka portfolio % change (daily / weekly / monthly / YTD),
+and emits BUY/SELL/HOLD recommendations based on regime transitions.
 
 Notification channels:
   - Telegram (via bot API)
@@ -12,8 +13,6 @@ Notification channels:
   - Console output (for GitHub Actions logs)
 
 Required GitHub Secrets:
-  EUREKA_CAPITAL        — Total portfolio capital in USD (e.g. 10000)
-  EUREKA_HOLDINGS       — JSON of current share counts, e.g. {"IAU":10,"GEV":5,...}
   TELEGRAM_BOT_TOKEN    — Telegram bot token
   TELEGRAM_CHAT_ID      — Telegram chat ID
   EMAIL_ADDRESS         — Gmail address for sending
@@ -23,11 +22,10 @@ Required GitHub Secrets:
 
 import os
 import sys
-import json
 import numpy as np
 import pandas as pd
 import yfinance as yf
-from datetime import datetime
+from datetime import datetime, timedelta
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -39,13 +37,16 @@ warnings.filterwarnings("ignore")
 EUREKA_UNIVERSE = ["IAU", "GEV", "VGSH", "VTIP", "VIXM"]
 VIX_TICKER = "^VIX"
 BENCHMARK = "SPY"
-DRIFT_THRESHOLD = 0.05  # 5% drift triggers rebalance
 
 REGIMES = {
     "RISK-ON":    {"vix_range": (0, 18),   "weights": {"IAU": 0.35, "GEV": 0.35, "VGSH": 0.125, "VTIP": 0.125, "VIXM": 0.05}},
     "TRANSITION": {"vix_range": (18, 28),  "weights": {"IAU": 0.20, "GEV": 0.20, "VGSH": 0.20,  "VTIP": 0.20,  "VIXM": 0.20}},
     "CRISIS":     {"vix_range": (28, 100), "weights": {"IAU": 0.10, "GEV": 0.10, "VGSH": 0.25,  "VTIP": 0.25,  "VIXM": 0.30}},
 }
+
+# Thresholds for momentum signals
+TAKE_PROFIT_THRESHOLD = 0.01   # daily return > +1% → take profit window
+DIP_BUY_THRESHOLD = -0.02      # daily return < -2% → opportunistic buy window
 
 
 def classify_regime(vix_level):
@@ -58,147 +59,261 @@ def classify_regime(vix_level):
 
 
 # ============================================================
-#  DATA FETCHING
+#  DATA FETCHING — historical for % change computation
 # ============================================================
 
-def fetch_prices():
-    """Download latest prices for the Eureka universe."""
+def fetch_historical_data(lookback_days=90):
+    """Download price history for the Eureka universe to compute % changes."""
     tickers = EUREKA_UNIVERSE + [VIX_TICKER, BENCHMARK]
-    prices = {}
+    start_date = (datetime.now() - timedelta(days=lookback_days)).strftime("%Y-%m-%d")
+    all_data = {}
 
     for t in tickers:
         try:
-            df = yf.download(t, period="5d", progress=False)
+            df = yf.download(t, start=start_date, progress=False)
             if df.empty:
                 continue
             if isinstance(df.columns, pd.MultiIndex):
-                price = float(df['Close'][t].iloc[-1])
+                s = df['Close'][t]
             else:
-                price = float(df['Close'].iloc[-1])
-            prices[t] = price
+                s = df['Close']
+            s.name = t
+            all_data[t] = s
         except Exception as e:
             print(f"[!] Failed to fetch {t}: {e}")
 
+    if not all_data or VIX_TICKER not in all_data:
+        return None
+
+    prices = pd.DataFrame(all_data).dropna()
     return prices
 
 
 # ============================================================
-#  SIGNAL GENERATION
+#  EUREKA PORTFOLIO % CHANGE ENGINE
 # ============================================================
 
-def generate_signals(capital, holdings, prices):
+def compute_eureka_performance(prices):
     """
-    Given capital, current holdings (shares), and latest prices,
-    compute exact BUY/SELL orders per asset.
+    Compute Eureka portfolio performance using regime-adaptive weights.
+    Returns daily portfolio returns series and summary metrics.
     """
-    vix = prices.get(VIX_TICKER, 20.0)
-    regime = classify_regime(vix)
-    target_weights = REGIMES[regime]["weights"]
+    if prices is None or prices.empty:
+        return None
 
-    # Compute current portfolio value from holdings
-    portfolio_value = sum(holdings.get(tk, 0) * prices.get(tk, 0) for tk in EUREKA_UNIVERSE)
+    returns = prices.pct_change().dropna()
+    vix_series = prices[VIX_TICKER]
 
-    # If holdings are empty/zero, use provided capital
-    if portfolio_value < 1:
-        portfolio_value = capital
+    # Build portfolio returns using regime-driven weights each day
+    port_returns = []
+    regime_history = []
 
-    spy_price = prices.get(BENCHMARK, 0)
+    for i in range(len(returns)):
+        idx = returns.index[i]
+        vix_val = vix_series.loc[idx] if idx in vix_series.index else 20.0
+        regime = classify_regime(vix_val)
+        regime_history.append(regime)
+        w = REGIMES[regime]["weights"]
+        day_ret = sum(returns[tk].iloc[i] * w.get(tk, 0) for tk in w if tk in returns.columns)
+        port_returns.append(day_ret)
 
-    signals = []
-    total_target_value = 0
-    total_actual_value = 0
+    port_returns = pd.Series(port_returns, index=returns.index)
+    cum_returns = (1 + port_returns).cumprod()
 
-    for tk in EUREKA_UNIVERSE:
-        price = prices.get(tk, 0)
-        if price <= 0:
-            continue
+    # SPY benchmark
+    spy_returns = returns[BENCHMARK] if BENCHMARK in returns.columns else pd.Series(0, index=returns.index)
+    spy_cum = (1 + spy_returns).cumprod()
 
-        current_shares = holdings.get(tk, 0)
-        current_value = current_shares * price
-        w_actual = current_value / portfolio_value if portfolio_value > 0 else 0
-        w_target = target_weights.get(tk, 0)
+    # Current state
+    current_vix = float(vix_series.iloc[-1])
+    current_regime = classify_regime(current_vix)
+    current_weights = REGIMES[current_regime]["weights"]
 
-        target_value = w_target * portfolio_value
-        target_shares = int(target_value / price)
-        delta_shares = target_shares - current_shares
-        delta_value = delta_shares * price
+    # Percentage changes at different horizons
+    daily_pct = float(port_returns.iloc[-1]) * 100 if len(port_returns) >= 1 else 0.0
+    weekly_pct = float((cum_returns.iloc[-1] / cum_returns.iloc[-6] - 1) * 100) if len(cum_returns) >= 6 else daily_pct
+    monthly_pct = float((cum_returns.iloc[-1] / cum_returns.iloc[-22] - 1) * 100) if len(cum_returns) >= 22 else weekly_pct
 
-        drift = (w_actual - w_target) / w_target if w_target > 0 else 0
+    # YTD: from first trading day of current year
+    ytd_start = cum_returns.index[cum_returns.index >= f"{datetime.now().year}-01-01"]
+    if len(ytd_start) > 0:
+        ytd_pct = float((cum_returns.iloc[-1] / cum_returns.loc[ytd_start[0]] - 1) * 100)
+    else:
+        ytd_pct = float((cum_returns.iloc[-1] - 1) * 100)
 
-        action = "HOLD"
-        if abs(drift) > DRIFT_THRESHOLD:
-            action = "BUY" if delta_shares > 0 else "SELL"
+    # SPY comparisons
+    spy_daily = float(spy_returns.iloc[-1]) * 100 if len(spy_returns) >= 1 else 0.0
+    spy_ytd_start = spy_cum.index[spy_cum.index >= f"{datetime.now().year}-01-01"]
+    if len(spy_ytd_start) > 0:
+        spy_ytd = float((spy_cum.iloc[-1] / spy_cum.loc[spy_ytd_start[0]] - 1) * 100)
+    else:
+        spy_ytd = float((spy_cum.iloc[-1] - 1) * 100)
 
-        total_target_value += target_value
-        total_actual_value += current_value
+    # Previous regime (yesterday) for transition detection
+    prev_regime = regime_history[-2] if len(regime_history) >= 2 else current_regime
 
-        signals.append({
-            "ticker": tk,
-            "price": price,
-            "current_shares": current_shares,
-            "current_value": current_value,
-            "w_actual": w_actual,
-            "w_target": w_target,
-            "target_shares": target_shares,
-            "delta_shares": delta_shares,
-            "delta_value": delta_value,
-            "drift": drift,
-            "action": action,
-        })
+    # Latest prices and per-asset daily returns
+    latest_prices = {tk: float(prices[tk].iloc[-1]) for tk in EUREKA_UNIVERSE if tk in prices.columns}
+    spy_price = float(prices[BENCHMARK].iloc[-1]) if BENCHMARK in prices.columns else 0.0
+    asset_daily_returns = {tk: float(returns[tk].iloc[-1]) for tk in EUREKA_UNIVERSE if tk in returns.columns}
 
     return {
-        "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC"),
-        "vix": vix,
-        "regime": regime,
-        "portfolio_value": portfolio_value,
+        "current_vix": current_vix,
+        "current_regime": current_regime,
+        "prev_regime": prev_regime,
+        "regime_changed": prev_regime != current_regime,
+        "current_weights": current_weights,
+        "prev_weights": REGIMES[prev_regime]["weights"],
+        "daily_pct": daily_pct,
+        "weekly_pct": weekly_pct,
+        "monthly_pct": monthly_pct,
+        "ytd_pct": ytd_pct,
+        "spy_daily": spy_daily,
+        "spy_ytd": spy_ytd,
         "spy_price": spy_price,
-        "signals": signals,
+        "latest_prices": latest_prices,
+        "asset_daily_returns": asset_daily_returns,
+        "port_returns": port_returns,
+        "cum_returns": cum_returns,
     }
+
+
+# ============================================================
+#  BUY / SELL RECOMMENDATION ENGINE
+# ============================================================
+
+BUY_THRESHOLD = -0.015    # asset down 1.5% → BUY the dip
+SELL_THRESHOLD = 0.015    # asset up 1.5% → SELL / take profit
+
+
+def generate_recommendations(perf):
+    """
+    Generate BUY/SELL/HOLD recommendations based on each asset's
+    daily % change. Assumes portfolio is at target weights.
+    Includes trade_pct: exact % of portfolio to trade.
+    """
+    actions = []
+    port_daily_ret = perf["daily_pct"] / 100.0
+
+    for tk in EUREKA_UNIVERSE:
+        w_now = perf["current_weights"].get(tk, 0)
+        price = perf["latest_prices"].get(tk, 0)
+        asset_daily = perf["asset_daily_returns"].get(tk, 0)
+        asset_daily_pct = asset_daily * 100
+
+        # Drift: weight shift from target due to today's move
+        denom = 1 + port_daily_ret
+        new_weight = w_now * (1 + asset_daily) / denom if denom != 0 else w_now
+        drift = new_weight - w_now
+        trade_pct = abs(drift) * 100
+
+        if asset_daily <= BUY_THRESHOLD:
+            action = "BUY"
+            reason = f"Down {asset_daily_pct:+.2f}% — buy the dip"
+        elif asset_daily >= SELL_THRESHOLD:
+            action = "SELL"
+            reason = f"Up {asset_daily_pct:+.2f}% — take profit"
+        else:
+            action = "HOLD"
+            reason = f"Within range ({asset_daily_pct:+.2f}%)"
+            trade_pct = 0.0
+
+        actions.append({
+            "ticker": tk,
+            "price": price,
+            "target_pct": w_now * 100,
+            "asset_daily_pct": asset_daily_pct,
+            "trade_pct": trade_pct,
+            "action": action,
+            "reason": reason,
+        })
+
+    # Portfolio-level momentum signal
+    daily_ret = perf["daily_pct"] / 100.0
+    momentum_signal = None
+    if daily_ret > TAKE_PROFIT_THRESHOLD:
+        momentum_signal = f"📈 TAKE-PROFIT WINDOW: Eureka up {perf['daily_pct']:+.2f}% today. Consider trimming winners."
+    elif daily_ret < DIP_BUY_THRESHOLD:
+        momentum_signal = f"📉 OPPORTUNISTIC BUY WINDOW: Eureka down {perf['daily_pct']:+.2f}% today. Consider adding to core positions."
+
+    return actions, momentum_signal
 
 
 # ============================================================
 #  MESSAGE FORMATTING
 # ============================================================
 
-def format_message(result):
-    """Format the signal result into a clean text message."""
+def format_message(perf, actions, momentum_signal):
+    """Format the complete notification message."""
+    ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
     lines = []
+
     lines.append("=" * 50)
-    lines.append("🏛️  EUREKA SOVEREIGN — DAILY TRADE SIGNAL")
+    lines.append("🏛️  EUREKA SOVEREIGN — DAILY DISPATCH")
     lines.append("=" * 50)
-    lines.append(f"📅  {result['timestamp']}")
-    lines.append(f"📊  VIX: {result['vix']:.2f}  |  REGIME: {result['regime']}")
-    lines.append(f"💰  Portfolio: ${result['portfolio_value']:,.2f}")
-    lines.append(f"📈  SPY: ${result['spy_price']:.2f}")
-    lines.append("-" * 50)
-    lines.append(f"{'TICKER':<6} {'ACTION':<6} {'Δ SHARES':>9} {'Δ VALUE':>10} {'DRIFT':>7}")
-    lines.append("-" * 50)
+    lines.append(f"📅  {ts}")
+    lines.append(f"📊  VIX: {perf['current_vix']:.2f}  |  REGIME: {perf['current_regime']}")
+    lines.append(f"📈  SPY: ${perf['spy_price']:.2f}")
+    lines.append("")
 
-    for s in result["signals"]:
-        action_str = s["action"]
-        delta_str = f"{s['delta_shares']:+d}" if s["action"] != "HOLD" else "—"
-        value_str = f"${s['delta_value']:+,.0f}" if s["action"] != "HOLD" else "—"
-        drift_str = f"{s['drift']*100:+.1f}%"
+    # ── Portfolio % Change ──
+    lines.append("─" * 50)
+    lines.append("📊  EUREKA PORTFOLIO % CHANGE")
+    lines.append("─" * 50)
 
-        lines.append(f"{s['ticker']:<6} {action_str:<6} {delta_str:>9} {value_str:>10} {drift_str:>7}")
+    def arrow(val):
+        return "▲" if val > 0 else "▼" if val < 0 else "─"
 
-    lines.append("-" * 50)
+    lines.append(f"  Today:   {arrow(perf['daily_pct'])} {perf['daily_pct']:+.2f}%   (SPY: {perf['spy_daily']:+.2f}%)")
+    lines.append(f"  5-Day:   {arrow(perf['weekly_pct'])} {perf['weekly_pct']:+.2f}%")
+    lines.append(f"  30-Day:  {arrow(perf['monthly_pct'])} {perf['monthly_pct']:+.2f}%")
+    lines.append(f"  YTD:     {arrow(perf['ytd_pct'])} {perf['ytd_pct']:+.2f}%   (SPY: {perf['spy_ytd']:+.2f}%)")
+    alpha = perf['ytd_pct'] - perf['spy_ytd']
+    lines.append(f"  α (YTD): {arrow(alpha)} {alpha:+.2f}%")
+    lines.append("")
 
-    # Action summary
-    actions = [s for s in result["signals"] if s["action"] != "HOLD"]
-    if actions:
-        lines.append(f"\n⚡ {len(actions)} TRADE(S) REQUIRED:")
-        for s in actions:
-            emoji = "🟢" if s["action"] == "BUY" else "🔴"
-            lines.append(f"  {emoji} {s['action']} {abs(s['delta_shares'])} shares of {s['ticker']} @ ${s['price']:.2f} (${abs(s['delta_value']):,.0f})")
-        lines.append("\n⚠️  T+2 Settlement: Plan accordingly to avoid Good Faith Violations.")
+    # ── Regime Status ──
+    if perf["regime_changed"]:
+        lines.append("⚡ REGIME CHANGE DETECTED ⚡")
+        lines.append(f"   {perf['prev_regime']} → {perf['current_regime']}")
+        lines.append("")
+
+    # ── Asset Daily Moves & Trade Orders ──
+    lines.append("─" * 50)
+    lines.append(f"🎯  ASSETS ({perf['current_regime']}) — Daily % Change")
+    lines.append("─" * 50)
+    lines.append(f"{'TICKER':<6} {'TARGET':<8} {'DAILY Δ':>8} {'TRADE %':>8} {'ACTION':>6}")
+    lines.append("─" * 50)
+    for a in actions:
+        t_pct = f"{a['trade_pct']:.2f}%" if a['trade_pct'] > 0 else "  —"
+        lines.append(f"  {a['ticker']:<6} {a['target_pct']:5.1f}%   {a['asset_daily_pct']:+6.2f}%  {t_pct:>7}  {a['action']}")
+    lines.append("")
+
+    # ── Trade Orders ──
+    trade_actions = [a for a in actions if a["action"] != "HOLD"]
+    if trade_actions:
+        lines.append("─" * 50)
+        lines.append("⚡  RECOMMENDED TRADE ORDERS")
+        lines.append("─" * 50)
+        for a in trade_actions:
+            emoji = "🟢" if a["action"] == "BUY" else "🔴"
+            lines.append(f"  {emoji} {a['action']}  {a['trade_pct']:.2f}% of portfolio  —  {a['ticker']} @ ${a['price']:.2f}")
+            lines.append(f"     {a['reason']}")
+        lines.append("")
+        lines.append("⚠️  T+2 Settlement: Plan accordingly.")
     else:
-        lines.append("\n✅  ALL POSITIONS WITHIN TOLERANCE — No trades needed.")
+        lines.append("✅  All assets within ±1.5% — no trades needed.")
 
-    lines.append(f"\n{'=' * 50}")
-    lines.append(f"Regime Weights ({result['regime']}):")
-    w = REGIMES[result['regime']]['weights']
-    lines.append("  " + " | ".join(f"{tk}: {v*100:.0f}%" for tk, v in w.items()))
+    # ── Momentum Signal ──
+    if momentum_signal:
+        lines.append("")
+        lines.append(momentum_signal)
+
+    # ── Execution Window ──
+    lines.append("")
+    lines.append("─" * 50)
+    lines.append("🕐  EXECUTION WINDOW: ~15 min to market close")
+    lines.append("    Place percentage-based orders NOW to fill before 4:00 PM ET")
     lines.append("=" * 50)
 
     return "\n".join(lines)
@@ -232,7 +347,7 @@ def send_email(message, from_addr, app_password, to_addr):
     from email.mime.text import MIMEText
     try:
         msg = MIMEText(message, "plain", "utf-8")
-        msg["Subject"] = f"🏛️ Eureka Signal — {datetime.utcnow().strftime('%Y-%m-%d')}"
+        msg["Subject"] = f"🏛️ Eureka Dispatch — {datetime.utcnow().strftime('%Y-%m-%d')}"
         msg["From"] = from_addr
         msg["To"] = to_addr
         with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
@@ -248,31 +363,30 @@ def send_email(message, from_addr, app_password, to_addr):
 # ============================================================
 
 def main():
-    print("\n[*] Eureka Sovereign — Daily Signal Generator")
+    print("\n[*] Eureka Sovereign — Daily Dispatch Generator")
     print(f"[*] Timestamp: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}\n")
 
-    # --- Read config from environment / secrets ---
-    capital = float(os.environ.get("EUREKA_CAPITAL", "10000"))
-    holdings_str = os.environ.get("EUREKA_HOLDINGS", "{}")
-    try:
-        holdings = json.loads(holdings_str)
-    except json.JSONDecodeError:
-        print("[!] Invalid EUREKA_HOLDINGS JSON. Using empty holdings.")
-        holdings = {}
+    # --- Fetch historical data ---
+    print("[*] Fetching market data (90-day lookback)...")
+    prices = fetch_historical_data(lookback_days=90)
 
-    # --- Fetch live prices ---
-    print("[*] Fetching live market data...")
-    prices = fetch_prices()
-
-    if not prices or VIX_TICKER not in prices:
+    if prices is None:
         print("[!!] FATAL: Could not fetch required price data.")
         sys.exit(1)
 
-    print(f"[*] Prices loaded for {len(prices)} tickers.\n")
+    print(f"[*] Prices loaded: {list(prices.columns)}\n")
 
-    # --- Generate signals ---
-    result = generate_signals(capital, holdings, prices)
-    message = format_message(result)
+    # --- Compute Eureka portfolio performance ---
+    perf = compute_eureka_performance(prices)
+    if perf is None:
+        print("[!!] FATAL: Could not compute portfolio performance.")
+        sys.exit(1)
+
+    # --- Generate BUY/SELL recommendations ---
+    actions, momentum_signal = generate_recommendations(perf)
+
+    # --- Format message ---
+    message = format_message(perf, actions, momentum_signal)
 
     # --- Console output (always) ---
     print(message)
@@ -290,7 +404,7 @@ def main():
     if email_addr and email_pass:
         send_email(message, email_addr, email_pass, email_to)
 
-    print("\n[*] Signal generation complete.")
+    print("\n[*] Dispatch complete.")
 
 
 if __name__ == "__main__":
