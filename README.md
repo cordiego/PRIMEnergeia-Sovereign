@@ -1,20 +1,22 @@
 # ⚡ PRIMEnergeia Sovereign
 
-### Intelligent Grid Control That Recovers Lost Capital
+### Intelligent Multi-Market Grid Control That Recovers Lost Capital
 
 [![Live Dashboard](https://img.shields.io/badge/🔴_LIVE_DEMO-Streamlit_Cloud-00d1ff?style=for-the-badge)](https://primenergeia-sovereign.streamlit.app)
 [![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)](#license)
+[![Markets](https://img.shields.io/badge/Markets-SEN_|_ERCOT_|_MIBEL-fbc02d?style=for-the-badge)](#markets)
 
 ---
 
 > **$231,243 USD** in capital recovered at a single node (VZA-400) through optimal frequency control.  
-> **$173,432 USD** returned to the client. **Zero hardware changes.**
+> **72 nodes** across **3 international markets** — SEN 🇲🇽 · ERCOT 🇺🇸 · MIBEL 🇪🇸🇵🇹  
+> **~$48M USD** projected annual recurring revenue.
 
 ---
 
 ## The Problem
 
-Mexico's electric grid (SEN) loses millions annually through **suboptimal power injection**. When grid frequency deviates from 60 Hz, CENACE applies penalties. When generators fail to track local marginal prices (PML), capital is left on the table. Current industrial control systems are reactive — they respond to instability *after* it happens.
+Electric grids worldwide lose millions annually through **suboptimal power injection**. When frequency deviates from nominal (50/60 Hz), grid operators apply penalties. When generators fail to track local prices, capital is left on the table. Current control systems are reactive — they respond to instability *after* it happens.
 
 ## The Solution
 
@@ -28,13 +30,31 @@ V_t + min_u { L(x, u) + ∇V · f(x, u) } = 0
 |---|---|
 | **Predicts** frequency excursions | Stochastic grid dynamics model |
 | **Injects** synthetic inertia proactively | HJB optimal control law |
-| **Eliminates** CENACE penalties | Real-time Swing Equation solver |
-| **Captures** PML arbitrage | Market-aware dispatch optimization |
+| **Eliminates** operator penalties | Real-time Swing Equation solver |
+| **Captures** price arbitrage | Market-aware dispatch optimization |
 | **Self-heals** after disturbances | Deep RL actor-critic neural network |
 
 ---
 
-## Proven Results — Node VZA-400 (Valle de México)
+## Markets
+
+The unified dashboard includes a **sidebar market selector** to switch between all three markets in real-time.
+
+| Market | Country | Frequency | Nodes | Pricing | THD Standard | Accent |
+|--------|---------|-----------|-------|---------|-------------|--------|
+| **SEN** | 🇲🇽 Mexico | 60 Hz | 30 | PML / CENACE | Código de Red (≤5%) | Cyan |
+| **ERCOT** | 🇺🇸 Texas | 60 Hz | 22 | LMP ($5k cap) | IEEE 519 (≤5%) | Orange |
+| **MIBEL** | 🇪🇸🇵🇹 Iberian | 50 Hz | 20 | OMIE Pool (EUR) | EN 50160 (≤8%) | Gold |
+
+### Key Differences
+
+- **ERCOT** — Islanded grid, lower inertia (H=4.5s), higher volatility, $5,000/MWh scarcity cap
+- **SEN** — 9 CENACE regions, 15-min settlement, Código de Red compliance
+- **MIBEL** — 50 Hz ENTSO-E grid, higher inertia (H=6.0s), OMIE pool pricing in EUR
+
+---
+
+## Proven Results — Node VZA-400 (SEN, Valle de México)
 
 | Metric | Value |
 |--------|-------|
@@ -42,46 +62,7 @@ V_t + min_u { L(x, u) + ∇V · f(x, u) } = 0
 | Client Net Savings (75%) | $173,432 USD |
 | PRIMEnergeia Fee (25%) | $57,811 USD |
 | Frequency Stability | 99.96% |
-| Instability Events Mitigated | 6 |
-| Avg Frequency Deviation | 0.042 Hz (mitigated) |
 | System Latency | < 0.5 ms |
-
----
-
-## Network — 30 Active Nodes (Full SEN Coverage)
-
-| Node | Location | Region | Voltage |
-|------|----------|--------|---------|
-| **05-VZA-400** | Valle de México | **Central (Master)** | 400 kV |
-| 01-QRO-230 | Querétaro | Central | 230 kV |
-| 01-TUL-400 | Tula, Hidalgo | Central | 400 kV |
-| 06-SLP-400 | San Luis Potosí | Central | 400 kV |
-| 02-PUE-400 | Puebla | Oriental | 400 kV |
-| 02-VER-230 | Veracruz | Oriental | 230 kV |
-| 02-OAX-230 | Oaxaca | Oriental | 230 kV |
-| 02-TEH-400 | Tehuantepec | Oriental | 400 kV |
-| 03-GDL-400 | Guadalajara | Occidental | 400 kV |
-| 03-MAN-400 | Manzanillo | Occidental | 400 kV |
-| 03-AGS-230 | Aguascalientes | Occidental | 230 kV |
-| 03-COL-115 | Colima | Occidental | 115 kV |
-| 04-MTY-400 | Monterrey | Noreste | 400 kV |
-| 04-TAM-230 | Tampico | Noreste | 230 kV |
-| 04-SAL-400 | Saltillo | Noreste | 400 kV |
-| 05-CHI-400 | Chihuahua | Norte | 400 kV |
-| 05-LAG-230 | Gómez Palacio | Norte | 230 kV |
-| 05-DGO-230 | Durango | Norte | 230 kV |
-| 05-JRZ-230 | Cd. Juárez | Norte | 230 kV |
-| 07-HER-230 | Hermosillo | Noroeste | 230 kV |
-| 07-NAV-230 | Navojoa | Noroeste | 230 kV |
-| 07-CUM-115 | Cd. Obregón | Noroeste | 115 kV |
-| 07-GUY-230 | Guaymas | Noroeste | 230 kV |
-| 07-CUL-230 | Culiacán | Noroeste | 230 kV |
-| 08-MXL-230 | Mexicali | Baja California | 230 kV |
-| 08-ENS-230 | Ensenada | Baja California | 230 kV |
-| 08-TIJ-230 | Tijuana | Baja California | 230 kV |
-| 09-LAP-115 | La Paz | Baja California Sur | 115 kV |
-| 10-MER-230 | Mérida | Peninsular | 230 kV |
-| 10-CAN-230 | Cancún | Peninsular | 230 kV |
 
 ---
 
@@ -90,32 +71,36 @@ V_t + min_u { L(x, u) + ∇V · f(x, u) } = 0
 ```
 ┌─────────────────────────────────────────────────┐
 │               DASHBOARD LAYER                    │
-│     Streamlit SCADA UI (dashboard/)              │
+│  Unified Streamlit SCADA — Market Selector      │
+│  (dashboard/ + markets/)                         │
 ├─────────────────────────────────────────────────┤
-│            ORCHESTRATION LAYER                   │
-│     Multi-node coordination (orchestration/)     │
+│           MARKET ENGINES LAYER                   │
+│  SEN (30 nodes) │ ERCOT (22 nodes) │ MIBEL (20)│
+│  (markets/sen/  │  markets/ercot/  │  mibel/)   │
 ├─────────────────────────────────────────────────┤
 │               CORE LAYER                         │
-│   HJB Solver │ DRL Auto-Healing │ PML Engine    │
-│   (core/)                                        │
+│  HJB Solver │ DRL Auto-Healing │ Price Engine   │
+│  (core/)                                         │
 ├─────────────────────────────────────────────────┤
 │             PHYSICS LAYER                        │
-│   Swing Equation │ Synthetic Inertia │ CUDA/MPS │
-│   (physics/)                                     │
+│  Swing Eq (50/60 Hz) │ Synthetic Inertia │ GPU  │
+│  (physics/ + markets/*/physics_*.py)             │
 ├─────────────────────────────────────────────────┤
 │               DATA LAYER                         │
-│     CENACE Node Telemetry (data/nodos/)          │
+│  Market Telemetry (data/ + market_config.py)     │
 └─────────────────────────────────────────────────┘
 ```
 
 | Module | Description |
 |--------|-------------|
-| `core/software_core.py` | Stochastic vector synthesis, PML simulation, fiduciary recovery |
+| `dashboard/dashboard_primenergeia.py` | Unified multi-market SCADA dashboard with sidebar selector |
+| `markets/market_config.py` | Shared market configuration dataclasses (all 72 nodes) |
+| `markets/ercot/` | ERCOT physics, orchestrator, standalone dashboard |
+| `markets/sen/` | SEN physics, orchestrator, standalone dashboard |
+| `markets/mibel/` | MIBEL physics (50 Hz), orchestrator, standalone dashboard |
+| `core/software_core.py` | Stochastic vector synthesis, price simulation, fiduciary recovery |
 | `core/auto_healing_core.py` | Deep RL actor-critic (HJB Critic + Auto-Healing Actor) |
-| `physics/motor_fisica_soberana.py` | Swing Equation solver with synthetic inertia injection |
-| `physics/motor_cuda_mps_v8.py` | GPU-accelerated physics engine (CUDA / Apple MPS) |
-| `orchestration/` | 30-node national grid expansion orchestrator |
-| `manifiestos/` | Automated fiduciary report generation for auditing |
+| `physics/motor_fisica_soberana.py` | Base Swing Equation solver with synthetic inertia injection |
 
 ## Quick Start
 
@@ -129,7 +114,7 @@ streamlit run dashboard/dashboard_primenergeia.py
 ## Documentation
 
 - 📋 [Executive Brief (ES)](docs/EXECUTIVE_BRIEF.md) — Propuesta de valor para directivos
-- 📊 [ROI Analysis](docs/ROI_ANALYSIS.md) — Per-node revenue projections & 10-node model
+- 📊 [ROI Analysis](docs/ROI_ANALYSIS.md) — Multi-market revenue projections (~$48M ARR)
 - 🏗️ [Architecture](docs/architecture.md) — System design & control flow
 
 ---
@@ -143,4 +128,4 @@ This software is the intellectual property of PRIMEnergeia S.A.S. Unauthorized c
 ---
 
 **PRIMEnergeia S.A.S.** | Lead Computational Physicist: Diego Córdoba Urrutia  
-*Soberanía Energética para México* 🇲🇽
+*Soberanía Energética Global* ⚡🇲🇽🇺🇸🇪🇸🇵🇹

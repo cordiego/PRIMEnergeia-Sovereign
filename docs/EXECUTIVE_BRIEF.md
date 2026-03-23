@@ -1,6 +1,6 @@
 # PRIMEnergeia S.A.S. — Propuesta Ejecutiva de Valor
 
-**Sistema de Control Inteligente para la Red Eléctrica Nacional**
+**Sistema de Control Inteligente Multi-Mercado para Redes Eléctricas**
 
 ---
 
@@ -14,13 +14,13 @@
 
 ## 1. El Problema
 
-Los generadores conectados al Sistema Eléctrico Nacional (SEN) pierden capital cada día por tres razones:
+Las redes eléctricas a nivel global pierden millones anualmente por tres razones:
 
-1. **Penalizaciones CENACE** — Desviaciones de frecuencia (>±0.5 Hz) generan multas automáticas
-2. **Inyección subóptima** — Los sistemas de control actuales reaccionan a la inestabilidad *después* de que ocurre, perdiendo la ventana de arbitraje
-3. **Disipación de exergía** — La diferencia entre la potencia teórica óptima y la potencia real inyectada es capital evaporado
+1. **Penalizaciones del operador** — Desviaciones de frecuencia generan multas automáticas (CENACE, NERC, ENTSO-E)
+2. **Inyección subóptima** — Los sistemas de control actuales reaccionan *después* de la inestabilidad
+3. **Disipación de exergía** — La diferencia entre potencia óptima y potencia real es capital evaporado
 
-**Estimación conservadora:** Un nodo de 100 MW pierde entre **$150,000 – $300,000 USD mensuales** en capital que podría recuperarse.
+**Estimación conservadora:** Un nodo de 100 MW pierde entre **$150,000 – $400,000 USD mensuales**.
 
 ---
 
@@ -28,22 +28,29 @@ Los generadores conectados al Sistema Eléctrico Nacional (SEN) pierden capital 
 
 Nuestra plataforma resuelve la ecuación **Hamilton-Jacobi-Bellman (HJB)** en tiempo real para calcular la acción de control óptima *antes* de que la inestabilidad se manifieste.
 
+### Mercados Activos
+
+| Mercado | Región | Frecuencia | Nodos | Pricing | Moneda |
+|---------|--------|-----------|-------|---------|--------|
+| **SEN** | 🇲🇽 México | 60 Hz | 30 | PML / CENACE | USD |
+| **ERCOT** | 🇺🇸 Texas | 60 Hz | 22 | LMP ($5k cap) | USD |
+| **MIBEL** | 🇪🇸🇵🇹 Ibérico | 50 Hz | 20 | OMIE Pool | EUR |
+
 ### Capacidades Técnicas
 
 | Función | Mecanismo |
 |---------|-----------|
 | Predicción de excursiones de frecuencia | Modelo estocástico de dinámica de red |
 | Inyección proactiva de inercia sintética | Ley de control óptimo HJB |
-| Eliminación de penalizaciones CENACE | Resolución en tiempo real de la Ecuación de Oscilación |
-| Captura de arbitraje PML | Optimización de despacho sensible al mercado |
+| Eliminación de penalizaciones | Resolución de Ecuación de Oscilación (50/60 Hz) |
+| Captura de arbitraje de precios | Optimización de despacho (PML / LMP / OMIE) |
 | Auto-reparación post-disturbio | Red neuronal actor-crítico (Deep RL) |
 
-**Latencia del sistema:** < 0.5 ms  
-**Sin cambios de hardware** — se integra como capa de software sobre la infraestructura existente.
+**Latencia:** < 0.5 ms | **Sin cambios de hardware** | **72 nodos en 3 mercados**
 
 ---
 
-## 3. Resultados Certificados — Nodo VZA-400
+## 3. Resultados Certificados — Nodo VZA-400 (SEN)
 
 | Métrica | Resultado |
 |---------|-----------|
@@ -52,39 +59,29 @@ Nuestra plataforma resuelve la ecuación **Hamilton-Jacobi-Bellman (HJB)** en ti
 | Fee Operativo PRIMEnergeia (25%) | $57,811 USD |
 | Estabilidad de Frecuencia | 99.96% |
 | Eventos de Inestabilidad Mitigados | 6 |
-| Desviación Promedio de Frecuencia | 0.042 Hz |
-
-> El capital rescatado ha sido validado contra los precios marginales locales (PML) del nodo de interconexión.
 
 ---
 
-## 4. Modelo Comercial
+## 4. Proyecciones de Ingresos — Multi-Mercado
+
+| Mercado | Nodos | Rescate Anual | Ingreso PRIME (25%) |
+|---------|-------|--------------|---------------------|
+| SEN 🇲🇽 | 30 | $64.7M USD | $16.2M USD |
+| ERCOT 🇺🇸 | 22 | $71.7M USD | $17.9M USD |
+| MIBEL 🇪🇸🇵🇹 | 20 | €51.6M EUR | €12.9M EUR |
+| **TOTAL** | **72** | **~$188M** | **~$48M USD** |
+
+---
+
+## 5. Modelo Comercial
 
 | Concepto | Valor |
 |----------|-------|
 | **Fee de Implementación** | $50,000 USD (por nodo) |
-| **Royalty Operativo** | 20–25% del capital rescatado |
+| **Royalty Operativo** | 25% del capital rescatado |
 | **Plazo de Contrato** | 12 meses renovables |
 
-**Alineación de incentivos:** PRIMEnergeia solo cobra sobre el valor *que realmente genera*. Si no se rescata capital, no hay royalty.
-
----
-
-## 5. Requerimientos Técnicos
-
-Para la integración en un nuevo nodo, requerimos:
-
-1. **Telemetría eléctrica** (CSV/Excel, resolución < 1s, mínimo 7 días):
-   - Frecuencia de Red (Hz)
-   - Tensión por Fase (kV)
-   - Distorsión Armónica Total (THD %)
-   - Factor de Potencia (cos φ)
-
-2. **Datos de mercado:**
-   - Histórico de PML en el nodo de interconexión
-
-3. **Mapa de hardware:**
-   - Direcciones Modbus/DNP3 para lectura de sensores y escritura de set-points
+**Alineación de incentivos:** PRIMEnergeia solo cobra sobre el valor *que realmente genera*.
 
 ---
 
@@ -105,4 +102,4 @@ Lead Computational Physicist | PRIMEnergeia S.A.S.
 
 ---
 
-*PRIMEnergeia S.A.S. — Soberanía Energética para México* 🇲🇽
+*PRIMEnergeia S.A.S. — Soberanía Energética Global* ⚡🇲🇽🇺🇸🇪🇸🇵🇹
