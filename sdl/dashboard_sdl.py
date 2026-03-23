@@ -175,14 +175,16 @@ if mode == "🧠 HJB Fabrication":
     result, hjb_ctrl = res_pair
     opt = result.optimal_recipe
 
-    # Metrics
-    m1, m2, m3, m4, m5, m6 = st.columns(6)
+    # Metrics — 2 rows of 3
+    m1, m2, m3 = st.columns(3)
     m1.metric("🏆 PCE", f"{opt['pce_pct']:.2f}%")
     m2.metric("📈 Improvement", f"+{result.pce_improvement_pct:.1f}%")
-    m3.metric("🌀 RPM", f"{opt['spin_rpm']:.0f}")
-    m4.metric("🔥 Temp", f"{opt['anneal_temp_C']:.0f} °C")
-    m5.metric("🧪 Conc", f"{opt['concentration_M']:.2f} M")
-    m6.metric("💎 Grain", f"{opt['grain_nm']:.0f} nm")
+    m3.metric("💎 Grain Size", f"{opt['grain_nm']:.0f} nm")
+
+    m4, m5, m6 = st.columns(3)
+    m4.metric("🌀 Spin RPM", f"{opt['spin_rpm']:.0f}")
+    m5.metric("🔥 Anneal Temp", f"{opt['anneal_temp_C']:.0f} °C")
+    m6.metric("🧪 Concentration", f"{opt['concentration_M']:.2f} M")
 
     tab1, tab2, tab3, tab4 = st.tabs([
         "📈 Convergence", "🗺️ Value Function",
