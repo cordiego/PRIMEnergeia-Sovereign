@@ -1,5 +1,5 @@
 import streamlit as st
-st.set_page_config(page_title="PRIMEnergeia Sovereign", page_icon="⚡", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="PRIMEnergeia", page_icon="⚡", layout="wide")
 st.markdown("# PRIMEnergeia Sovereign")
 st.caption("UNIFIED COMMAND CENTER")
 st.divider()
