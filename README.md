@@ -82,6 +82,10 @@ The unified dashboard includes a **sidebar market selector** to switch between a
 │  HJB Solver │ DRL Auto-Healing │ Price Engine   │
 │  (core/)                                         │
 ├─────────────────────────────────────────────────┤
+│          OPTIMIZATION LAYER (Granas)             │
+│  Bayesian Optimization │ GP Surrogate │ 6D PCE  │
+│  (optimization/)                                 │
+├─────────────────────────────────────────────────┤
 │             PHYSICS LAYER                        │
 │  Swing Eq (50/60 Hz) │ Synthetic Inertia │ GPU  │
 │  (physics/ + markets/*/physics_*.py)             │
@@ -101,6 +105,9 @@ The unified dashboard includes a **sidebar market selector** to switch between a
 | `core/software_core.py` | Stochastic vector synthesis, price simulation, fiduciary recovery |
 | `core/auto_healing_core.py` | Deep RL actor-critic (HJB Critic + Auto-Healing Actor) |
 | `physics/motor_fisica_soberana.py` | Base Swing Equation solver with synthetic inertia injection |
+| `optimization/granas_bayesian.py` | Bayesian Optimization engine for perovskite (Granas) ink recipes |
+| `optimization/granas_visualizer.py` | Convergence, landscape, parallel coordinates, Pareto front plots |
+| `optimization/granas_dashboard.py` | Streamlit dashboard for interactive Granas optimization |
 
 ## Quick Start
 
@@ -109,7 +116,23 @@ git clone https://github.com/cordiego/PRIMEnergeia-Sovereign.git
 cd PRIMEnergeia-Sovereign
 pip install -r requirements.txt
 streamlit run dashboard/dashboard_primenergeia.py
+
+# Granas Optimizer
+streamlit run optimization/granas_dashboard.py
+
+# Run Granas BO from CLI
+python -m optimization.granas_bayesian
 ```
+
+## Granas — Perovskite Bayesian Optimization
+
+The `optimization/` module uses **Bayesian Optimization** with Gaussian Process surrogate models to find the optimal perovskite ink recipe for PRIMEnergeia Granas™ solar cells. The physics-informed objective models:
+
+- **Crystallization kinetics** — LaMer nucleation, Scherrer grain-size estimation
+- **Defect density** — Urbach-tail passivation via additives (Cl⁻, GuaBr, MACl)
+- **Shockley-Queisser-bounded PCE** — capped at practical champion ~25.8%
+
+**6D Search Space:** Molar concentration, DMSO:DMF ratio, spin speed, additive %, annealing temperature, annealing time.
 
 ## Documentation
 

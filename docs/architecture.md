@@ -23,6 +23,10 @@
 │  HJB Solver │ DRL Auto-Healing │ Price Engine   │
 │  (core/)                                         │
 ├─────────────────────────────────────────────────┤
+│          OPTIMIZATION LAYER (Granas)             │
+│  Bayesian Opt │ GP Surrogate │ 6D Perovskite   │
+│  (optimization/)                                 │
+├─────────────────────────────────────────────────┤
 │             PHYSICS LAYER                        │
 │  Swing Equation │ Synthetic Inertia │ CUDA/MPS  │
 │  (physics/ + markets/*/physics_*.py)             │
@@ -57,3 +61,14 @@
 6. **Orchestration** — Per-market orchestrators coordinate across all nodes (22–30 per market)
 7. **Financial engine** — Market-specific pricing (PML/LMP/Pool) calculates capital recovery
 8. **Dashboard** — Unified 6-tab SCADA visualization renders all markets with dynamic theming
+
+## Granas Optimization Layer
+
+The `optimization/` module adds Bayesian Optimization for perovskite (Granas™) solar cell fabrication:
+
+1. **GP Surrogate** — Gaussian Process models the 6D ink-recipe → PCE response surface
+2. **Acquisition** — EI/PI/LCB selects the next most informative experiment
+3. **Physics Model** — Crystallization kinetics, Scherrer grain size, defect density, SQ-bounded PCE
+4. **Multi-Objective** — Joint optimization of PCE + T80 stability
+5. **Warm Start** — Seed from prior lab experiments via CSV
+6. **Dashboard** — Interactive Streamlit UI for optimization control and visualization

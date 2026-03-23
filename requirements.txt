@@ -7,3 +7,5 @@ fpdf
 scipy
 torch
 yfinance
+scikit-optimize
+pytest
