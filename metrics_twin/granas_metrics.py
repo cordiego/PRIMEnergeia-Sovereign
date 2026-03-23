@@ -58,12 +58,17 @@ class OpticsMetrics:
         absorptance = 1 - np.exp(-alpha * thickness * 1e-7 * path_enhance)
         absorptance = np.clip(absorptance, 0, 1)
 
-        # Jsc
-        am15 = 1.0 * np.exp(-((wl - 500) / 300)**2)
-        photon_flux = am15 * wl / (1240 * 1.602e-19) * 1e-4
-        integrand = absorptance * photon_flux * 1.602e-19 * 1e4
-        jsc = float(_trapz(integrand, wl)) * 1e3 * 0.15
-        jsc = max(jsc, 0.5)
+        # Jsc calculation with correct units
+        # AM1.5G approximation: ~1.5 W/m²/nm peak at 500nm
+        am15_W_m2_nm = 1.5 * np.exp(-((wl - 500) / 300)**2)
+        # Photon flux: Φ = E_λ × λ / (h×c) [photons/m²/s/nm]
+        # h×c = 1240 eV·nm, q = 1.602e-19 C
+        photon_flux = am15_W_m2_nm * wl / (1240 * 1.602e-19)  # photons/m²/s/nm
+        # Jsc = q × ∫ EQE(λ) × Φ(λ) dλ  [A/m²] → convert to mA/cm²
+        integrand = absorptance * photon_flux * 1.602e-19  # A/m²/nm
+        jsc_A_m2 = float(_trapz(integrand, wl))             # A/m²
+        jsc = jsc_A_m2 / 10.0  # A/m² → mA/cm²  (1 A/m² = 0.1 mA/cm²)
+        jsc = float(np.clip(jsc, 0.5, 40))
 
         eqe_avg = float(np.mean(absorptance[(wl >= 400) & (wl <= 750)])) * 100
         x_500 = 2 * np.pi * radius / 500
