@@ -126,6 +126,18 @@ if not ENGINE_AVAILABLE:
             ENGINE_AVAILABLE = True
             break
 
+# Import HJB Optics Controller
+HJB_AVAILABLE = False
+try:
+    from optics.hjb_optics import HJBOpticsController, OpticalDesignState, FastOpticsModel
+    HJB_AVAILABLE = True
+except ImportError:
+    try:
+        from hjb_optics import HJBOpticsController, OpticalDesignState, FastOpticsModel
+        HJB_AVAILABLE = True
+    except ImportError:
+        pass
+
 
 # ─────────────────────────────────────────────────────────────
 # Header
@@ -269,9 +281,10 @@ st.markdown("")
 
 
 # ─── Tabs ───────────────────────────────────────────────────
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📈 Spectral Response", "⚡ E-field Map", "🎯 Mie Spectrum",
-    "🔬 EQE / Jsc", "🔵 Granule Packing", "📊 Optimization Sweep"
+    "🔬 EQE / Jsc", "🔵 Granule Packing", "📊 Sweep",
+    "🧠 HJB Optimizer"
 ])
 
 
@@ -552,6 +565,110 @@ with tab6:
 
         st.success(f"🏆 Optimal: r = {best_r:.0f} nm, spacing = {best_s:.0f} nm → "
                    f"Jsc = {best_jsc:.2f} mA/cm², Absorption = {best_abs:.1f}%")
+
+
+# ─── Tab 7: HJB Optimizer ────────────────────────────────────
+with tab7:
+    if not HJB_AVAILABLE:
+        st.warning("HJB module not found. Ensure `optics/hjb_optics.py` exists.")
+    else:
+        st.markdown("### 🧠 HJB Optimal Control for Panel Design")
+        st.markdown("Hamilton-Jacobi-Bellman dynamic programming: find the optimal "
+                    "(radius, density, thickness) that maximizes Jsc.")
+
+        if "hjb_optics_result" not in st.session_state:
+            st.session_state.hjb_optics_result = None
+
+        hc1, hc2 = st.columns(2)
+        with hc1:
+            hjb_init_r = st.number_input("Initial Radius (nm)", value=150, step=25,
+                                          key="hjb_r")
+            hjb_init_d = st.number_input("Initial Density", value=0.30, step=0.05,
+                                          key="hjb_d", format="%.2f")
+            hjb_init_t = st.number_input("Initial Thickness (nm)", value=500, step=100,
+                                          key="hjb_t")
+        with hc2:
+            hjb_iters = st.slider("Iterations", 5, 40, 20, key="hjb_iters")
+            hjb_grid_r = st.slider("Radius Grid Points", 8, 20, 12, key="hjb_gr")
+            hjb_grid_d = st.slider("Density Grid Points", 6, 15, 10, key="hjb_gd")
+
+        hjb_run = st.button("🧠 Run HJB Optimizer", type="primary", key="hjb_run")
+
+        if hjb_run:
+            with st.spinner("🧠 Solving HJB value function..."):
+                ctrl = HJBOpticsController(
+                    n_iterations=hjb_iters, n_radius=hjb_grid_r,
+                    n_density=hjb_grid_d, n_thickness=8, n_control=5,
+                )
+                hjb_res = ctrl.optimize(OpticalDesignState(
+                    radius_nm=float(hjb_init_r),
+                    packing_density=float(hjb_init_d),
+                    thickness_nm=float(hjb_init_t),
+                ))
+                st.session_state.hjb_optics_result = (hjb_res, ctrl)
+            st.toast("✅ HJB Optimization Complete!", icon="🧠")
+
+        if st.session_state.hjb_optics_result is not None:
+            hjb_res, hjb_ctrl = st.session_state.hjb_optics_result
+            opt = hjb_res.optimal_design
+
+            hm1, hm2, hm3, hm4, hm5 = st.columns(5)
+            hm1.metric("⚡ Jsc", f"{opt['jsc_mA_cm2']:.2f} mA/cm²")
+            hm2.metric("📈 Improvement", f"+{hjb_res.jsc_improvement_pct:.1f}%")
+            hm3.metric("🔵 Radius", f"{opt['radius_nm']:.0f} nm")
+            hm4.metric("📦 Density", f"{opt['packing_density']:.3f}")
+            hm5.metric("📏 Thickness", f"{opt['thickness_nm']:.0f} nm")
+
+            # Convergence + Value Function
+            hfig = make_subplots(rows=1, cols=2,
+                                subplot_titles=["Jsc Convergence", "Value Function"])
+
+            hfig.add_trace(go.Scatter(
+                x=list(range(len(hjb_res.jsc_trajectory))),
+                y=hjb_res.jsc_trajectory,
+                line=dict(color="#8a2be2", width=3), name="Jsc",
+            ), row=1, col=1)
+
+            hfig.add_trace(go.Heatmap(
+                z=-hjb_res.value_function,
+                colorscale=[[0, "#050810"], [0.5, "#8a2be2"], [1, "#ffd700"]],
+                showscale=False, name="V(r,d)",
+            ), row=1, col=2)
+
+            hfig.update_layout(
+                template="plotly_dark", paper_bgcolor="#050810",
+                plot_bgcolor="#050810", height=400, showlegend=False,
+                font=dict(family="Inter, sans-serif", color="#e2e8f0"),
+            )
+            st.plotly_chart(hfig, use_container_width=True)
+
+            # Spectral comparison: initial vs optimal
+            wl_hjb = np.linspace(300, 1200, 91)
+            fm = FastOpticsModel()
+            A_init = fm.absorptance_spectrum(
+                hjb_init_r, hjb_init_d, hjb_init_t, wl_hjb) * 100
+            A_opt = fm.absorptance_spectrum(
+                opt["radius_nm"], opt["packing_density"],
+                opt["thickness_nm"], wl_hjb) * 100
+
+            fig_comp = go.Figure()
+            fig_comp.add_trace(go.Scatter(
+                x=wl_hjb, y=A_init, name="Initial",
+                line=dict(color="#ff6b35", width=2, dash="dot"),
+            ))
+            fig_comp.add_trace(go.Scatter(
+                x=wl_hjb, y=A_opt, name="HJB Optimal",
+                line=dict(color="#8a2be2", width=3),
+                fill="tozeroy", fillcolor="rgba(138,43,226,0.1)",
+            ))
+            fig_comp.update_layout(
+                template="plotly_dark", paper_bgcolor="#050810",
+                plot_bgcolor="#050810", height=400,
+                title="Absorptance: Initial vs HJB-Optimized",
+                xaxis_title="Wavelength (nm)", yaxis_title="Absorptance (%)",
+                font=dict(family="Inter, sans-serif", color="#e2e8f0"),
+            )
+            st.plotly_chart(fig_comp, use_container_width=True)
 
 
 # ─── Footer ─────────────────────────────────────────────────
