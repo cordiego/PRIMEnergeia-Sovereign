@@ -110,71 +110,72 @@ st.divider()
 st.markdown("### Product Suite")
 st.markdown("")
 
-c1, c2, c3, c4 = st.columns(4)
+c1, c2, c3, c4, c5 = st.columns(5)
 
 with c1:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #00d1ff;'>⚡ Grid Control</div>
-        <div class='product-desc'>
-            Multi-market HJB optimal frequency control.
-            SCADA for SEN 🇲🇽, ERCOT 🇺🇸, MIBEL 🇪🇸🇵🇹.
-        </div>
+        <div class='product-desc'>HJB frequency control. SEN 🇲🇽 ERCOT 🇺🇸 MIBEL 🇪🇸🇵🇹</div>
         <div>
-            <span class='product-badge'>HJB CONTROL</span>
-            <span class='product-badge'>3 MARKETS</span>
+            <span class='product-badge'>HJB</span>
+            <span class='product-badge'>3 MKTS</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/1_⚡_Grid_Control.py", label="Open Grid Control →", icon="⚡")
+    st.page_link("pages/1_⚡_Grid_Control.py", label="Open →", icon="⚡")
 
 with c2:
     st.markdown("""
     <div class='product-card'>
-        <div class='product-title' style='color: #F1C40F;'>🏛️ Eureka Sovereign</div>
-        <div class='product-desc'>
-            VIX-Regime Volatility Targeting Engine.
-            Regime-switching allocation across 5 assets.
-        </div>
+        <div class='product-title' style='color: #F1C40F;'>🏛️ Eureka</div>
+        <div class='product-desc'>VIX-Regime Volatility Targeting. 5-asset allocation.</div>
         <div>
-            <span class='product-badge'>VIX REGIMES</span>
+            <span class='product-badge'>VIX</span>
             <span class='product-badge'>5 ASSETS</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/2_🏛️_Eureka_Sovereign.py", label="Open Eureka →", icon="🏛️")
+    st.page_link("pages/2_🏛️_Eureka_Sovereign.py", label="Open →", icon="🏛️")
 
 with c3:
     st.markdown("""
     <div class='product-card'>
-        <div class='product-title' style='color: #00ff88;'>🧪 Granas Optimizer</div>
-        <div class='product-desc'>
-            Bayesian Optimizer for perovskite solar cells.
-            6D physics-informed GP + EI acquisition.
-        </div>
+        <div class='product-title' style='color: #00ff88;'>🧪 Granas Opt</div>
+        <div class='product-desc'>Bayesian perovskite optimizer. 6D GP + EI.</div>
         <div>
-            <span class='product-badge'>BAYESIAN OPT</span>
-            <span class='product-badge'>6D SEARCH</span>
+            <span class='product-badge'>BAYES</span>
+            <span class='product-badge'>6D</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/3_🧪_Granas_Optimizer.py", label="Open Granas →", icon="🧪")
+    st.page_link("pages/3_🧪_Granas_Optimizer.py", label="Open →", icon="🧪")
 
 with c4:
     st.markdown("""
     <div class='product-card'>
-        <div class='product-title' style='color: #8a2be2;'>🔬 Granas Optics</div>
-        <div class='product-desc'>
-            Mie scattering + TMM light-trapping sim.
-            AM1.5G solar, Yablonovitch limit analysis.
-        </div>
+        <div class='product-title' style='color: #8a2be2;'>🔬 Optics</div>
+        <div class='product-desc'>Mie + TMM light-trapping. AM1.5G Yablonovitch.</div>
         <div>
-            <span class='product-badge'>MIE + TMM</span>
-            <span class='product-badge'>PHOTON CAGE</span>
+            <span class='product-badge'>MIE</span>
+            <span class='product-badge'>TMM</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/4_🔬_Granas_Optics.py", label="Open Optics →", icon="🔬")
+    st.page_link("pages/4_🔬_Granas_Optics.py", label="Open →", icon="🔬")
+
+with c5:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00ffcc;'>🧬 SDL</div>
+        <div class='product-desc'>Self-Driving Lab. HJB Optics + Active Learning.</div>
+        <div>
+            <span class='product-badge'>HJB</span>
+            <span class='product-badge'>SDL</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/5_🧬_Granas_SDL.py", label="Open →", icon="🧬")
 
 st.markdown("")
 st.divider()
