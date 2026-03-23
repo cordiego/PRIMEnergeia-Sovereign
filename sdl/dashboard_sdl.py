@@ -75,11 +75,13 @@ st.markdown("""
     }
     div[data-testid="stMetricValue"] {
         color: #00ffcc; font-family: 'JetBrains Mono', monospace;
-        font-size: 26px; font-weight: 700;
+        font-size: 34px; font-weight: 700;
+        text-shadow: 0 0 12px rgba(0,255,204,0.3);
     }
+    div[data-testid="stMetricDelta"] { font-size: 13px; }
     div[data-testid="stMetricLabel"] {
-        color: #6b7fa3; font-family: 'Inter', sans-serif; font-weight: 600;
-        font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+        color: #94a3b8; font-family: 'Inter', sans-serif; font-weight: 600;
+        font-size: 13px; letter-spacing: 1.2px; text-transform: uppercase;
     }
     .stTabs [data-baseweb="tab"] { color: #94a3b8; font-weight: 500; }
     .stTabs [aria-selected="true"] {
