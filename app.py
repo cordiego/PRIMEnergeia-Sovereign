@@ -31,15 +31,19 @@ st.markdown("""
 div[data-testid="stMetricValue"] {
     color: #00d1ff;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 28px;
+    font-size: 34px;
     font-weight: 700;
+    text-shadow: 0 0 12px rgba(0,209,255,0.3);
+}
+div[data-testid="stMetricDelta"] {
+    font-size: 13px;
 }
 div[data-testid="stMetricLabel"] {
-    color: #6b7fa3;
+    color: #94a3b8;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
-    font-size: 11px;
-    letter-spacing: 1.5px;
+    font-size: 13px;
+    letter-spacing: 1.2px;
     text-transform: uppercase;
 }
 
@@ -54,14 +58,14 @@ div[data-testid="stMetricLabel"] {
 .product-card:hover { border-color: #00d1ff; }
 .product-title {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 700;
     margin-bottom: 8px;
 }
 .product-desc {
-    color: #6b7fa3;
-    font-size: 14px;
-    line-height: 1.6;
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.5;
 }
 .product-badge {
     display: inline-block;
