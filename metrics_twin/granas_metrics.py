@@ -110,8 +110,8 @@ class SDLMetrics:
             decomp = max(0.3, 1.0 - 0.02 * (temp - 150))
         grain = float(np.clip(growth * rpm_factor * decomp, 50, 700))
 
-        # PCE
-        t_score = np.exp(-((thickness - 550) / 500)**2)
+        # Score components
+        t_score = np.exp(-((thickness - 600) / 600)**2)
         g_score = 1.0 - np.exp(-grain / 150)
         c_score = np.exp(-((conc - 1.2) / 0.5)**2)
         r_score = np.exp(-((rpm - 4000) / 3000)**2)
@@ -120,7 +120,12 @@ class SDLMetrics:
             a_score = max(0.1, np.exp(-0.05 * (temp - 150)))
         if temp < 60:
             a_score *= 0.5
-        pce = float(np.clip(max(2.0, 22.0 * t_score * g_score * c_score * r_score * a_score), 0, 25))
+
+        # Tandem PCE (perovskite top 23% + silicon bottom 15%)
+        perovskite_pce = 23.0 * t_score * g_score * c_score * r_score * a_score
+        si_coupling = min(1.0, (g_score + t_score) / 2 + 0.1)
+        silicon_pce = 15.0 * si_coupling
+        pce = float(np.clip(max(3.0, perovskite_pce + silicon_pce), 0, 42))
 
         film_quality = float(g_score * t_score * a_score)
         recipe_cost = (rpm / 8000 * 0.3 + temp / 200 * 0.4 + conc / 2.0 * 0.3)
@@ -186,11 +191,11 @@ class HolisticGranas:
         optics_boost = 1.0 + 0.2 * (self.optics.jsc_mA_cm2 / 20 - 1)
         self.device_pce = self.sdl.pce_pct * max(0.8, optics_boost)
 
-        # Figure of Merit = weighted composite
-        pce_norm = self.sdl.pce_pct / 22.0
-        jsc_norm = self.optics.jsc_mA_cm2 / 25.0
-        grain_norm = self.sdl.grain_nm / 500.0
-        abs_norm = self.optics.weighted_absorption_pct / 100.0
+        # Figure of Merit = weighted composite (tandem: max 38%)
+        pce_norm = min(self.sdl.pce_pct / 38.0, 1.0)
+        jsc_norm = min(self.optics.jsc_mA_cm2 / 25.0, 1.0)
+        grain_norm = min(self.sdl.grain_nm / 500.0, 1.0)
+        abs_norm = min(self.optics.weighted_absorption_pct / 100.0, 1.0)
         self.figure_of_merit = (
             0.35 * pce_norm +
             0.25 * jsc_norm +
@@ -201,12 +206,14 @@ class HolisticGranas:
         # Cost efficiency
         self.cost_efficiency = self.sdl.pce_pct / max(self.sdl.recipe_cost, 0.1)
 
-        # TRL estimate
-        if self.sdl.pce_pct > 18:
+        # TRL estimate (tandem targets)
+        if self.sdl.pce_pct > 33:
+            self.technology_readiness = 7
+        elif self.sdl.pce_pct > 28:
             self.technology_readiness = 6
-        elif self.sdl.pce_pct > 14:
+        elif self.sdl.pce_pct > 22:
             self.technology_readiness = 5
-        elif self.sdl.pce_pct > 10:
+        elif self.sdl.pce_pct > 15:
             self.technology_readiness = 4
         else:
             self.technology_readiness = 3

@@ -111,10 +111,10 @@ class FabricationModel:
         """
         Predict PCE from fabrication parameters.
 
-        PCE model combines:
-          - Film quality (grain size, coverage)
-          - Thickness optimization (too thin → low absorption, too thick → recombination)
-          - Compositional quality (concentration affects stoichiometry)
+        Perovskite-Silicon Tandem Model:
+          - Perovskite top cell: up to ~23% (bandgap ~1.55 eV)
+          - Silicon bottom cell: up to ~15% (bandgap ~1.12 eV)
+          - Tandem max: ~38% (current matching limited)
         """
         # Film thickness
         thickness = FabricationModel.film_thickness_nm(spin_rpm, concentration_M)
@@ -122,10 +122,10 @@ class FabricationModel:
         # Grain size
         grain = FabricationModel.grain_size_nm(anneal_temp_C, spin_rpm)
 
-        # Thickness penalty (optimal 300-800nm, wider tolerance)
-        thickness_score = np.exp(-((thickness - 550) / 500)**2)
+        # Thickness penalty (optimal 300-900nm, tandem-optimized)
+        thickness_score = np.exp(-((thickness - 600) / 600)**2)
 
-        # Grain quality (bigger = better, scale with 150nm)
+        # Grain quality (bigger = better)
         grain_score = 1.0 - np.exp(-grain / 150)
 
         # Concentration quality (optimal ~1.0-1.4 M)
@@ -141,11 +141,17 @@ class FabricationModel:
         if anneal_temp_C < 60:
             anneal_score *= 0.5
 
-        # Combined PCE (max ~22% for MAPbI3)
-        base_pce = 22.0
-        pce = base_pce * thickness_score * grain_score * conc_score * rpm_score * anneal_score
+        # Perovskite top cell (max ~23%)
+        perovskite_pce = 23.0 * thickness_score * grain_score * conc_score * rpm_score * anneal_score
 
-        return float(np.clip(max(2.0, pce), 0, 25))
+        # Silicon bottom cell (current-matched tandem)
+        si_coupling = min(1.0, (grain_score + thickness_score) / 2 + 0.1)
+        silicon_pce = 15.0 * si_coupling
+
+        # Total tandem PCE
+        pce = perovskite_pce + silicon_pce
+
+        return float(np.clip(max(3.0, pce), 0, 42))
 
 
 # ─────────────────────────────────────────────────────────────
