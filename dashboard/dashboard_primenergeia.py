@@ -182,9 +182,16 @@ st.markdown(f"""
     border: 1px solid {M['border']}; border-radius: 8px; padding: 18px 20px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }}
-div[data-testid="stMetricValue"] {{ color: {AC}; font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 700; }}
+div[data-testid="stMetricValue"] {{ color: {AC}; font-family: 'JetBrains Mono', monospace; font-size: 34px; font-weight: 700; text-shadow: 0 0 12px rgba(0,209,255,0.3); }}
 div[data-testid="stMetricDelta"] {{ font-family: 'JetBrains Mono', monospace; }}
-div[data-testid="stMetricLabel"] {{ color: #6b7fa3; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; }}
+div[data-testid="stMetricLabel"] {
+    color: #94a3b8;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}}
 .stTabs [data-baseweb="tab-list"] {{ gap: 0px; background-color: #0a0f1a; border-radius: 8px; padding: 4px; }}
 .stTabs [data-baseweb="tab"] {{ color: #6b7fa3; font-weight: 600; font-size: 13px; border-radius: 6px; padding: 10px 20px; }}
 .stTabs [aria-selected="true"] {{ background: linear-gradient(135deg, {AC}22, {M['accent2']}22); color: {AC} !important; }}

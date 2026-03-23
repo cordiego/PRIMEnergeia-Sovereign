@@ -24,7 +24,13 @@ def run_dashboard():
         <style>
         .main { background-color: #0b1016; color: #ffffff; font-family: 'JetBrains Mono', monospace; }
         .stMetric { background-color: #161b22; border: 1px solid #00d1ff; padding: 20px; border-radius: 5px; }
-        div[data-testid="stMetricValue"] { color: #00d1ff; font-size: 40px; }
+        div[data-testid="stMetricValue"] {
+    color: #00d1ff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 34px;
+    font-weight: 700;
+    text-shadow: 0 0 12px rgba(0,209,255,0.3);
+}
         .status-active { color: #00ff88; font-weight: bold; animation: blinker 1.5s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.5; } }
         </style>

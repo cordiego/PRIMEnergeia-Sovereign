@@ -68,13 +68,20 @@ st.markdown("""
         border: 1px solid #1e2d4a; border-radius: 8px; padding: 16px 20px;
     }
     div[data-testid="stMetricValue"] {
-        color: #8a2be2; font-family: 'JetBrains Mono', monospace;
-        font-size: 26px; font-weight: 700;
-    }
+    color: #00d1ff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 34px;
+    font-weight: 700;
+    text-shadow: 0 0 12px rgba(0,209,255,0.3);
+}
     div[data-testid="stMetricLabel"] {
-        color: #6b7fa3; font-family: 'Inter', sans-serif; font-weight: 600;
-        font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
-    }
+    color: #94a3b8;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+}
     .stTabs [data-baseweb="tab"] { color: #94a3b8; font-weight: 500; }
     .stTabs [aria-selected="true"] {
         color: #8a2be2 !important; border-bottom-color: #8a2be2 !important;

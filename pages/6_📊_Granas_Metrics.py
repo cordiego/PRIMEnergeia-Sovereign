@@ -2,19 +2,15 @@
 PRIMEnergeia — Granas Metrics Page Wrapper
 """
 import streamlit as st
-import sys, os, re
+import sys, os, re, importlib, importlib.util, types
 
 _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _root not in sys.path:
     sys.path.insert(0, _root)
 
-# Remap imports: metrics → metrics_twin
+# Remap: metrics_twin → metrics (so dashboard_metrics.py can import from "metrics.granas_metrics")
 _metrics_twin = os.path.join(_root, "metrics_twin")
-if os.path.exists(_metrics_twin):
-    sys.path.insert(0, _root)
-    # Make metrics_twin accessible as "metrics"
-    import importlib
-    import types
+if os.path.exists(_metrics_twin) and "metrics" not in sys.modules:
     metrics_mod = types.ModuleType("metrics")
     metrics_mod.__path__ = [_metrics_twin]
     sys.modules["metrics"] = metrics_mod
@@ -28,7 +24,7 @@ if os.path.exists(_metrics_twin):
 
 _dashboard = os.path.join(_metrics_twin, "dashboard_metrics.py")
 if not os.path.exists(_dashboard):
-    st.error("⚠️ Metrics engine not found.")
+    st.error("⚠️ Metrics engine not found. Ensure `metrics_twin/` folder exists.")
     st.stop()
 
 with open(_dashboard, "r") as f:
