@@ -221,8 +221,7 @@ with tab2:
     fig_spec.add_trace(go.Scatter(x=wl, y=green_R*100, name="Green Reflection",
                                    line=dict(color="#00ff00", width=2, dash="dot"),
                                    fill="tozeroy", fillcolor="rgba(0,255,0,0.08)"))
-    fig_spec.add_vline(x=535, line_dash="dash", line_color="#00ff0088",
-                        annotation_text="535nm")
+    fig_spec.add_vline(x=535, line_dash="dash", line_color="rgba(0,255,0,0.5)")
     fig_spec.update_layout(
         template="plotly_dark", paper_bgcolor="#020608", plot_bgcolor="#020608",
         title="Absorptance & Green Reflectance", height=450,
@@ -255,8 +254,7 @@ with tab3:
                h.sdl.additive_pct, h.sdl.solvent_ratio).pce_pct for t in temps_sw]
     fig_sdl = go.Figure(go.Scatter(x=temps_sw, y=pces_sw, name="PCE",
                                     line=dict(color="#00ffcc", width=3)))
-    fig_sdl.add_vline(x=h.sdl.anneal_temp_C, line_dash="dash", line_color="#8a2be2",
-                       annotation_text="Current")
+    fig_sdl.add_vline(x=h.sdl.anneal_temp_C, line_dash="dash", line_color="#8a2be2")
     fig_sdl.update_layout(
         template="plotly_dark", paper_bgcolor="#020608", plot_bgcolor="#020608",
         title="PCE vs Anneal Temperature", xaxis_title="°C", yaxis_title="PCE (%)",
@@ -287,8 +285,9 @@ with tab4:
                             subplot_titles=["Tj vs Green Reflectance", "T80 vs Green Reflectance"])
     fig_th.add_trace(go.Scatter(x=refls*100, y=tjs, name="Tj (°C)",
                                  line=dict(color="#ff6b35", width=3)), row=1, col=1)
-    fig_th.add_hline(y=42, line_dash="dot", line_color="#00ff6488",
-                      annotation_text="Verde-1 target", row=1, col=1)
+    fig_th.add_shape(type="line", x0=0, x1=50, y0=42, y1=42,
+                      line=dict(color="rgba(0,255,100,0.5)", width=1, dash="dot"),
+                      xref="x", yref="y", row=1, col=1)
     fig_th.add_trace(go.Scatter(x=refls*100, y=t80s, name="T80 (yr)",
                                  line=dict(color="#00d1ff", width=3)), row=1, col=2)
     fig_th.update_layout(
