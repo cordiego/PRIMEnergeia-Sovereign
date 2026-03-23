@@ -110,20 +110,19 @@ st.divider()
 st.markdown("### Product Suite")
 st.markdown("")
 
-c1, c2, c3 = st.columns(3)
+c1, c2, c3, c4 = st.columns(4)
 
 with c1:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #00d1ff;'>⚡ Grid Control</div>
         <div class='product-desc'>
-            Multi-market Hamilton-Jacobi-Bellman optimal frequency control system.
-            Real-time SCADA for SEN 🇲🇽, ERCOT 🇺🇸, and MIBEL 🇪🇸🇵🇹 power grids.
+            Multi-market HJB optimal frequency control.
+            SCADA for SEN 🇲🇽, ERCOT 🇺🇸, MIBEL 🇪🇸🇵🇹.
         </div>
         <div>
             <span class='product-badge'>HJB CONTROL</span>
             <span class='product-badge'>3 MARKETS</span>
-            <span class='product-badge'>72 NODES</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -134,13 +133,12 @@ with c2:
     <div class='product-card'>
         <div class='product-title' style='color: #F1C40F;'>🏛️ Eureka Sovereign</div>
         <div class='product-desc'>
-            Dynamic VIX-Regime Volatility Targeting Engine.
-            CEO-grade portfolio management with regime-switching allocation across 5 assets.
+            VIX-Regime Volatility Targeting Engine.
+            Regime-switching allocation across 5 assets.
         </div>
         <div>
             <span class='product-badge'>VIX REGIMES</span>
             <span class='product-badge'>5 ASSETS</span>
-            <span class='product-badge'>LIVE DATA</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -151,17 +149,32 @@ with c3:
     <div class='product-card'>
         <div class='product-title' style='color: #00ff88;'>🧪 Granas Optimizer</div>
         <div class='product-desc'>
-            Sol-Ink Bayesian Optimizer for perovskite solar cell fabrication.
-            6D physics-informed search space with GP surrogate and EI acquisition.
+            Bayesian Optimizer for perovskite solar cells.
+            6D physics-informed GP + EI acquisition.
         </div>
         <div>
             <span class='product-badge'>BAYESIAN OPT</span>
             <span class='product-badge'>6D SEARCH</span>
-            <span class='product-badge'>GP + EI</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
     st.page_link("pages/3_🧪_Granas_Optimizer.py", label="Open Granas →", icon="🧪")
+
+with c4:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #8a2be2;'>🔬 Granas Optics</div>
+        <div class='product-desc'>
+            Mie scattering + TMM light-trapping sim.
+            AM1.5G solar, Yablonovitch limit analysis.
+        </div>
+        <div>
+            <span class='product-badge'>MIE + TMM</span>
+            <span class='product-badge'>PHOTON CAGE</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/4_🔬_Granas_Optics.py", label="Open Optics →", icon="🔬")
 
 st.markdown("")
 st.divider()
