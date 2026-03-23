@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import yfinance as yf
 from datetime import datetime, timedelta
+import time
 import warnings
 
 warnings.filterwarnings("ignore")
@@ -471,16 +472,18 @@ with tab2:
 
     # Stacked weights
     weight_colors_rgba = {
-        "IAU": "rgba(241,196,15,0.67)", "GEV": "rgba(0,209,255,0.67)",
-        "VGSH": "rgba(0,255,136,0.67)", "VTIP": "rgba(167,139,250,0.67)",
-        "VIXM": "rgba(255,107,107,0.67)"
+        "IAU": "rgba(241, 196, 15, 0.66)",
+        "GEV": "rgba(0, 209, 255, 0.66)",
+        "VGSH": "rgba(0, 255, 136, 0.66)",
+        "VTIP": "rgba(167, 139, 250, 0.66)",
+        "VIXM": "rgba(255, 107, 107, 0.66)"
     }
     for tk in EUREKA_UNIVERSE:
         fig_vix.add_trace(go.Scatter(
             x=data["weight_df"].index, y=data["weight_df"][tk].values * 100,
             name=f"{tk} ({ASSET_META[tk]['desc']})",
             stackgroup='one', line=dict(width=0.5),
-            fillcolor=weight_colors_rgba.get(tk, "rgba(255,255,255,0.67)")
+            fillcolor=weight_colors_rgba.get(tk, "rgba(255, 255, 255, 0.66)")
         ), row=2, col=1)
 
     fig_vix.update_layout(
@@ -589,141 +592,61 @@ with tab3:
 #  TAB 4: REBALANCE COMMAND CENTER
 # ═══════════════════════════════════════════════
 with tab4:
-    st.markdown("<div class='section-header'>REBALANCE COMMAND CENTER — PERCENTAGE CHANGE & TRADE SIGNALS</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>REBALANCE COMMAND CENTER — DRIFT DETECTION & EXECUTION</div>", unsafe_allow_html=True)
 
     st.markdown("""
     <div class='math-block'>
-    <strong>% Change Engine:</strong>&nbsp;&nbsp; ΔP = Σ w<sub>i</sub>(Φ(VIX<sub>t</sub>)) · r<sub>i,t</sub> — regime-adaptive portfolio return<br>
-    <strong>Signal Logic:</strong>&nbsp;&nbsp; If Φ(VIX<sub>t</sub>) ≠ Φ(VIX<sub>t-1</sub>) → REBALANCE to new target weights<br>
-    <strong>Execution Window:</strong>&nbsp;&nbsp; 15 min before market close — place % orders for optimal fill
+    <strong>Drift Threshold:</strong>&nbsp;&nbsp; |w<sub>actual</sub> − w<sub>target</sub>| / w<sub>target</sub> > 5%<br>
+    <strong>Trade Logic:</strong>&nbsp;&nbsp; If drift exceeds threshold → generate BUY/SELL order to restore target weight<br>
+    <strong>Settlement:</strong>&nbsp;&nbsp; T+2 for US equities — avoid Good Faith Violations
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Eureka Portfolio % Change KPIs ──
-    # Compute daily, 5d, 30d, YTD percentage changes from the live data
-    port_ret = data["port_returns"]
-    cum_ret = data["cum_returns"]
+    # Simulate current vs target (small random drift from target)
+    np.random.seed(int(time.time()) % 10000)
+    target_w = data["current_weights"]
+    CAPITAL = 10000.0  # Default simulation capital
 
-    daily_chg = float(port_ret.iloc[-1]) * 100 if len(port_ret) >= 1 else 0.0
-    weekly_chg = float((cum_ret.iloc[-1] / cum_ret.iloc[-6] - 1) * 100) if len(cum_ret) >= 6 else daily_chg
-    monthly_chg = float((cum_ret.iloc[-1] / cum_ret.iloc[-22] - 1) * 100) if len(cum_ret) >= 22 else weekly_chg
-
-    # YTD
-    ytd_idx = cum_ret.index[cum_ret.index >= f"{now.year}-01-01"]
-    ytd_chg = float((cum_ret.iloc[-1] / cum_ret.loc[ytd_idx[0]] - 1) * 100) if len(ytd_idx) > 0 else float((cum_ret.iloc[-1] - 1) * 100)
-
-    # SPY equivalents
-    spy_daily = float(data["returns"][BENCHMARK].iloc[-1]) * 100 if BENCHMARK in data["returns"].columns else 0.0
-    spy_cum_s = data["spy_cum"]
-    spy_ytd_idx = spy_cum_s.index[spy_cum_s.index >= f"{now.year}-01-01"]
-    spy_ytd = float((spy_cum_s.iloc[-1] / spy_cum_s.loc[spy_ytd_idx[0]] - 1) * 100) if len(spy_ytd_idx) > 0 else float((spy_cum_s.iloc[-1] - 1) * 100)
-
-    def chg_color(v):
-        return "#00ff88" if v > 0 else "#ff4b4b" if v < 0 else "#6b7fa3"
-
-    def chg_arrow(v):
-        return "▲" if v > 0 else "▼" if v < 0 else "─"
-
-    st.markdown("<div class='section-header'>EUREKA PORTFOLIO % CHANGE</div>", unsafe_allow_html=True)
-
-    pc1, pc2, pc3, pc4 = st.columns(4)
-    with pc1:
-        st.markdown(f"""<div class='kpi-highlight'>
-            <div class='kpi-value' style='color:{chg_color(daily_chg)};'>{chg_arrow(daily_chg)} {daily_chg:+.2f}%</div>
-            <div class='kpi-label'>TODAY (SPY: {spy_daily:+.2f}%)</div>
-        </div>""", unsafe_allow_html=True)
-    with pc2:
-        st.markdown(f"""<div class='kpi-highlight'>
-            <div class='kpi-value' style='color:{chg_color(weekly_chg)};'>{chg_arrow(weekly_chg)} {weekly_chg:+.2f}%</div>
-            <div class='kpi-label'>5-DAY</div>
-        </div>""", unsafe_allow_html=True)
-    with pc3:
-        st.markdown(f"""<div class='kpi-highlight'>
-            <div class='kpi-value' style='color:{chg_color(monthly_chg)};'>{chg_arrow(monthly_chg)} {monthly_chg:+.2f}%</div>
-            <div class='kpi-label'>30-DAY</div>
-        </div>""", unsafe_allow_html=True)
-    with pc4:
-        alpha_ytd = ytd_chg - spy_ytd
-        st.markdown(f"""<div class='kpi-highlight'>
-            <div class='kpi-value' style='color:{chg_color(ytd_chg)};'>{chg_arrow(ytd_chg)} {ytd_chg:+.2f}%</div>
-            <div class='kpi-label'>YTD (α: {alpha_ytd:+.2f}%)</div>
-        </div>""", unsafe_allow_html=True)
+    cap_input = st.number_input("Portfolio Capital (USD)", min_value=100.0, max_value=100_000_000.0, value=CAPITAL, step=500.0)
 
     st.markdown("")
 
-    # ── Trade Orders Based on Daily Asset % Change ──
-    # Assumes portfolio is at target weights; signals based on each asset's daily move
-    regime_hist = data["regime_history"]
-    current_regime_now = data["current_regime"]
-    prev_regime = regime_hist.iloc[-2] if len(regime_hist) >= 2 else current_regime_now
-    regime_changed = prev_regime != current_regime_now
-
-    if regime_changed:
-        st.markdown(f"""
-        <div style='background: linear-gradient(135deg, #1a0a00, #331a00); border: 2px solid #ff6b00;
-                    border-radius: 10px; padding: 20px 24px; margin-bottom: 16px; text-align:center;'>
-            <div style='font-family:JetBrains Mono; font-size:14px; color:#fbc02d; letter-spacing:2px; margin-bottom:8px;'>⚡ REGIME CHANGE DETECTED ⚡</div>
-            <div style='font-family:JetBrains Mono; font-size:22px; color:#e0e6ed;'>
-                <span style='color:{REGIMES[prev_regime]["color"]};'>{prev_regime}</span>
-                &nbsp;→&nbsp;
-                <span style='color:{REGIMES[current_regime_now]["color"]};'>{current_regime_now}</span>
-            </div>
-            <div style='font-size:12px; color:#6b7fa3; margin-top:8px;'>Rebalance to new target weights immediately</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    st.markdown("<div class='section-header'>TRADE ORDERS — BASED ON DAILY ASSET % CHANGE</div>", unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class='math-block'>
-    <strong>Logic:</strong>&nbsp;&nbsp; Assumes portfolio at target weights. If asset daily Δ ≥ +1.5% → <span style='color:#ff4b4b'>SELL</span> (take profit)&nbsp;|&nbsp;
-    If Δ ≤ −1.5% → <span style='color:#00ff88'>BUY</span> (buy dip)&nbsp;|&nbsp; Otherwise → HOLD
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Build trade order table
-    target_w = data["current_weights"]
-    asset_returns = data["returns"]
-    port_daily_ret = float(port_ret.iloc[-1]) if len(port_ret) >= 1 else 0.0
-
-    BUY_THRESHOLD = -0.015    # asset down 1.5% → BUY the dip
-    SELL_THRESHOLD = 0.015    # asset up 1.5% → SELL / take profit
-
+    # Build rebalance table
     reb_rows = []
     for tk in EUREKA_UNIVERSE:
         w_target = target_w.get(tk, 0)
-        price = float(data["prices"][tk].iloc[-1]) if tk in data["prices"].columns else 0.0
-        r_asset = float(asset_returns[tk].iloc[-1]) if tk in asset_returns.columns else 0.0
-        asset_daily_pct = r_asset * 100
+        drift_noise = np.random.normal(0, 0.04)
+        w_actual = max(0, w_target + drift_noise)
+        drift_pct = (w_actual - w_target) / w_target * 100 if w_target > 0 else 0
+        price = data["prices"][tk].iloc[-1] if tk in data["prices"].columns else 100.0
 
-        # Drift: how much the weight shifted from target due to today's move
-        # new_weight = w_target * (1 + r_asset) / (1 + r_portfolio)
-        denom = 1 + port_daily_ret
-        new_weight = w_target * (1 + r_asset) / denom if denom != 0 else w_target
-        drift = new_weight - w_target
-        trade_pct = abs(drift) * 100  # % of portfolio to trade
+        adj_pct = (w_target - w_actual) * 100
 
-        # Determine action based on daily % change
-        if r_asset <= BUY_THRESHOLD:
-            action = "🟢 BUY"
-        elif r_asset >= SELL_THRESHOLD:
-            action = "🔴 SELL"
-        else:
-            action = "HOLD"
-            trade_pct = 0.0
+        action = "HOLD"
+        shares = 0
+        if abs(drift_pct) > 5:
+            diff_usd = (w_target - w_actual) * cap_input
+            shares = round(abs(diff_usd) / price)
+            action = "BUY" if diff_usd > 0 else "SELL"
+            if shares == 0:
+                action = "HOLD (sub-lot)"
 
         reb_rows.append({
             "Asset": tk,
             "Description": ASSET_META[tk]["desc"],
             "Target %": f"{w_target*100:.1f}%",
+            "Actual %": f"{w_actual*100:.1f}%",
+            "Drift": f"{drift_pct:+.1f}%",
+            "Adj %": f"{adj_pct:+.1f}%",
             "Price": f"${price:.2f}",
-            "Daily Δ": f"{asset_daily_pct:+.2f}%",
-            "Trade %": f"{trade_pct:.2f}%" if trade_pct > 0 else "—",
             "Action": action,
+            "Shares": shares,
         })
 
+    # Display table
     df_reb = pd.DataFrame(reb_rows)
 
+    # Color the action column
     def style_action(val):
         if "BUY" in str(val):
             return "color: #00ff88; font-weight: 700"
@@ -731,28 +654,15 @@ with tab4:
             return "color: #ff4b4b; font-weight: 700"
         return "color: #6b7fa3"
 
-    def style_daily(val):
-        try:
-            v = float(val.replace("%", "").replace("+", ""))
-            if v > 0:
-                return "color: #00ff88"
-            elif v < 0:
-                return "color: #ff4b4b"
-        except:
-            pass
-        return "color: #6b7fa3"
-
     st.dataframe(
-        df_reb.style.map(style_action, subset=["Action"]).map(style_daily, subset=["Daily Δ"]),
+        df_reb.style.map(style_action, subset=["Action"]),
         use_container_width=True, hide_index=True, height=280
     )
 
-    # Trade summary
-    active_trades = [r for r in reb_rows if "BUY" in r["Action"] or "SELL" in r["Action"]]
+    # Warnings
+    active_trades = [r for r in reb_rows if r["Action"] not in ["HOLD", "HOLD (sub-lot)"]]
     if active_trades:
-        st.warning(f"⚠️ **{len(active_trades)} trade order(s) recommended** based on today's asset moves.")
-        for r in active_trades:
-            st.markdown(f"&nbsp;&nbsp;&nbsp; **{r['Action']}** {r['Asset']} ({r['Description']}) — **{r['Trade %']}** of portfolio @ {r['Price']}  *(daily: {r['Daily Δ']})*")
+        st.warning(f"⚠️ **{len(active_trades)} rebalance signal(s) detected.** Review before execution.")
         st.markdown("""
         <div class='math-block'>
         <strong>⚠ SETTLEMENT WARNING (T+2):</strong> If you sell today, cash will NOT be available for same-ticker
@@ -760,58 +670,27 @@ with tab4:
         </div>
         """, unsafe_allow_html=True)
     else:
-        st.success("✅ All assets within ±1.5% daily range — no trades needed.")
-
-    # Momentum overlay
-    if daily_chg > 1.0:
-        st.info(f"📈 **Take-Profit Window:** Eureka up **{daily_chg:+.2f}%** today. Consider trimming winners.")
-    elif daily_chg < -2.0:
-        st.info(f"📉 **Opportunistic Buy Window:** Eureka down **{daily_chg:+.2f}%** today. Consider adding to core positions.")
+        st.success("✅ All positions within tolerance. No rebalance required.")
 
     st.markdown("")
 
-    # ── Percentage Change Time Series Chart ──
-    st.markdown("<div class='section-header'>EUREKA % CHANGE — ROLLING PERFORMANCE</div>", unsafe_allow_html=True)
+    # Weight comparison chart
+    fig_reb = go.Figure()
+    tks = [r["Asset"] for r in reb_rows]
+    targets = [float(r["Target %"].replace("%", "")) for r in reb_rows]
+    actuals = [float(r["Actual %"].replace("%", "")) for r in reb_rows]
 
-    fig_reb = make_subplots(
-        rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.12,
-        subplot_titles=("Eureka Daily % Change", "Cumulative Growth vs SPY"),
-        row_heights=[0.4, 0.6]
-    )
-
-    # Daily % change bars
-    daily_pcts = port_ret * 100
-    bar_colors = ["#00ff88" if r > 0 else "#ff4b4b" for r in daily_pcts.values]
-    fig_reb.add_trace(go.Bar(
-        x=daily_pcts.index[-60:], y=daily_pcts.values[-60:],
-        name="Daily Δ%", marker_color=bar_colors[-60:], opacity=0.7
-    ), row=1, col=1)
-
-    # Cumulative growth (last 60 days)
-    cum_60 = cum_ret.iloc[-60:]
-    spy_60 = spy_cum_s.iloc[-60:]
-    fig_reb.add_trace(go.Scatter(
-        x=cum_60.index, y=cum_60.values,
-        name="Eureka", line=dict(color="#F1C40F", width=3),
-        fill='tozeroy', fillcolor='rgba(241,196,15,0.05)'
-    ), row=2, col=1)
-    fig_reb.add_trace(go.Scatter(
-        x=spy_60.index, y=spy_60.values,
-        name="SPY", line=dict(color="rgba(255,255,255,0.35)", width=1.5, dash="dot")
-    ), row=2, col=1)
-
+    fig_reb.add_trace(go.Bar(x=tks, y=targets, name="Target", marker_color="#00d1ff", opacity=0.8))
+    fig_reb.add_trace(go.Bar(x=tks, y=actuals, name="Actual", marker_color="#fbc02d", opacity=0.8))
     fig_reb.update_layout(
-        template="plotly_dark", height=600, showlegend=True,
+        template="plotly_dark", height=350, barmode="group",
         paper_bgcolor="#050810", plot_bgcolor="#0a0f1a",
-        margin=dict(l=60, r=20, t=80, b=40),
-        legend=dict(orientation="h", y=1.12, x=0.5, xanchor="center", font=dict(size=10)),
-        font=dict(family="JetBrains Mono", size=11, color="#6b7fa3")
+        yaxis_title="Weight (%)",
+        margin=dict(l=60, r=20, t=20, b=40),
+        legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"),
+        font=dict(family="JetBrains Mono", size=12, color="#6b7fa3")
     )
-    fig_reb.update_xaxes(gridcolor="#1a2744")
     fig_reb.update_yaxes(gridcolor="#1a2744")
-    fig_reb.update_yaxes(title_text="Δ%", row=1, col=1)
-    fig_reb.update_yaxes(title_text="Growth of $1", row=2, col=1)
-
     st.plotly_chart(fig_reb, use_container_width=True)
 
 
@@ -878,8 +757,8 @@ with tab5:
     st.markdown("<div class='section-header'>CURRENT ALLOCATION — TREEMAP</div>", unsafe_allow_html=True)
     w_labels = list(data["current_weights"].keys())
     w_values = [v * 100 for v in data["current_weights"].values()]
-    w_colors_hex = {"IAU": "#F1C40F", "GEV": "#00d1ff", "VGSH": "#00ff88", "VTIP": "#a78bfa", "VIXM": "#ff6b6b"}
-    w_colors = [w_colors_hex.get(tk, "#ffffff") for tk in w_labels]
+    treemap_colors = {"IAU": "#F1C40F", "GEV": "#00d1ff", "VGSH": "#00ff88", "VTIP": "#a78bfa", "VIXM": "#ff6b6b"}
+    w_colors = [treemap_colors.get(tk, "#ffffff") for tk in w_labels]
 
     fig_tree = go.Figure(go.Treemap(
         labels=[f"{tk}<br>{v:.0f}%" for tk, v in zip(w_labels, w_values)],
