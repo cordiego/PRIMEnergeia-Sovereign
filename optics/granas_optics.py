@@ -23,6 +23,9 @@ import logging
 from dataclasses import dataclass, field
 from typing import Optional, Dict, Tuple, List
 
+# NumPy 2.0 compatibility: np.trapz was renamed to np.trapezoid
+_trapz = getattr(np, 'trapezoid', None) or getattr(np, 'trapz', None)
+
 # ─────────────────────────────────────────────────────────────
 # Logging
 # ─────────────────────────────────────────────────────────────
@@ -179,7 +182,7 @@ class SolarSpectrum:
         """
         flux = SolarSpectrum.photon_flux(wavelengths_nm)
         # Integrate in nm (flux is per nm), convert result
-        jsc_A_m2 = Q_ELECTRON * np.trapz(eqe * flux, wavelengths_nm)
+        jsc_A_m2 = Q_ELECTRON * _trapz(eqe * flux, wavelengths_nm)
         return float(jsc_A_m2 / 10.0)  # A/m² → mA/cm²
 
 
@@ -801,8 +804,8 @@ class GranasEngine:
 
         # AM1.5G-weighted absorption
         irr = SolarSpectrum.irradiance(wavelengths_nm)
-        weighted_abs = float(np.trapz(absorptance * irr, wavelengths_nm) /
-                              np.trapz(irr, wavelengths_nm) * 100)
+        weighted_abs = float(_trapz(absorptance * irr, wavelengths_nm) /
+                              _trapz(irr, wavelengths_nm) * 100)
 
         # Path length enhancement
         n_avg = float(np.mean([mat.n_complex(wl).real
