@@ -4,11 +4,11 @@ Wraps the Granas dashboard for the unified multi-page app.
 """
 import sys
 import os
+import re
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Read and exec the Granas dashboard
 _dashboard_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                                 "optimization", "granas_dashboard.py")
 
@@ -20,15 +20,13 @@ if not os.path.exists(_dashboard_path):
 with open(_dashboard_path, "r") as f:
     _code = f.read()
 
-# Remove set_page_config block
-_code = _code.replace(
-    """st.set_page_config(
-    page_title="Granas Sovereign | Perovskite Optimizer",
-    page_icon="🧪",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)""",
-    "# page_config handled by app.py"
+# Robustly remove set_page_config block (handles any formatting)
+_code = re.sub(
+    r'st\.set_page_config\s*\(.*?\)',
+    '# page_config handled by app.py',
+    _code,
+    count=1,
+    flags=re.DOTALL
 )
 
 exec(_code)

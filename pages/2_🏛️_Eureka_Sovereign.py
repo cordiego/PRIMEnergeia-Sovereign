@@ -4,12 +4,12 @@ Wraps the Eureka dashboard for the unified multi-page app.
 """
 import sys
 import os
+import re
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Read and exec the Eureka dashboard
-# First check if it exists in PRIMEnergeia-Sovereign, otherwise load from Eureka-Sovereign
+# Check candidate paths for the Eureka dashboard
 _candidates = [
     os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                  "dashboard", "dashboard_eureka.py"),
@@ -30,15 +30,13 @@ if _dashboard_path is None:
 with open(_dashboard_path, "r") as f:
     _code = f.read()
 
-# Remove set_page_config block
-_code = _code.replace(
-    """st.set_page_config(
-    page_title="Eureka Sovereign | Vol-Targeting",
-    page_icon="🏛️",
-    layout="wide",
-    initial_sidebar_state="collapsed"
-)""",
-    "# page_config handled by app.py"
+# Robustly remove set_page_config block (handles any formatting)
+_code = re.sub(
+    r'st\.set_page_config\s*\(.*?\)',
+    '# page_config handled by app.py',
+    _code,
+    count=1,
+    flags=re.DOTALL
 )
 
 exec(_code)
