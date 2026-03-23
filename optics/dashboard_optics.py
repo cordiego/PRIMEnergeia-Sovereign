@@ -42,7 +42,6 @@ st.set_page_config(
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
-
     .stApp {
         background: linear-gradient(145deg, #050810 0%, #0a1628 50%, #050810 100%);
         font-family: 'Inter', sans-serif;
@@ -58,55 +57,39 @@ st.markdown("""
         background: linear-gradient(90deg, #8a2be2, #00d1ff);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin: 0;
+        font-size: 2.2rem; font-weight: 700; margin: 0;
     }
-    .optics-header p {
-        color: #94a3b8;
-        font-size: 1rem;
-        margin: 0.3rem 0 0 0;
-    }
+    .optics-header p { color: #94a3b8; font-size: 1rem; margin: 0.3rem 0 0 0; }
     div[data-testid="stSidebar"] {
         background: linear-gradient(180deg, #0a0f1a 0%, #050810 100%);
     }
     [data-testid="stMetric"] {
         background: linear-gradient(135deg, #0d1520 0%, #111b2a 100%);
-        border: 1px solid #1e2d4a;
-        border-radius: 8px;
-        padding: 16px 20px;
-        box-shadow: 0 4px 20px rgba(138,43,226,0.06);
+        border: 1px solid #1e2d4a; border-radius: 8px; padding: 16px 20px;
     }
     div[data-testid="stMetricValue"] {
-        color: #8a2be2;
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 26px;
-        font-weight: 700;
+        color: #8a2be2; font-family: 'JetBrains Mono', monospace;
+        font-size: 26px; font-weight: 700;
     }
     div[data-testid="stMetricLabel"] {
-        color: #6b7fa3;
-        font-family: 'Inter', sans-serif;
-        font-weight: 600;
-        font-size: 11px;
-        letter-spacing: 1.5px;
-        text-transform: uppercase;
+        color: #6b7fa3; font-family: 'Inter', sans-serif; font-weight: 600;
+        font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
     }
     .stTabs [data-baseweb="tab"] { color: #94a3b8; font-weight: 500; }
     .stTabs [aria-selected="true"] {
-        color: #8a2be2 !important;
-        border-bottom-color: #8a2be2 !important;
+        color: #8a2be2 !important; border-bottom-color: #8a2be2 !important;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────
-# Import optics engine — try multiple strategies
+# Import optics engine
 # ─────────────────────────────────────────────────────────────
 ENGINE_AVAILABLE = False
 try:
     from optics.granas_optics import (
         MieScatterer, GranularMatrix, TransferMatrixSolver,
-        SolarSpectrum, GranasEngine, MaterialLibrary
+        SolarSpectrum, GranasEngine, MATERIAL_LIBRARY, MaterialData
     )
     ENGINE_AVAILABLE = True
 except ImportError:
@@ -116,14 +99,13 @@ if not ENGINE_AVAILABLE:
     try:
         from granas_optics import (
             MieScatterer, GranularMatrix, TransferMatrixSolver,
-            SolarSpectrum, GranasEngine, MaterialLibrary
+            SolarSpectrum, GranasEngine, MATERIAL_LIBRARY, MaterialData
         )
         ENGINE_AVAILABLE = True
     except ImportError:
         pass
 
 if not ENGINE_AVAILABLE:
-    # Last resort: direct import from known path
     import importlib.util
     for _candidate in [
         os.path.join(_project_root, "optics", "granas_optics.py"),
@@ -139,7 +121,8 @@ if not ENGINE_AVAILABLE:
             TransferMatrixSolver = _mod.TransferMatrixSolver
             SolarSpectrum = _mod.SolarSpectrum
             GranasEngine = _mod.GranasEngine
-            MaterialLibrary = _mod.MaterialLibrary
+            MATERIAL_LIBRARY = _mod.MATERIAL_LIBRARY
+            MaterialData = _mod.MaterialData
             ENGINE_AVAILABLE = True
             break
 
@@ -169,6 +152,8 @@ if "optics_result" not in st.session_state:
     st.session_state.optics_result = None
 if "optics_engine" not in st.session_state:
     st.session_state.optics_engine = None
+if "optics_params" not in st.session_state:
+    st.session_state.optics_params = {}
 
 
 # ─────────────────────────────────────────────────────────────
@@ -178,7 +163,7 @@ with st.sidebar:
     st.markdown("### 🔬 Simulation Controls")
     st.markdown("---")
 
-    materials = list(MaterialLibrary.MATERIALS.keys())
+    materials = list(MATERIAL_LIBRARY.keys())
     material = st.selectbox("Granule Material", materials, index=0)
 
     granule_radius = st.slider("Granule Radius (nm)", 50, 800, 250, step=25)
@@ -211,9 +196,9 @@ with st.sidebar:
     st.markdown("""
     | Concept | |
     |---------|--|
-    | **Mie Theory** | Qₑₓₜ, Qₛ꜀ₐ, Qₐᵦₛ |
+    | **Mie Theory** | Q_ext, Q_sca, Q_abs |
     | **TMM** | R + T + A = 1 |
-    | **AM1.5G** | 300–1200 nm |
+    | **AM1.5G** | 300-1200 nm |
     | **Yablonovitch** | 4n² limit |
     """)
 
@@ -223,18 +208,29 @@ with st.sidebar:
 # ─────────────────────────────────────────────────────────────
 if run_btn:
     with st.spinner("🔬 Running optical simulation..."):
-        engine = GranasEngine(
-            name="Dashboard_Sim",
-            domain_nm=(domain_x, domain_y, domain_z),
-            granule_radius_nm=granule_radius,
-            min_spacing_nm=min_spacing,
+        engine = GranasEngine(f"Dashboard_{material}")
+        engine.domain_nm = (float(domain_x), float(domain_y), float(domain_z))
+        engine.granule_radius_nm = float(granule_radius)
+        engine.min_spacing_nm = float(min_spacing)
+        engine.granule_material = material
+
+        wl = np.linspace(300, 1200, n_wavelengths)
+        engine.build_granular_matrix(
+            density=0.7,
+            radius_mean=float(granule_radius),
+            radius_std=50.0,
             material=material,
             seed=seed,
         )
-        wl = np.linspace(300, 1200, n_wavelengths)
         result = engine.run_analysis(wl)
         st.session_state.optics_result = result
         st.session_state.optics_engine = engine
+        st.session_state.optics_params = {
+            "material": material,
+            "granule_radius": granule_radius,
+            "domain": (domain_x, domain_y, domain_z),
+            "min_spacing": min_spacing,
+        }
     st.toast("✅ Simulation Complete!", icon="🔬")
 
 
@@ -243,6 +239,7 @@ if run_btn:
 # ─────────────────────────────────────────────────────────────
 result = st.session_state.optics_result
 engine = st.session_state.optics_engine
+params = st.session_state.optics_params
 
 if result is None:
     st.markdown("""
@@ -261,18 +258,12 @@ if result is None:
 # ─── Top Metrics ────────────────────────────────────────────
 st.markdown("### 📊 Simulation Results")
 m1, m2, m3, m4, m5, m6 = st.columns(6)
-with m1:
-    st.metric("🔆 Absorption", f"{result.weighted_absorption:.1f}%")
-with m2:
-    st.metric("⚡ Jsc", f"{result.jsc_mA_cm2:.2f} mA/cm²")
-with m3:
-    st.metric("🔄 Path Enh.", f"{result.path_length_enhancement:.1f}×")
-with m4:
-    st.metric("🎯 4n² Limit", f"{result.yablonovitch_limit:.1f}×")
-with m5:
-    st.metric("💡 LTE", f"{result.light_trapping_efficiency:.3f}")
-with m6:
-    st.metric("🔵 Granules", f"{len(result.granule_positions)}")
+m1.metric("🔆 Absorption", f"{result.weighted_absorption:.1f}%")
+m2.metric("⚡ Jsc", f"{result.jsc_mA_cm2:.2f} mA/cm²")
+m3.metric("🔄 Path Enh.", f"{result.path_length_enhancement:.1f}×")
+m4.metric("🎯 4n² Limit", f"{result.yablonovitch_limit:.1f}×")
+m5.metric("💡 LTE", f"{result.light_trapping_efficiency:.3f}")
+m6.metric("🔵 Granules", f"{len(result.granule_positions)}")
 
 st.markdown("")
 
@@ -308,26 +299,19 @@ with tab1:
 
     fig_spec.update_layout(
         template="plotly_dark",
-        paper_bgcolor="#050810",
-        plot_bgcolor="#050810",
+        paper_bgcolor="#050810", plot_bgcolor="#050810",
         title="Spectral Response — A / R / T",
-        xaxis_title="Wavelength (nm)",
-        yaxis_title="Fraction (%)",
+        xaxis_title="Wavelength (nm)", yaxis_title="Fraction (%)",
         font=dict(family="Inter, sans-serif", color="#e2e8f0"),
-        height=500,
-        legend=dict(x=0.75, y=0.95),
+        height=500, legend=dict(x=0.75, y=0.95),
         yaxis=dict(range=[0, 105]),
     )
     st.plotly_chart(fig_spec, use_container_width=True)
 
-    # Energy conservation check
     total = result.absorptance + result.reflectance + result.transmittance
     col_a, col_b = st.columns(2)
-    with col_a:
-        st.metric("R + T + A (avg)", f"{total.mean():.4f}")
-    with col_b:
-        conservation_ok = np.all(total < 1.05)
-        st.metric("Conservation", "✅ PASS" if conservation_ok else "⚠️ CHECK")
+    col_a.metric("R + T + A (avg)", f"{total.mean():.4f}")
+    col_b.metric("Conservation", "✅ PASS" if np.all(total < 1.05) else "⚠️ CHECK")
 
 
 # ─── Tab 2: E-field Map ─────────────────────────────────────
@@ -336,22 +320,16 @@ with tab2:
         fig_ef = go.Figure(go.Heatmap(
             z=result.efield_map,
             colorscale=[
-                [0, "#050810"],
-                [0.2, "#1a0a3e"],
-                [0.4, "#8a2be2"],
-                [0.6, "#ff6b35"],
-                [0.8, "#ffd700"],
-                [1.0, "#ffffff"],
+                [0, "#050810"], [0.2, "#1a0a3e"], [0.4, "#8a2be2"],
+                [0.6, "#ff6b35"], [0.8, "#ffd700"], [1.0, "#ffffff"],
             ],
             colorbar=dict(title="|E|²"),
         ))
         fig_ef.update_layout(
             template="plotly_dark",
-            paper_bgcolor="#050810",
-            plot_bgcolor="#050810",
+            paper_bgcolor="#050810", plot_bgcolor="#050810",
             title="Near-Field |E|² Distribution (Cross-Section)",
-            xaxis_title="X (grid units)",
-            yaxis_title="Y (grid units)",
+            xaxis_title="X (grid units)", yaxis_title="Y (grid units)",
             font=dict(family="Inter, sans-serif", color="#e2e8f0"),
             height=550,
         )
@@ -369,27 +347,32 @@ with tab2:
 
 # ─── Tab 3: Mie Spectrum ────────────────────────────────────
 with tab3:
-    mat_data = MaterialLibrary.get_material(material)
+    mat_data = MATERIAL_LIBRARY[params.get("material", "MAPbI3")]
+    _radius = params.get("granule_radius", 250)
     wl_mie = np.linspace(300, 1200, 100)
-    q_ext, q_sca, q_abs, g_arr = [], [], [], []
+    q_ext_arr, q_sca_arr, q_abs_arr, g_arr = [], [], [], []
 
     for w in wl_mie:
-        n_at_wl = mat_data.n_at_wavelength(w)
-        eff = MieScatterer.efficiencies(granule_radius, w, n_at_wl)
-        q_ext.append(eff["Q_ext"])
-        q_sca.append(eff["Q_sca"])
-        q_abs.append(eff["Q_abs"])
+        # Interpolate n_complex at this wavelength
+        n_real_interp = np.interp(w, mat_data.wavelengths_nm, mat_data.n_real)
+        n_imag_interp = np.interp(w, mat_data.wavelengths_nm, mat_data.n_imag)
+        n_complex = complex(n_real_interp, n_imag_interp)
+
+        eff = MieScatterer.efficiencies(_radius, w, n_complex)
+        q_ext_arr.append(eff["Q_ext"])
+        q_sca_arr.append(eff["Q_sca"])
+        q_abs_arr.append(eff["Q_abs"])
         g_arr.append(eff["g"])
 
     fig_mie = make_subplots(rows=2, cols=1, shared_xaxes=True,
                             subplot_titles=["Mie Efficiencies", "Asymmetry Parameter g"],
                             vertical_spacing=0.12)
 
-    fig_mie.add_trace(go.Scatter(x=wl_mie, y=q_ext, name="Q_ext",
+    fig_mie.add_trace(go.Scatter(x=wl_mie, y=q_ext_arr, name="Q_ext",
                                   line=dict(color="#8a2be2", width=3)), row=1, col=1)
-    fig_mie.add_trace(go.Scatter(x=wl_mie, y=q_sca, name="Q_sca",
+    fig_mie.add_trace(go.Scatter(x=wl_mie, y=q_sca_arr, name="Q_sca",
                                   line=dict(color="#00d1ff", width=2)), row=1, col=1)
-    fig_mie.add_trace(go.Scatter(x=wl_mie, y=q_abs, name="Q_abs",
+    fig_mie.add_trace(go.Scatter(x=wl_mie, y=q_abs_arr, name="Q_abs",
                                   line=dict(color="#ff6b35", width=2)), row=1, col=1)
     fig_mie.add_trace(go.Scatter(x=wl_mie, y=g_arr, name="g",
                                   line=dict(color="#00ff88", width=2),
@@ -397,26 +380,22 @@ with tab3:
 
     fig_mie.update_layout(
         template="plotly_dark",
-        paper_bgcolor="#050810",
-        plot_bgcolor="#050810",
+        paper_bgcolor="#050810", plot_bgcolor="#050810",
         font=dict(family="Inter, sans-serif", color="#e2e8f0"),
-        height=600,
-        legend=dict(x=0.75, y=0.95),
+        height=600, legend=dict(x=0.75, y=0.95),
     )
     fig_mie.update_xaxes(title_text="Wavelength (nm)", row=2, col=1)
     fig_mie.update_yaxes(title_text="Efficiency Q", row=1, col=1)
     fig_mie.update_yaxes(title_text="g", row=2, col=1)
     st.plotly_chart(fig_mie, use_container_width=True)
 
-    # Size parameter at reference wavelength
-    x_500 = 2 * np.pi * granule_radius / 500
+    x_500 = 2 * np.pi * _radius / 500
     st.metric("Size Parameter x (at 500nm)", f"{x_500:.2f}",
               help="x = 2πr/λ. Rayleigh: x<<1, Mie: x~1, Geometric: x>>1")
 
 
 # ─── Tab 4: EQE / Jsc ───────────────────────────────────────
 with tab4:
-    # EQE approximated as absorptance (ideal IQE=1)
     eqe = np.clip(result.absorptance, 0, 1)
 
     fig_eqe = go.Figure()
@@ -427,7 +406,6 @@ with tab4:
         fill="tozeroy", fillcolor="rgba(0,255,136,0.1)",
     ))
 
-    # AM1.5G irradiance overlay
     irr = SolarSpectrum.am15g_irradiance(wl)
     irr_norm = irr / irr.max() * 100
     fig_eqe.add_trace(go.Scatter(
@@ -438,20 +416,17 @@ with tab4:
 
     fig_eqe.update_layout(
         template="plotly_dark",
-        paper_bgcolor="#050810",
-        plot_bgcolor="#050810",
+        paper_bgcolor="#050810", plot_bgcolor="#050810",
         title="External Quantum Efficiency & AM1.5G Solar Spectrum",
-        xaxis_title="Wavelength (nm)",
-        yaxis_title="%",
+        xaxis_title="Wavelength (nm)", yaxis_title="%",
         font=dict(family="Inter, sans-serif", color="#e2e8f0"),
-        height=500,
-        legend=dict(x=0.6, y=0.95),
+        height=500, legend=dict(x=0.6, y=0.95),
     )
     st.plotly_chart(fig_eqe, use_container_width=True)
 
     jc1, jc2, jc3 = st.columns(3)
     jc1.metric("Jsc", f"{result.jsc_mA_cm2:.2f} mA/cm²")
-    theoretical_max = 69.0  # ~69 mA/cm² for 300-1200nm
+    theoretical_max = 69.0
     jc2.metric("Jsc (theoretical max)", f"{theoretical_max:.0f} mA/cm²")
     jc3.metric("Jsc / Max", f"{result.jsc_mA_cm2/theoretical_max*100:.1f}%")
 
@@ -466,19 +441,17 @@ with tab5:
         rs = [g.radius_nm for g in granules]
 
         fig_pack = go.Figure(go.Scatter3d(
-            x=xs, y=ys, z=zs,
-            mode="markers",
+            x=xs, y=ys, z=zs, mode="markers",
             marker=dict(
-                size=[r/30 for r in rs],
-                color=rs,
+                size=[r/30 for r in rs], color=rs,
                 colorscale=[[0, "#3b82f6"], [0.5, "#8a2be2"], [1, "#ff6b35"]],
                 colorbar=dict(title="Radius (nm)"),
-                opacity=0.8,
-                line=dict(width=1, color="#050810"),
+                opacity=0.8, line=dict(width=1, color="#050810"),
             ),
-            hovertemplate="x: %{x:.0f} nm<br>y: %{y:.0f} nm<br>z: %{z:.0f} nm<br>r: %{marker.color:.0f} nm<extra></extra>",
+            hovertemplate="x: %{x:.0f} nm<br>y: %{y:.0f} nm<br>z: %{z:.0f} nm<extra></extra>",
         ))
 
+        dom = params.get("domain", (2000, 2000, 1000))
         fig_pack.update_layout(
             template="plotly_dark",
             paper_bgcolor="#050810",
@@ -493,7 +466,7 @@ with tab5:
         )
         st.plotly_chart(fig_pack, use_container_width=True)
 
-        density = GranularMatrix.packing_density(granules, (domain_x, domain_y, domain_z))
+        density = GranularMatrix.packing_density(granules, dom)
         pc1, pc2, pc3 = st.columns(3)
         pc1.metric("Granules", f"{len(granules)}")
         pc2.metric("Packing Density", f"{density:.3f}")
@@ -529,17 +502,20 @@ with tab6:
         total_sims = len(radii) * len(spacings)
         count = 0
 
-        wl_sweep = np.linspace(300, 1200, 46)  # Fewer points for speed
+        _mat = params.get("material", "MAPbI3")
+        _dom = params.get("domain", (2000, 2000, 1000))
+        wl_sweep = np.linspace(300, 1200, 46)
 
         for i, r in enumerate(radii):
             for j, s in enumerate(spacings):
-                eng = GranasEngine(
-                    name=f"sweep_r{r:.0f}_s{s:.0f}",
-                    domain_nm=(domain_x, domain_y, domain_z),
-                    granule_radius_nm=r,
-                    min_spacing_nm=s,
-                    material=material,
-                    seed=seed,
+                eng = GranasEngine(f"sweep_r{r:.0f}_s{s:.0f}")
+                eng.domain_nm = (float(_dom[0]), float(_dom[1]), float(_dom[2]))
+                eng.granule_radius_nm = float(r)
+                eng.min_spacing_nm = float(s)
+                eng.granule_material = _mat
+                eng.build_granular_matrix(
+                    density=0.7, radius_mean=float(r),
+                    radius_std=50.0, material=_mat, seed=42,
                 )
                 res = eng.run_analysis(wl_sweep)
                 jsc_map[i, j] = res.jsc_mA_cm2
@@ -549,7 +525,6 @@ with tab6:
 
         progress.empty()
 
-        # Jsc heatmap
         fig_sweep = go.Figure(go.Heatmap(
             z=jsc_map,
             x=[f"{s:.0f}" for s in spacings],
@@ -561,17 +536,14 @@ with tab6:
         ))
         fig_sweep.update_layout(
             template="plotly_dark",
-            paper_bgcolor="#050810",
-            plot_bgcolor="#050810",
+            paper_bgcolor="#050810", plot_bgcolor="#050810",
             title="Jsc Optimization — Radius × Spacing",
-            xaxis_title="Min Spacing (nm)",
-            yaxis_title="Granule Radius (nm)",
+            xaxis_title="Min Spacing (nm)", yaxis_title="Granule Radius (nm)",
             font=dict(family="Inter, sans-serif", color="#e2e8f0"),
             height=500,
         )
         st.plotly_chart(fig_sweep, use_container_width=True)
 
-        # Find optimal
         best_idx = np.unravel_index(np.argmax(jsc_map), jsc_map.shape)
         best_r = radii[best_idx[0]]
         best_s = spacings[best_idx[1]]
