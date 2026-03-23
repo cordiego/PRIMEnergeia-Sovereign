@@ -114,7 +114,7 @@ st.divider()
 st.markdown("### Product Suite")
 st.markdown("")
 
-c1, c2, c3, c4, c5 = st.columns(5)
+c1, c2, c3 = st.columns(3)
 
 with c1:
     st.markdown("""
@@ -123,7 +123,7 @@ with c1:
         <div class='product-desc'>HJB frequency control. SEN 🇲🇽 ERCOT 🇺🇸 MIBEL 🇪🇸🇵🇹</div>
         <div>
             <span class='product-badge'>HJB</span>
-            <span class='product-badge'>3 MKTS</span>
+            <span class='product-badge'>3 MARKETS</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -132,7 +132,7 @@ with c1:
 with c2:
     st.markdown("""
     <div class='product-card'>
-        <div class='product-title' style='color: #F1C40F;'>🏛️ Eureka</div>
+        <div class='product-title' style='color: #F1C40F;'>🏛️ Eureka Sovereign</div>
         <div class='product-desc'>VIX-Regime Volatility Targeting. 5-asset allocation.</div>
         <div>
             <span class='product-badge'>VIX</span>
@@ -145,24 +145,26 @@ with c2:
 with c3:
     st.markdown("""
     <div class='product-card'>
-        <div class='product-title' style='color: #00ff88;'>🧪 Granas Opt</div>
-        <div class='product-desc'>Bayesian perovskite optimizer. 6D GP + EI.</div>
+        <div class='product-title' style='color: #00ff88;'>🧪 Granas Optimizer</div>
+        <div class='product-desc'>Bayesian perovskite optimizer. 6D GP + EI acquisition.</div>
         <div>
-            <span class='product-badge'>BAYES</span>
+            <span class='product-badge'>BAYESIAN</span>
             <span class='product-badge'>6D</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
     st.page_link("pages/3_🧪_Granas_Optimizer.py", label="Open →", icon="🧪")
 
+c4, c5, c6 = st.columns(3)
+
 with c4:
     st.markdown("""
     <div class='product-card'>
-        <div class='product-title' style='color: #8a2be2;'>🔬 Optics</div>
-        <div class='product-desc'>Mie + TMM light-trapping. AM1.5G Yablonovitch.</div>
+        <div class='product-title' style='color: #8a2be2;'>🔬 Granas Optics</div>
+        <div class='product-desc'>Mie + TMM light-trapping. AM1.5G + HJB optimizer.</div>
         <div>
-            <span class='product-badge'>MIE</span>
-            <span class='product-badge'>TMM</span>
+            <span class='product-badge'>MIE + TMM</span>
+            <span class='product-badge'>HJB</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -171,8 +173,8 @@ with c4:
 with c5:
     st.markdown("""
     <div class='product-card'>
-        <div class='product-title' style='color: #00ffcc;'>🧬 SDL</div>
-        <div class='product-desc'>Self-Driving Lab. HJB Optics + Active Learning.</div>
+        <div class='product-title' style='color: #00ffcc;'>🧬 Granas SDL</div>
+        <div class='product-desc'>Self-Driving Lab. HJB fabrication + active learning.</div>
         <div>
             <span class='product-badge'>HJB</span>
             <span class='product-badge'>SDL</span>
@@ -180,6 +182,19 @@ with c5:
     </div>
     """, unsafe_allow_html=True)
     st.page_link("pages/5_🧬_Granas_SDL.py", label="Open →", icon="🧬")
+
+with c6:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #ffd700;'>📊 Granas Metrics</div>
+        <div class='product-desc'>Holistic twin. Cross-product performance analytics.</div>
+        <div>
+            <span class='product-badge'>RADAR</span>
+            <span class='product-badge'>PARETO</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/6_📊_Granas_Metrics.py", label="Open →", icon="📊")
 
 st.markdown("")
 st.divider()
