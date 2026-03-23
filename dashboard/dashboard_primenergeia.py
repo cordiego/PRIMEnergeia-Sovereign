@@ -184,7 +184,7 @@ st.markdown(f"""
 }}
 div[data-testid="stMetricValue"] {{ color: {AC}; font-family: 'JetBrains Mono', monospace; font-size: 34px; font-weight: 700; text-shadow: 0 0 12px rgba(0,209,255,0.3); }}
 div[data-testid="stMetricDelta"] {{ font-family: 'JetBrains Mono', monospace; }}
-div[data-testid="stMetricLabel"] {
+div[data-testid="stMetricLabel"] {{
     color: #94a3b8;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
