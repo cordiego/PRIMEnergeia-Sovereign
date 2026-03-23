@@ -8,13 +8,15 @@ _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _root not in sys.path:
     sys.path.insert(0, _root)
 
-# Remap: metrics_twin → metrics (so dashboard_metrics.py can import from "metrics.granas_metrics")
+# Always register metrics_twin as "metrics" (force reload for new classes)
 _metrics_twin = os.path.join(_root, "metrics_twin")
-if os.path.exists(_metrics_twin) and "metrics" not in sys.modules:
+if os.path.exists(_metrics_twin):
+    # Register package
     metrics_mod = types.ModuleType("metrics")
     metrics_mod.__path__ = [_metrics_twin]
     sys.modules["metrics"] = metrics_mod
 
+    # Force-load granas_metrics with all classes
     spec = importlib.util.spec_from_file_location(
         "metrics.granas_metrics",
         os.path.join(_metrics_twin, "granas_metrics.py"))
