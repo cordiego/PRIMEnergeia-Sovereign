@@ -15,7 +15,12 @@ import pandas as pd
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add all possible paths where optics module might live
+_this_dir = os.path.dirname(os.path.abspath(__file__))
+_project_root = os.path.dirname(_this_dir)
+for _p in [_project_root, _this_dir, os.getcwd(), os.path.dirname(os.getcwd())]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 try:
     import plotly.graph_objects as go
@@ -95,8 +100,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────────────────────────
-# Lazy import the optics engine (may not be available on Cloud)
+# Import optics engine — try multiple strategies
 # ─────────────────────────────────────────────────────────────
+ENGINE_AVAILABLE = False
 try:
     from optics.granas_optics import (
         MieScatterer, GranularMatrix, TransferMatrixSolver,
@@ -104,7 +110,38 @@ try:
     )
     ENGINE_AVAILABLE = True
 except ImportError:
-    ENGINE_AVAILABLE = False
+    pass
+
+if not ENGINE_AVAILABLE:
+    try:
+        from granas_optics import (
+            MieScatterer, GranularMatrix, TransferMatrixSolver,
+            SolarSpectrum, GranasEngine, MaterialLibrary
+        )
+        ENGINE_AVAILABLE = True
+    except ImportError:
+        pass
+
+if not ENGINE_AVAILABLE:
+    # Last resort: direct import from known path
+    import importlib.util
+    for _candidate in [
+        os.path.join(_project_root, "optics", "granas_optics.py"),
+        os.path.join(_this_dir, "granas_optics.py"),
+        os.path.join(os.getcwd(), "optics", "granas_optics.py"),
+    ]:
+        if os.path.exists(_candidate):
+            _spec = importlib.util.spec_from_file_location("granas_optics", _candidate)
+            _mod = importlib.util.module_from_spec(_spec)
+            _spec.loader.exec_module(_mod)
+            MieScatterer = _mod.MieScatterer
+            GranularMatrix = _mod.GranularMatrix
+            TransferMatrixSolver = _mod.TransferMatrixSolver
+            SolarSpectrum = _mod.SolarSpectrum
+            GranasEngine = _mod.GranasEngine
+            MaterialLibrary = _mod.MaterialLibrary
+            ENGINE_AVAILABLE = True
+            break
 
 
 # ─────────────────────────────────────────────────────────────
