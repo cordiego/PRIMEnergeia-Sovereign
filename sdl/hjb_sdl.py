@@ -85,19 +85,25 @@ class FabricationModel:
 
     @staticmethod
     def grain_size_nm(anneal_temp_C: float, spin_rpm: float) -> float:
-        """Arrhenius grain growth with decomposition cutoff."""
-        temp_K = anneal_temp_C + 273.15
-        Ea = 0.45  # eV
-        kB = 8.617e-5  # eV/K
-        growth = 200 * np.exp(-Ea / (kB * temp_K))
-        # Slower spin → thicker film → more time for grain growth
-        rpm_factor = 1.0 + 0.3 * (4000 - spin_rpm) / 4000
-        # Decomposition above onset
+        """
+        Empirical grain size model calibrated to MAPbI3 literature.
+
+        50°C → ~50nm (amorphous), 80°C → ~150nm, 100°C → ~350nm,
+        120°C → ~450nm (peak), 150°C+ → decomposition shrinks grains.
+        """
+        # Sigmoid growth: half-max at ~90°C, saturates ~450nm
+        growth = 500.0 / (1.0 + np.exp(-(anneal_temp_C - 90) / 15))
+        # Minimum grain size (amorphous baseline)
+        growth = max(growth, 50.0)
+        # Slower spin → thicker film → slightly larger grains
+        rpm_factor = 1.0 + 0.15 * (4000 - spin_rpm) / 4000
+        rpm_factor = max(rpm_factor, 0.5)
+        # Decomposition above 150°C → grain damage
         decomp = 1.0
         if anneal_temp_C > FabricationModel.DECOMP_ONSET:
-            decomp = np.exp(-0.03 * (anneal_temp_C - FabricationModel.DECOMP_ONSET))
-        grain = growth * max(rpm_factor, 0.3) * decomp
-        return float(np.clip(grain, 30, 900))
+            decomp = max(0.3, 1.0 - 0.02 * (anneal_temp_C - FabricationModel.DECOMP_ONSET))
+        grain = growth * rpm_factor * decomp
+        return float(np.clip(grain, 50, 700))
 
     @staticmethod
     def predict_pce(spin_rpm: float, anneal_temp_C: float,
@@ -116,23 +122,22 @@ class FabricationModel:
         # Grain size
         grain = FabricationModel.grain_size_nm(anneal_temp_C, spin_rpm)
 
-        # Thickness penalty (optimal ~400-600nm)
-        thickness_score = np.exp(-((thickness - 500) / 300)**2)
+        # Thickness penalty (optimal 300-800nm, wider tolerance)
+        thickness_score = np.exp(-((thickness - 550) / 500)**2)
 
-        # Grain quality (bigger = better, up to ~500nm)
-        grain_score = 1.0 - np.exp(-grain / 200)
+        # Grain quality (bigger = better, scale with 150nm)
+        grain_score = 1.0 - np.exp(-grain / 150)
 
         # Concentration quality (optimal ~1.0-1.4 M)
-        conc_score = np.exp(-((concentration_M - 1.2) / 0.4)**2)
+        conc_score = np.exp(-((concentration_M - 1.2) / 0.5)**2)
 
-        # Spin uniformity (moderate rpm = best uniformity)
-        rpm_score = np.exp(-((spin_rpm - 4000) / 2000)**2)
+        # Spin uniformity (moderate rpm = best)
+        rpm_score = np.exp(-((spin_rpm - 4000) / 3000)**2)
 
-        # Anneal quality (decomposition penalty)
+        # Anneal quality
         anneal_score = 1.0
         if anneal_temp_C > FabricationModel.DECOMP_ONSET:
             anneal_score = max(0.1, np.exp(-0.05 * (anneal_temp_C - FabricationModel.DECOMP_ONSET)))
-        # Too low temp → poor crystallinity
         if anneal_temp_C < 60:
             anneal_score *= 0.5
 
@@ -140,9 +145,7 @@ class FabricationModel:
         base_pce = 22.0
         pce = base_pce * thickness_score * grain_score * conc_score * rpm_score * anneal_score
 
-        # Add noise floor
-        pce = max(2.0, pce + np.random.normal(0, 0.1))
-        return float(np.clip(pce, 0, 25))
+        return float(np.clip(max(2.0, pce), 0, 25))
 
 
 # ─────────────────────────────────────────────────────────────
