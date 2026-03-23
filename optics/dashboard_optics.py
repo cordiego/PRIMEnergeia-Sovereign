@@ -406,7 +406,7 @@ with tab4:
         fill="tozeroy", fillcolor="rgba(0,255,136,0.1)",
     ))
 
-    irr = SolarSpectrum.am15g_irradiance(wl)
+    irr = SolarSpectrum.irradiance(wl)
     irr_norm = irr / irr.max() * 100
     fig_eqe.add_trace(go.Scatter(
         x=wl, y=irr_norm,
