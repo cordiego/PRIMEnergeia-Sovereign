@@ -164,6 +164,12 @@ st.sidebar.caption(M["tagline"])
 
 AC = M["accent"]  # shortcut
 
+def hex_to_rgba(hex_color, alpha):
+    """Convert hex color to rgba string for Plotly."""
+    h = hex_color.lstrip('#')
+    r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
+    return f'rgba({r},{g},{b},{alpha})'
+
 # --- DYNAMIC CSS ---
 st.markdown(f"""
 <style>
@@ -362,7 +368,7 @@ with tab2:
     sg = state["state_grid"]
     fig2 = make_subplots(rows=2, cols=2, vertical_spacing=0.18, horizontal_spacing=0.08,
         subplot_titles=("Value Function V(x)", "Policy Gradient ∇V(x)", "Optimal Control u*(x)", "Hamiltonian H(x,u*)"))
-    fig2.add_trace(go.Scatter(x=sg, y=state["V_function"], line=dict(color=AC, width=3), fill='tozeroy', fillcolor=f'{AC}0F'), row=1, col=1)
+    fig2.add_trace(go.Scatter(x=sg, y=state["V_function"], line=dict(color=AC, width=3), fill='tozeroy', fillcolor=hex_to_rgba(AC, 0.06)), row=1, col=1)
     fig2.add_trace(go.Scatter(x=sg, y=state["V_gradient"], line=dict(color="#ff6b6b", width=2.5)), row=1, col=2)
     fig2.add_hline(y=0, line_dash="dash", line_color="#333", row=1, col=2)
     fig2.add_trace(go.Scatter(x=sg, y=state["u_optimal"], line=dict(color="#00ff88", width=3), fill='tozeroy', fillcolor='rgba(0,255,136,0.08)'), row=2, col=1)
@@ -398,7 +404,7 @@ with tab3:
     fig3.add_trace(go.Scatter(x=h, y=state["optimal_mw"], name="P* Optimal", line=dict(color="#00ff88", width=2.5)), row=1, col=1)
     fig3.add_trace(go.Scatter(x=h, y=state["actual_mw"], name="P Actual", line=dict(color="#ff4b4b", width=1.5, dash="dash")), row=1, col=1)
     fig3.add_trace(go.Scatter(x=h, y=state["optimal_mw"], fill='tonexty', fillcolor='rgba(255,75,75,0.12)', showlegend=False, line=dict(width=0)), row=1, col=1)
-    fig3.add_trace(go.Scatter(x=h, y=state["capital_cumulative"], name="Rescued", line=dict(color=AC, width=3), fill='tozeroy', fillcolor=f'{AC}14'), row=2, col=1)
+    fig3.add_trace(go.Scatter(x=h, y=state["capital_cumulative"], name="Rescued", line=dict(color=AC, width=3), fill='tozeroy', fillcolor=hex_to_rgba(AC, 0.08)), row=2, col=1)
     curr_h = now.hour + now.minute/60.0
     fig3.add_vline(x=curr_h, line_dash="dash", line_color=AC, opacity=0.7, annotation_text="LIVE")
     fig3.update_layout(template="plotly_dark", height=700, showlegend=True, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=100,b=40), legend=dict(orientation="h", y=1.18, x=0.5, xanchor="center"), font=dict(family="JetBrains Mono", size=11, color="#6b7fa3"))
@@ -408,7 +414,7 @@ with tab3:
 
     st.markdown(f"<div class='section-header'>{M['price_name']} MARKET DYNAMICS</div>", unsafe_allow_html=True)
     fig_px = go.Figure()
-    fig_px.add_trace(go.Scatter(x=h, y=state["prices"], name=f"{M['price_name']} ({M['cur_code']}/MWh)", line=dict(color=AC, width=2), fill='tozeroy', fillcolor=f'{AC}0F'))
+    fig_px.add_trace(go.Scatter(x=h, y=state["prices"], name=f"{M['price_name']} ({M['cur_code']}/MWh)", line=dict(color=AC, width=2), fill='tozeroy', fillcolor=hex_to_rgba(AC, 0.06)))
     fig_px.add_hline(y=M["price_threshold"], line_dash="dash", line_color="#ff4b4b", annotation_text=M["threshold_label"])
     fig_px.add_vline(x=curr_h, line_dash="dash", line_color=AC, opacity=0.7, annotation_text="LIVE")
     fig_px.update_layout(template="plotly_dark", height=280, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=20,b=40), font=dict(family="JetBrains Mono", size=11, color="#6b7fa3"))
