@@ -1,42 +1,27 @@
 """
 Eureka Sovereign — VIX-Regime Vol-Targeting Page
-Wraps the Eureka dashboard for the unified multi-page app.
+Uses lib/page_loader for safe dynamic loading.
 """
 import sys
 import os
-import re
 
-# Add project root to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _root not in sys.path:
+    sys.path.insert(0, _root)
 
-# Check candidate paths for the Eureka dashboard
+from lib.page_loader import load_dashboard
+
+# Try local copy first, then external Eureka repo
 _candidates = [
-    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
-                 "dashboard", "dashboard_eureka.py"),
+    os.path.join(_root, "dashboard", "dashboard_eureka.py"),
     os.path.expanduser("~/Eureka-Sovereign/dashboard/dashboard_eureka.py"),
 ]
 
-_dashboard_path = None
-for _p in _candidates:
-    if os.path.exists(_p):
-        _dashboard_path = _p
-        break
+_path = next((p for p in _candidates if os.path.exists(p)), None)
 
-if _dashboard_path is None:
+if _path is None:
     import streamlit as st
-    st.error("⚠️ Eureka dashboard not found. Please copy dashboard_eureka.py to dashboard/")
+    st.error("⚠️ Eureka dashboard not found. Copy dashboard_eureka.py to dashboard/")
     st.stop()
-
-with open(_dashboard_path, "r") as f:
-    _code = f.read()
-
-# Robustly remove set_page_config block (handles any formatting)
-_code = re.sub(
-    r'st\.set_page_config\s*\(.*?\)',
-    '# page_config handled by app.py',
-    _code,
-    count=1,
-    flags=re.DOTALL
-)
-
-exec(_code)
+else:
+    load_dashboard(_path)
