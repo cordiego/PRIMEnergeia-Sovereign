@@ -8,7 +8,7 @@ st.header("🏗️ Granas CFRP — Structural Skeleton Engine")
 st.caption("17×10.5 Geometric Blueprint | Kirchhoff Orthotropic Plate | Photon Recycling Ridges")
 
 # ─── Parameters ───
-with st.expander("️ Engineering Parameters", expanded=False):
+with st.expander("⚙️ Engineering Parameters", expanded=False):
     c1, c2 = st.columns(2)
     with c1:
         pressure = st.slider("Design Load (Pa)", 1000, 8000, 5400, 200)

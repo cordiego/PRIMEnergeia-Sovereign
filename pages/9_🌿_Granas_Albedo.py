@@ -75,7 +75,7 @@ with c2:
     fig2.add_trace(go.Scatter(x=hours/8760, y=pce_g, mode='lines',
         name='Granas', line=dict(color='#00c878', width=3)))
     fig2.add_trace(go.Scatter(x=hours/8760, y=pce_c, mode='lines',
-        name='Control (MAPBI₃)', line=dict(color='red', width=2, dash='dash')))
+        name='Control (MAPbI₃)', line=dict(color='red', width=2, dash='dash')))
     fig2.add_hline(y=pce_init*0.8, line_dash="dot", line_color="gray",
                    annotation_text="T80 threshold")
     fig2.update_layout(title="PCE Degradation Projection",
@@ -83,10 +83,10 @@ with c2:
         margin=dict(t=40, b=40), legend=dict(x=0.6, y=0.98),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(gridcolor='rgba(128,128,128,0.2)'),
-        yaxis=dict(gridcolor='rgba(128,128,0.2)'))
+        yaxis=dict(gridcolor='rgba(128,128,128,0.2)'))
     st.plotly_chart(fig2, use_container_width=True)
 
-# ─── +Urban Albedo ───
+# ─── Urban Albedo ───
 st.subheader("🏢 Urban Cooling Effect")
 u1, u2, u3 = st.columns(3)
 with u1:

@@ -196,6 +196,88 @@ with c6:
     """, unsafe_allow_html=True)
     st.page_link("pages/6_📊_Granas_Metrics.py", label="Open →", icon="📊")
 
+c7, c8, c9 = st.columns(3)
+
+with c7:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00c878;'>🏗️ Granas CFRP</div>
+        <div class='product-desc'>Structural skeleton. Kirchhoff orthotropic plate + photon recycling ridges.</div>
+        <div>
+            <span class='product-badge'>KIRCHHOFF</span>
+            <span class='product-badge'>17×10.5</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/7_🏗️_Granas_CFRP.py", label="Open →", icon="🏗️")
+
+with c8:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #7B68EE;'>⚗️ Granas GHB</div>
+        <div class='product-desc'>Green Haber-Bosch NRR. Mo-N₄ single-site catalyst + decentralized NH₃.</div>
+        <div>
+            <span class='product-badge'>NRR</span>
+            <span class='product-badge'>Mo-N₄</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/8_⚗️_Granas_GHB.py", label="Open →", icon="⚗️")
+
+with c9:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #2ecc71;'>🌿 Granas Albedo</div>
+        <div class='product-desc'>535nm spectral selection. Junction cooling + Arrhenius degradation control.</div>
+        <div>
+            <span class='product-badge'>ALBEDO</span>
+            <span class='product-badge'>ARRHENIUS</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/9_🌿_Granas_Albedo.py", label="Open →", icon="🌿")
+
+c10, c11, c12 = st.columns(3)
+
+with c10:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00BFFF;'>🛡️ Granas ETFE</div>
+        <div class='product-desc'>96% transmittance front encapsulation. Self-cleaning lotus effect.</div>
+        <div>
+            <span class='product-badge'>ETFE</span>
+            <span class='product-badge'>96% T</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/10_🛡️_Granas_ETFE.py", label="Open →", icon="🛡️")
+
+with c11:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #FF6347;'>🔬 Granas TOPCon</div>
+        <div class='product-desc'>n-type Cz silicon bottom cell. 1.5nm tunnel oxide + >720mV Voc.</div>
+        <div>
+            <span class='product-badge'>TOPCon</span>
+            <span class='product-badge'>n-Cz</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/11_🔬_Granas_TOPCon.py", label="Open →", icon="🔬")
+
+with c12:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00c878;'>📐 Granas Blueprint</div>
+        <div class='product-desc'>Master geometric engine. COMSOL-validated optomechanics + continuous fiber RTM.</div>
+        <div>
+            <span class='product-badge'>COMSOL</span>
+            <span class='product-badge'>RTM</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/12_📐_Granas_Blueprint.py", label="Open →", icon="📐")
+
 st.markdown("")
 st.divider()
 
@@ -205,7 +287,7 @@ st.divider()
 st.markdown("### Platform Metrics")
 m1, m2, m3, m4, m5 = st.columns(5)
 m1.metric("MARKETS", "3", "SEN · ERCOT · MIBEL")
-m2.metric("GRID NODES", "72", "Multi-Continental")
+m2.metric("ENGINE PAGES", "12", "Full Granas Suite")
 m3.metric("PORTFOLIO ASSETS", "5", "VIX-Regime Managed")
 m4.metric("OPTIMIZATION", "6D", "Perovskite Search Space")
 m5.metric("FREQUENCY", "50/60 Hz", "Multi-Standard")
