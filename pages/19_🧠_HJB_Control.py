@@ -47,9 +47,9 @@ if "Annealing" in controller:
 
     if st.button("🚀 Solve HJB & Simulate Trajectory", key="hjb_anneal"):
         with st.spinner("Solving HJB value function (value iteration)..."):
-            # Add granas_hjb.py to path
-            hjb_path = os.path.expanduser("~/Granas-Sovereign/optimization")
-            sys.path.insert(0, hjb_path)
+            # Import from bundled lib/hjb/
+            lib_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "lib", "hjb")
+            sys.path.insert(0, lib_dir)
             from granas_hjb import GranasHJBController, AnnealingState
 
             ctrl = GranasHJBController(
@@ -141,8 +141,8 @@ else:
 
     if st.button("🚀 Optimize Fabrication Recipe", key="hjb_sdl"):
         with st.spinner("Solving SDL-HJB value function..."):
-            sdl_path = os.path.expanduser("~/Granas-SDL/sdl")
-            sys.path.insert(0, sdl_path)
+            lib_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "lib", "hjb")
+            sys.path.insert(0, lib_dir)
             from hjb_sdl import SDLHJBController, FabricationState
 
             ctrl = SDLHJBController(

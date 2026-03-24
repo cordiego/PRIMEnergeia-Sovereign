@@ -3,7 +3,11 @@ import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import sys, os, subprocess, json
+import sys, os
+
+# Resolve bundled engine modules
+_LIB_ENGINES = os.path.join(os.path.dirname(os.path.dirname(__file__)), "lib", "engines")
+sys.path.insert(0, _LIB_ENGINES)
 
 st.markdown("""<style>
 [data-testid="stMetricValue"] {font-size: 26px !important}
@@ -28,7 +32,6 @@ st.divider()
 #  A-ICE — AMMONIA COMBUSTION
 # ═══════════════════════════════════════════════════════════════
 if "A-ICE" in engine:
-    sys.path.insert(0, os.path.expanduser("~/PRIMEngines-AICE"))
     from aice_engine import AICESimulator
 
     sim = AICESimulator()
@@ -98,7 +101,6 @@ if "A-ICE" in engine:
 #  PEM FUEL CELL
 # ═══════════════════════════════════════════════════════════════
 elif "PEM" in engine:
-    sys.path.insert(0, os.path.expanduser("~/PRIMEngines-PEM"))
     from pem_stack import PEMSystem
 
     pem = PEMSystem()
@@ -142,7 +144,6 @@ elif "PEM" in engine:
 #  HYDROGEN TURBINE
 # ═══════════════════════════════════════════════════════════════
 elif "HY-P100" in engine:
-    sys.path.insert(0, os.path.expanduser("~/PRIMEngines-HYP"))
     from h2_turbine import BraytonCycle, HYP100Spec
 
     cycle = BraytonCycle(HYP100Spec())
@@ -190,7 +191,6 @@ elif "HY-P100" in engine:
 #  BATTERY BESS
 # ═══════════════════════════════════════════════════════════════
 elif "BESS" in engine:
-    sys.path.insert(0, os.path.expanduser("~/PRIMEnergeia-Battery"))
     from battery_system import CHEMISTRIES, BESSSpec, DegradationModel, RevenueModel
 
     chem = st.selectbox("Battery Chemistry", list(CHEMISTRIES.keys()))
@@ -244,7 +244,6 @@ elif "BESS" in engine:
 #  PRIMECYCLE RECYCLING
 # ═══════════════════════════════════════════════════════════════
 elif "PRIMEcycle" in engine:
-    sys.path.insert(0, os.path.expanduser("~/PRIMEcycle"))
     from primecycle import PRIMEcycleSimulator
 
     sim = PRIMEcycleSimulator()
@@ -294,7 +293,6 @@ elif "PRIMEcycle" in engine:
 #  WIND FARM
 # ═══════════════════════════════════════════════════════════════
 elif "PRIM-Wind" in engine:
-    sys.path.insert(0, os.path.expanduser("~/PRIM-Wind"))
     from wind_farm import WindFarmSimulator, TurbineSpec, WindResource
 
     c1, c2, c3 = st.columns(3)
