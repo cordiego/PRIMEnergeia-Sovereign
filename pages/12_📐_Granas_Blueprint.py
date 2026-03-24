@@ -6,13 +6,13 @@ import plotly.graph_objects as go
 st.header("📐 Granas Blueprint — Master Geometric Engine")
 st.caption("17×10.5 Dimensional Matrix | COMSOL-Validated Optomechanics | Continuous Fiber RTM")
 
-# --- KPIs ---
+# ─── KPIs ───
 k1, k2, k3, k4, k5 = st.columns(5)
-k1.metric("📐 Module Area", "1.785 m²")
-k2.metric("🔗 Total Vertices", "14")
-k3.metric("💠 Photon Recycling", "89%")
-k4.metric("🏗️ Deflection", "1.8 mm")
-k5.metric("⚖️ Rigidity Gain", "+42%")
+k1.metric("📏 Module Area", "1.785 m²")
+k2.metric("🔩 Total Vertices", "14")
+k3.metric("♻️ Photon Recycling", "89%")
+k4.metric("⬇️ Deflection", "1.8 mm")
+k5.metric("💪 Rigidity Gain", "+42%")
 
 st.divider()
 c1, c2 = st.columns(2)
@@ -53,7 +53,7 @@ with c1:
         height=350, margin=dict(t=40, b=20, l=20, r=20),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     # Legend annotations
-    fig.add_annotation(x=8.5, y=-0.5, text="⬛ 5.5u peripheral  ⬜ 3.5u internal  💠 3.0u central",
+    fig.add_annotation(x=8.5, y=-0.5, text="🔴 5.5u peripheral  🟡 3.5u internal  🔵 3.0u central",
         showarrow=False, font=dict(size=11))
     st.plotly_chart(fig, use_container_width=True)
 
@@ -72,22 +72,22 @@ with c2:
             tickfont=dict(size=9)), bgcolor='rgba(0,0,0,0)'),
         title="COMSOL Validation Results (%)",
         height=350, margin=dict(t=50, b=30, l=60, r=60),
-        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+ -�paper_bg_jcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig2, use_container_width=True)
 
-# --- Manufacturing ---
-st.subheader("🏗️ Manufacturing Translation")
+# ─── Manufacturing ───
+st.subheader("🏭 Manufacturing Translation")
 m1, m2 = st.columns(2)
 with m1:
     st.markdown("""
 **Mold Specification:**
-- 💠 Material: CNC-machined aluminum
+- 🔩 Material: CNC-machined aluminum
 - 📐 Pattern: 17×10.5 unit matrix
-- ⬛ 5.5u: Deep channels (anchoring)
-- ⬜ 3.5u: Medium channels (stress routing)
-- 💠 3.0u: Fine channels (precision vertices)
+- 🔴 5.5u: Deep channels (anchoring)
+- 🟡 3.5u: Medium channels (stress routing)
+- 🟢 3.0u: Fine channels (precision vertices)
 - 📐 Chamfer: 15° on all ridge walls
-""")
+    """)
 with m2:
     st.markdown("""
 **Critical Requirement:**
@@ -99,4 +99,4 @@ with m2:
 
 **Verdict:** _"The exact geometric drawing is an inherently flawless
 optomechanical blueprint for solar energy generation"_ — COMSOL validation
-""")
+    """)
