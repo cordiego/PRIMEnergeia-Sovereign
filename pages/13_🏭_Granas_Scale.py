@@ -291,8 +291,9 @@ with c1:
     )])
     fig_rev.update_layout(
         title=f"Annual Revenue Mix — {tier_name}",
-        template="plotly_dark", height=450,
+        template="plotly_dark", height=500,
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        showlegend=False,
     )
     st.plotly_chart(fig_rev, use_container_width=True)
 
