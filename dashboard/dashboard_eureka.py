@@ -42,7 +42,7 @@ st.markdown("""
 div[data-testid="stMetricValue"] {
     color: #00d1ff;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 40px;
+    font-size: 26px;
     font-weight: 700;
     text-shadow: 0 0 12px rgba(0,209,255,0.3);
 }
@@ -743,7 +743,7 @@ with tab5:
         template="plotly_dark", height=420,
         paper_bgcolor="#050810", plot_bgcolor="#0a0f1a",
         margin=dict(l=60, r=20, t=20, b=40),
-        font=dict(family="JetBrains Mono", size=13, color="#6b7fa3"),
+        font=dict(family="JetBrains Mono", size=14, color="#94a3b8"),
         xaxis=dict(side="bottom"), yaxis=dict(autorange="reversed")
     )
     st.plotly_chart(fig_corr, use_container_width=True)

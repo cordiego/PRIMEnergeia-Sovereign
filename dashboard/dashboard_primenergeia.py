@@ -182,7 +182,7 @@ st.markdown(f"""
     border: 1px solid {M['border']}; border-radius: 8px; padding: 18px 20px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }}
-div[data-testid="stMetricValue"] {{ color: {AC}; font-family: 'JetBrains Mono', monospace; font-size: 40px; font-weight: 700; text-shadow: 0 0 12px rgba(0,209,255,0.3); }}
+div[data-testid="stMetricValue"] {{ color: {AC}; font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 700; text-shadow: 0 0 12px rgba(0,209,255,0.3); }}
 div[data-testid="stMetricDelta"] {{ font-family: 'JetBrains Mono', monospace; color: #c8d6e5; }}
 div[data-testid="stMetricLabel"] {{
     color: #c8d6e5;
@@ -359,7 +359,7 @@ with tab1:
     fig.add_hline(y=f0 + M["penalty_f"], line_dash="dot", line_color="#ff4b4b", row=1, col=1)
     fig.add_trace(go.Scatter(x=t_axis, y=state["rocof_history"], name="df/dt", line=dict(color="#fbc02d", width=1.5), fill='tozeroy', fillcolor='rgba(251,192,45,0.08)'), row=2, col=1)
     fig.add_trace(go.Scatter(x=t_axis, y=state["inertia_injection"], name="u(t)", line=dict(color="#00ff88", width=2), fill='tozeroy', fillcolor='rgba(0,255,136,0.1)'), row=3, col=1)
-    fig.update_layout(template="plotly_dark", height=750, showlegend=False, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=80,b=40), font=dict(family="JetBrains Mono", size=13, color="#6b7fa3"))
+    fig.update_layout(template="plotly_dark", height=750, showlegend=False, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=80,b=40), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
     fig.update_xaxes(title_text="Time (s)", row=3, col=1, gridcolor="#1a2744")
     fig.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig, use_container_width=True)
@@ -384,7 +384,7 @@ with tab2:
     fig2.add_trace(go.Scatter(x=sg, y=state["u_optimal"], line=dict(color="#00ff88", width=3), fill='tozeroy', fillcolor='rgba(0,255,136,0.08)'), row=2, col=1)
     fig2.add_vline(x=f0, line_dash="dash", line_color="#fbc02d", annotation_text="f₀", row=2, col=1)
     fig2.add_trace(go.Scatter(x=sg, y=state["H_field"], line=dict(color="#fbc02d", width=2), fill='tozeroy', fillcolor='rgba(251,192,45,0.06)'), row=2, col=2)
-    fig2.update_layout(template="plotly_dark", height=750, showlegend=False, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=80,b=40), font=dict(family="JetBrains Mono", size=13, color="#6b7fa3"))
+    fig2.update_layout(template="plotly_dark", height=750, showlegend=False, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=80,b=40), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
     fig2.update_xaxes(title_text="Frequency (Hz)", gridcolor="#1a2744")
     fig2.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig2, use_container_width=True)
@@ -417,7 +417,7 @@ with tab3:
     fig3.add_trace(go.Scatter(x=h, y=state["capital_cumulative"], name="Rescued", line=dict(color=AC, width=3), fill='tozeroy', fillcolor=hex_to_rgba(AC, 0.08)), row=2, col=1)
     curr_h = now.hour + now.minute/60.0
     fig3.add_vline(x=curr_h, line_dash="dash", line_color=AC, opacity=0.7, annotation_text="LIVE")
-    fig3.update_layout(template="plotly_dark", height=700, showlegend=True, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=100,b=40), legend=dict(orientation="h", y=1.18, x=0.5, xanchor="center"), font=dict(family="JetBrains Mono", size=13, color="#6b7fa3"))
+    fig3.update_layout(template="plotly_dark", height=700, showlegend=True, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=100,b=40), legend=dict(orientation="h", y=1.18, x=0.5, xanchor="center"), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
     fig3.update_xaxes(title_text="Hour", gridcolor="#1a2744")
     fig3.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig3, use_container_width=True)
@@ -427,7 +427,7 @@ with tab3:
     fig_px.add_trace(go.Scatter(x=h, y=state["prices"], name=f"{M['price_name']} ({M['cur_code']}/MWh)", line=dict(color=AC, width=2), fill='tozeroy', fillcolor=hex_to_rgba(AC, 0.06)))
     fig_px.add_hline(y=M["price_threshold"], line_dash="dash", line_color="#ff4b4b", annotation_text=M["threshold_label"])
     fig_px.add_vline(x=curr_h, line_dash="dash", line_color=AC, opacity=0.7, annotation_text="LIVE")
-    fig_px.update_layout(template="plotly_dark", height=280, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=20,b=40), font=dict(family="JetBrains Mono", size=13, color="#6b7fa3"))
+    fig_px.update_layout(template="plotly_dark", height=280, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=20,b=40), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
     fig_px.update_xaxes(gridcolor="#1a2744")
     fig_px.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig_px, use_container_width=True)
@@ -450,7 +450,7 @@ with tab4:
         marker=dict(color=["#ff4b4b" if v > M['thd_limit']*0.6 else AC for v in hv], line=dict(color=M['border'], width=1)),
         text=[f"{v:.2f}%" for v in hv], textposition='outside', textfont=dict(family="JetBrains Mono", size=12, color="#e0e6ed")))
     fig4.add_hline(y=M['thd_limit']*0.6, line_dash="dash", line_color="#ff4b4b", annotation_text=f"{M['thd_std']} Ind. Limit")
-    fig4.update_layout(template="plotly_dark", height=350, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", yaxis_title="Magnitude (%)", margin=dict(l=60,r=20,t=20,b=40), font=dict(family="JetBrains Mono", size=13, color="#6b7fa3"))
+    fig4.update_layout(template="plotly_dark", height=350, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", yaxis_title="Magnitude (%)", margin=dict(l=60,r=20,t=20,b=40), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
     fig4.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig4, use_container_width=True)
 
@@ -465,7 +465,7 @@ with tab4:
     fig5.add_trace(go.Scatter(x=t_wave*1000, y=pa, name="Phase A", line=dict(color=AC, width=2.5)))
     fig5.add_trace(go.Scatter(x=t_wave*1000, y=pb, name="Phase B", line=dict(color="#00ff88", width=2)))
     fig5.add_trace(go.Scatter(x=t_wave*1000, y=pc, name="Phase C", line=dict(color="#fbc02d", width=2)))
-    fig5.update_layout(template="plotly_dark", height=320, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=20,b=40), xaxis_title="Time (ms)", yaxis_title="V (p.u.)", legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"), font=dict(family="JetBrains Mono", size=13, color="#6b7fa3"))
+    fig5.update_layout(template="plotly_dark", height=320, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=20,b=40), xaxis_title="Time (ms)", yaxis_title="V (p.u.)", legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
     fig5.update_xaxes(gridcolor="#1a2744")
     fig5.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig5, use_container_width=True)
