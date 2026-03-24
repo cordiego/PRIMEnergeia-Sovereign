@@ -42,17 +42,17 @@ st.markdown("""
 div[data-testid="stMetricValue"] {
     color: #00d1ff;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 34px;
+    font-size: 40px;
     font-weight: 700;
     text-shadow: 0 0 12px rgba(0,209,255,0.3);
 }
-div[data-testid="stMetricDelta"] { font-family: 'JetBrains Mono', monospace; }
+div[data-testid="stMetricDelta"] { font-family: 'JetBrains Mono', monospace; color: #c8d6e5; }
 div[data-testid="stMetricLabel"] {
-    color: #94a3b8;
+    color: #c8d6e5;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
-    font-size: 13px;
-    letter-spacing: 1.2px;
+    font-size: 14px;
+    letter-spacing: 1px;
     text-transform: uppercase;
 }
 
@@ -64,9 +64,9 @@ div[data-testid="stMetricLabel"] {
     padding: 4px;
 }
 .stTabs [data-baseweb="tab"] {
-    color: #6b7fa3;
+    color: #c8d6e5;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 15px;
     letter-spacing: 0.5px;
     border-radius: 6px;
     padding: 10px 20px;
@@ -88,7 +88,7 @@ div[data-testid="stMetricLabel"] {
 .section-header {
     color: #00d1ff;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
+    font-size: 14px;
     letter-spacing: 2px;
     text-transform: uppercase;
     border-bottom: 1px solid #1a2744;
@@ -100,8 +100,8 @@ div[data-testid="stMetricLabel"] {
     border-left: 3px solid #00d1ff;
     padding: 16px 20px;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
-    color: #c8d6e5;
+    font-size: 15px;
+    color: #e2e8f0;
     border-radius: 0 6px 6px 0;
     margin: 12px 0;
 }
@@ -113,7 +113,7 @@ div[data-testid="stMetricLabel"] {
     text-align: center;
 }
 .kpi-value { font-size: 42px; font-weight: 700; color: #00ff88; font-family: 'JetBrains Mono'; }
-.kpi-label { font-size: 11px; color: #6b7fa3; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
+.kpi-label { font-size: 13px; color: #94a3b8; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }
 
 /* Regime cards */
 .regime-card {
@@ -127,6 +127,9 @@ div[data-testid="stMetricLabel"] {
     border-color: #00d1ff;
     box-shadow: 0 0 20px rgba(0, 209, 255, 0.12);
 }
+/* Markdown & sidebar readability */
+.stMarkdown, .stMarkdown p { color: #e2e8f0 !important; font-size: 15px; }
+div[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -443,7 +446,7 @@ with tab2:
             <div class='regime-card {active_class}'>
                 <div style='display:flex; justify-content:space-between; align-items:center;'>
                     <span style='font-family:JetBrains Mono; font-size:16px; font-weight:700; color:{rdata["color"]};'>{rname}{badge}</span>
-                    <span style='font-family:JetBrains Mono; font-size:13px; color:#6b7fa3;'>VIX {lo}-{hi}</span>
+                    <span style='font-family:JetBrains Mono; font-size:13px; color:#94a3b8;'>VIX {lo}-{hi}</span>
                 </div>
                 <div style='font-size:12px; color:#c8d6e5; margin-top:10px; font-family:JetBrains Mono;'>{w_str}</div>
             </div>
@@ -719,7 +722,7 @@ with tab5:
                         <div style='display:flex; justify-content:space-between; align-items:center;'>
                             <div>
                                 <span style='font-family:JetBrains Mono; font-size:18px; font-weight:700; color:#e0e6ed;'>{tk}</span>
-                                <span style='font-size:12px; color:#6b7fa3; margin-left:12px;'>{ASSET_META[tk]["desc"]} · {cat}</span>
+                                <span style='font-size:12px; color:#94a3b8; margin-left:12px;'>{ASSET_META[tk]["desc"]} · {cat}</span>
                             </div>
                             <span style='font-family:JetBrains Mono; font-size:22px; color:#00d1ff;'>${stats["last_price"]:.2f}</span>
                         </div>
