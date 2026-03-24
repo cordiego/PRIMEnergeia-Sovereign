@@ -4,7 +4,7 @@ import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-st.header("⚗️ Granas GHB — Green Haber-Bosch Engine")
+st.header("️ Granas GHB — Green Haber-Bosch Engine")
 st.caption("Mo-N₄ Single-Site NRR | PG-MoSA-BC Back Contact | Decentralized NH₃")
 
 F = 96485
@@ -30,8 +30,7 @@ yield_mol = (j * 1e-3 * fe/100) / (3 * F) * 3600
 nh3_yield = float(yield_mol * 17e6)
 energy_eff = 0.06 / abs(potential) * fe
 
-# ─── KPI Row ───
-k1, k2, k3, k4, k5 = st.columns(5)
+# ─── KPI Row ───$k1, k2, k3, k4, k5 = st.columns(5)
 k1.metric("⚡ Faradaic Eff.", f"{fe:.1f}%", f"{'73× Pt/C' if fe > 5 else ''}")
 k2.metric("🧪 NH₃ Yield", f"{nh3_yield:.1f} μg/h·cm²")
 k3.metric("🔋 Energy Eff.", f"{energy_eff:.1f}%")
