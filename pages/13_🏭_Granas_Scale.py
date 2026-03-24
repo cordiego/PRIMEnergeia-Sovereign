@@ -426,30 +426,37 @@ st.divider()
 st.subheader("📋 Bill of Materials (per module)")
 c1, c2 = st.columns([2, 1])
 with c1:
-    labels = list(BOM.keys())
-    values = list(BOM.values())
-    fig6 = go.Figure(data=[go.Pie(
-        labels=labels, values=values,
-        hole=0.45, textinfo="label+percent",
-        marker=dict(colors=[
-            "#FF6347", "#FFD700", "#00c878", "#00BFFF", "#FF69B4",
-            "#9370DB", "#20B2AA", "#F0E68C", "#DDA0DD", "#87CEEB",
-            "#98FB98", "#FFA07A"
-        ]),
+    sorted_bom = sorted(BOM.items(), key=lambda x: x[1])
+    labels = [k for k, v in sorted_bom]
+    values = [v for k, v in sorted_bom]
+    colors = [
+        "#FF6347", "#FFD700", "#00c878", "#00BFFF", "#FF69B4",
+        "#9370DB", "#20B2AA", "#F0E68C", "#DDA0DD", "#87CEEB",
+        "#98FB98", "#FFA07A"
+    ]
+    fig6 = go.Figure(data=[go.Bar(
+        x=values, y=labels, orientation="h",
+        marker_color=colors[:len(labels)],
+        text=[f"${v:.2f} ({v/BOM_TOTAL*100:.0f}%)" for v in values],
+        textposition="outside",
     )])
     fig6.update_layout(
         title=f"BOM Breakdown — ${BOM_TOTAL:.0f}/module",
-        template="plotly_dark", height=450,
+        template="plotly_dark", height=500,
+        xaxis_title="Cost ($)", yaxis=dict(tickfont=dict(size=12)),
         paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=200),
     )
     st.plotly_chart(fig6, use_container_width=True)
 
 with c2:
-    st.markdown("**Component Costs**")
-    for comp, cost in sorted(BOM.items(), key=lambda x: -x[1]):
+    st.markdown("**Top Components**")
+    for comp, cost in sorted(BOM.items(), key=lambda x: -x[1])[:5]:
         pct = cost / BOM_TOTAL * 100
         st.markdown(f"- **{comp}**: ${cost:.2f} ({pct:.0f}%)")
-    st.markdown(f"---\n**Total: ${BOM_TOTAL:.2f}**")
+    st.markdown(f"---\n**Total: ${BOM_TOTAL:.2f} / module**")
+    st.markdown(f"**At scale: ${bom_total:,.0f}M** ({total_modules:,} modules)")
+
 
 st.divider()
 
