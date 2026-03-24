@@ -448,5 +448,5 @@ if __name__ == "__main__":
     os.makedirs(DATA_DIR, exist_ok=True)
     print(f"SIBO API v{VERSION} — Sol-Ink Bayesian Optimizer")
     print(f"PRIMEnergeia S.A.S. | Granas Division")
-    print(f"Docs: http://localhost:8000/docs")
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    print(f"Docs: http://localhost:8080/docs")
+    uvicorn.run(app, host="127.0.0.1", port=8080)
