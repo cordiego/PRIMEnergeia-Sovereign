@@ -323,22 +323,30 @@ def format_message(perf, actions, momentum_signal):
 #  NOTIFICATION CHANNELS
 # ============================================================
 
-def send_telegram(message, token, chat_id):
-    """Send message via Telegram Bot API."""
+def send_telegram(message, token, chat_id, max_retries=3):
+    """Send message via Telegram Bot API with retry logic."""
     import urllib.request
     import urllib.parse
+    import time
     url = f"https://api.telegram.org/bot{token}/sendMessage"
+    # NOTE: Do NOT use parse_mode='Markdown' — the message contains raw _+*
+    # characters that break Telegram's Markdown parser and silently kill sends.
     data = urllib.parse.urlencode({
         "chat_id": chat_id,
         "text": message,
-        "parse_mode": "Markdown"
     }).encode()
-    try:
-        req = urllib.request.Request(url, data=data)
-        urllib.request.urlopen(req, timeout=10)
-        print("[✓] Telegram notification sent.")
-    except Exception as e:
-        print(f"[!] Telegram failed: {e}")
+    for attempt in range(1, max_retries + 1):
+        try:
+            req = urllib.request.Request(url, data=data)
+            urllib.request.urlopen(req, timeout=15)
+            print(f"[✓] Telegram notification sent (attempt {attempt}).")
+            return True
+        except Exception as e:
+            print(f"[!] Telegram attempt {attempt}/{max_retries} failed: {e}")
+            if attempt < max_retries:
+                time.sleep(2 * attempt)
+    print("[!!] Telegram: ALL RETRIES EXHAUSTED — notification NOT delivered.")
+    return False
 
 
 def send_email(message, from_addr, app_password, to_addr):
@@ -354,8 +362,10 @@ def send_email(message, from_addr, app_password, to_addr):
             server.login(from_addr, app_password)
             server.send_message(msg)
         print("[✓] Email notification sent.")
+        return True
     except Exception as e:
         print(f"[!] Email failed: {e}")
+        return False
 
 
 # ============================================================
@@ -391,18 +401,32 @@ def main():
     # --- Console output (always) ---
     print(message)
 
+    # --- Track delivery ---
+    any_sent = False
+    any_channel = False
+
     # --- Telegram ---
     tg_token = os.environ.get("TELEGRAM_BOT_TOKEN")
     tg_chat = os.environ.get("TELEGRAM_CHAT_ID")
     if tg_token and tg_chat:
-        send_telegram(message, tg_token, tg_chat)
+        any_channel = True
+        if send_telegram(message, tg_token, tg_chat):
+            any_sent = True
+    else:
+        print("[!!] WARNING: TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID not set!")
 
     # --- Email ---
     email_addr = os.environ.get("EMAIL_ADDRESS")
     email_pass = os.environ.get("EMAIL_APP_PASSWORD")
     email_to = os.environ.get("EMAIL_TO", email_addr)
     if email_addr and email_pass:
-        send_email(message, email_addr, email_pass, email_to)
+        any_channel = True
+        if send_email(message, email_addr, email_pass, email_to):
+            any_sent = True
+
+    if any_channel and not any_sent:
+        print("\n[!!] CRITICAL: All notification channels FAILED.")
+        sys.exit(1)
 
     print("\n[*] Dispatch complete.")
 
