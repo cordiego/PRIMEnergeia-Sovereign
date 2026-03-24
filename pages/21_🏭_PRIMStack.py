@@ -30,6 +30,9 @@ st.divider()
 # ═══════════════════════════════════════════════════════════════
 from primstack import PRIMStackPlant, PlantConfig
 
+config = PlantConfig()
+grid_demand = 500
+
 with st.expander("⚙️ Plant Configuration", expanded=False):
     c1, c2, c3, c4 = st.columns(4)
     solar_mw = c1.number_input("Solar (MW)", 10, 200, 50, 10)
@@ -48,9 +51,6 @@ with st.expander("⚙️ Plant Configuration", expanded=False):
         electrolyzer_capacity_mw=elec_mw, bess_capacity_mwh=bess_mwh,
         n_aice=n_aice, n_pem=n_pem, n_hyp=n_hyp,
     )
-else:
-    config = PlantConfig()
-    grid_demand = 500
 
 plant = PRIMStackPlant(config)
 summary = plant.plant_summary()
