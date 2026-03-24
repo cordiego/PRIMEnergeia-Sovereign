@@ -71,12 +71,12 @@ with c2:
         polar=dict(radialaxis=dict(visible=True, range=[0,100],
             tickfont=dict(size=9)), bgcolor='rgba(0,0,0,0)'),
         title="COMSOL Validation Results (%)",
-        height=350, margin=dict(t=50, b=30, l=60, r=60),
- -�paper_bg_jcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    height=350, margin=dict(t=40, b=30, l=60, r=60),
+        paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig2, use_container_width=True)
 
-# ─── Manufacturing ───
-st.subheader("🏭 Manufacturing Translation")
+
+#st.subheader("📭 Manufacturing Translation")
 m1, m2 = st.columns(2)
 with m1:
     st.markdown("""
@@ -88,12 +88,12 @@ with m1:
 - 🟢 3.0u: Fine channels (precision vertices)
 - 📐 Chamfer: 15° on all ridge walls
     """)
-with m2:
+from m2:
     st.markdown("""
 **Critical Requirement:**
 
-> ⚠️ Continuous fiber must be **UNINTERRUPTED** across all 3.0-unit central
-> vertices and loop through 5.5-unit peripheral triangles — **NO cuts at intersections**
+> ⚠︍ Continuous fiber must be **UNINTERRUPTED** across all 3.0-unit central
+> vertices and loop through 5.5-unit peripheral triangles ✔ **NO cuts at intersections**
 
 **Method:** Continuous multi-axis robotic resin transfer molding
 
