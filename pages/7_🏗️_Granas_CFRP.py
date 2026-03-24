@@ -8,7 +8,7 @@ st.header("🏗️ Granas CFRP — Structural Skeleton Engine")
 st.caption("17×10.5 Geometric Blueprint | Kirchhoff Orthotropic Plate | Photon Recycling Ridges")
 
 # ─── Parameters ───
-with st.expander("⚙️ Engineering Parameters", expanded=False):
+with st.expander("️ Engineering Parameters", expanded=False):
     c1, c2 = st.columns(2)
     with c1:
         pressure = st.slider("Design Load (Pa)", 1000, 8000, 5400, 200)
@@ -16,7 +16,8 @@ with st.expander("⚙️ Engineering Parameters", expanded=False):
     with c2:
         chamfer = st.slider("Chamfer Angle (°)", 5, 30, 15, 1)
         reflectivity = st.slider("Ridge Reflectivity", 0.80, 0.98, 0.92, 0.01)
-*# ─── Physics Calculations ───
+
+# ─── Physics Calculations ───
 E1, E2, G12, nu = 135e9, 10e9, 5e9, 0.3
 h = thickness / 1000
 Dx = E1 * h**3 / (12 * (1 - nu**2))
