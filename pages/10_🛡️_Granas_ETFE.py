@@ -6,12 +6,12 @@ import plotly.graph_objects as go
 st.header("🛡️ Granas ETFE — Front Encapsulation Engine")
 st.caption("96% Transmittance | Self-Cleaning Lotus Effect | Thermoformed on CFRP Skeleton")
 
-# --- KPIs ---
+# ─── KPIs ───
 k1, k2, k3, k4, k5 = st.columns(5)
 k1.metric("☀️ Transmittance", "96.0%", "+5.5% vs glass")
-k2.metric("⚖️ Weight", "0.17 kg/m²", "2.1% of glass")
-k3.metric("🧪 Self-Cleaning", "✅ Lotus effect")
-k4.metric("🌫️ Haze", "12%", "controlled scattering")
+k2.metric("💨 Weight", "0.17 kg/m²", "2.1% of glass")
+k3.metric("🧹 Self-Cleaning", "✅ Lotus effect")
+k4.metric("🔬 Haze", "12%", "controlled scattering")
 k5.metric("🏗️ UV Lifetime", "30 years")
 
 st.divider()
@@ -62,27 +62,27 @@ with c2:
         yaxis=dict(gridcolor='rgba(128,128,128,0.2)'))
     st.plotly_chart(fig2, use_container_width=True)
 
-# --- Process ---
-st.subheader("🏗️ Thermoforming Process")
+# ─── Process ───
+st.subheader("🏭 Thermoforming Process")
 p1, p2, p3 = st.columns(3)
 with p1:
     st.markdown("""
-**LPCVD-based ETFE Deposition:**
+**Process Parameters:**
 - 🌡️ Form temp: **270°C**
-- ⚖️ Pressure: **2.0 bar**
-- ✨ Cooling rate: 5°C/min
+- 💨 Pressure: **2.0 bar**
+- ❄️ Cooling rate: 5°C/min
 - 🔗 Seal: heat-seal to CFRP
-- ⌛ Cycle: ~72 min
-""")
+- ⏱️ Cycle: ~72 min
+    """)
 with p2:
     st.markdown("""
 **Performance:**
-- 📈 AR gain vs glass: **5.5%**
+- 🔬 AR gain vs glass: **5.5%**
 - 🌫️ Path enhancement: **1.06×** (haze)
-- 🧪 Adhesion: **15 N/cm** peel
+- 🔩 Adhesion: **15 N/cm** peel
 - 🔥 Fire rating: **B1**
 - 💰 Cost: **$20/m²**
-""")
+    """)
 with p3:
     jsc_gain = 22.0 * (96/91) * 1.06
     st.metric("Jsc with ETFE", f"{jsc_gain:.1f} mA/cm²", f"+{jsc_gain-22:.1f} vs glass")
