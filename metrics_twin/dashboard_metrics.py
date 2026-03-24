@@ -79,26 +79,114 @@ st.markdown("""
 if "holistic" not in st.session_state:
     st.session_state.holistic = None
 
+# ─── Default slider values (can be overridden by auto-optimize) ────
+_defaults = {
+    "opt_radius": 300, "opt_density": 0.50,
+    "opt_rpm": 4000, "opt_temp": 120, "opt_conc": 1.2,
+    "opt_additive": 3.0, "opt_sol_ratio": 0.7,
+}
+for k, v in _defaults.items():
+    if k not in st.session_state:
+        st.session_state[k] = v
+
+
+def _run_auto_optimize():
+    """Grid search over 7D recipe space to maximize Figure of Merit."""
+    comp = GranasComposition()
+    best_fom = -1
+    best_params = {}
+
+    radii = list(range(140, 520, 60))
+    densities = [0.30, 0.40, 0.50, 0.55, 0.60, 0.65, 0.72]
+    rpms = list(range(2000, 6500, 500))
+    temps = list(range(80, 155, 10))
+    concs = [0.8, 1.0, 1.2, 1.4, 1.6]
+    additives = [1.5, 2.0, 2.5, 3.0, 3.5, 4.0]
+    sol_ratios = [0.5, 0.6, 0.7, 0.8]
+
+    # Phase 1: coarse sweep over RPM × Temp × Radius (most impactful)
+    for r in radii:
+        for rpm in rpms:
+            for t in temps:
+                sdl = SDLMetrics.from_recipe(rpm, t, 1.2, 3.0, 0.7)
+                optics = OpticsMetrics.from_params(r, 0.5, 500, comp)
+                h = HolisticGranas(optics=optics, sdl=sdl, sibo=[]).compute()
+                if h.figure_of_merit > best_fom:
+                    best_fom = h.figure_of_merit
+                    best_params = {"radius": r, "density": 0.5, "rpm": rpm,
+                                   "temp": t, "conc": 1.2, "additive": 3.0, "sol_ratio": 0.7}
+
+    # Phase 2: fine sweep around best point for density, conc, additive, solvent
+    bp = best_params
+    for d in densities:
+        for c in concs:
+            for a in additives:
+                for s in sol_ratios:
+                    sdl = SDLMetrics.from_recipe(bp["rpm"], bp["temp"], c, a, s)
+                    optics = OpticsMetrics.from_params(bp["radius"], d, 500, comp)
+                    h = HolisticGranas(optics=optics, sdl=sdl, sibo=[]).compute()
+                    if h.figure_of_merit > best_fom:
+                        best_fom = h.figure_of_merit
+                        best_params = {"radius": bp["radius"], "density": d,
+                                       "rpm": bp["rpm"], "temp": bp["temp"],
+                                       "conc": c, "additive": a, "sol_ratio": s}
+
+    return best_params, best_fom
+
+
 # ─── Sidebar ─────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("### 🧪 Granas Recipe")
     st.markdown("---")
+
+    # Auto-Optimize button
+    optimize_btn = st.button("⚡ Auto-Optimize", use_container_width=True,
+                              help="Grid search 7D recipe space to maximize Figure of Merit")
+    if optimize_btn:
+        with st.spinner("⚡ Sweeping 7D recipe space..."):
+            best_params, best_fom = _run_auto_optimize()
+            # Snap to slider steps
+            st.session_state.opt_radius = int(round(best_params["radius"] / 20) * 20)
+            st.session_state.opt_density = round(best_params["density"] / 0.05) * 0.05
+            st.session_state.opt_rpm = int(round(best_params["rpm"] / 250) * 250)
+            st.session_state.opt_temp = int(round(best_params["temp"] / 5) * 5)
+            st.session_state.opt_conc = round(best_params["conc"] / 0.1) * 0.1
+            st.session_state.opt_additive = round(best_params["additive"] / 0.5) * 0.5
+            st.session_state.opt_sol_ratio = round(best_params["sol_ratio"] / 0.1) * 0.1
+            st.session_state.auto_optimized = True
+            st.session_state._auto_compute = True
+            st.session_state.best_fom = best_fom
+        st.rerun()
+
+    if st.session_state.get("auto_optimized"):
+        st.success(f"⚡ Optimized! FoM: {st.session_state.best_fom:.1f}/100")
+        st.session_state.auto_optimized = False
+
+    st.markdown("---")
     st.markdown("#### 🔬 Optics")
-    radius = st.slider("Granule Radius (nm)", 80, 600, 300, step=20)
-    density = st.slider("Packing Density", 0.1, 0.72, 0.50, step=0.05)
+    radius = st.slider("Granule Radius (nm)", 80, 600,
+                        st.session_state.opt_radius, step=20, key="sl_radius")
+    density = st.slider("Packing Density", 0.1, 0.72,
+                         st.session_state.opt_density, step=0.05, key="sl_density")
     st.markdown("#### 🧬 Fabrication")
-    rpm = st.slider("Spin RPM", 1000, 8000, 4000, step=250)
-    temp = st.slider("Anneal Temp (°C)", 50, 200, 120, step=5)
-    conc = st.slider("Concentration (M)", 0.5, 2.0, 1.2, step=0.1)
-    additive = st.slider("Additive (%)", 0.0, 5.0, 3.0, step=0.5)
-    sol_ratio = st.slider("Solvent DMF:DMSO", 0.0, 1.0, 0.7, step=0.1)
+    rpm = st.slider("Spin RPM", 1000, 8000,
+                     st.session_state.opt_rpm, step=250, key="sl_rpm")
+    temp = st.slider("Anneal Temp (°C)", 50, 200,
+                      st.session_state.opt_temp, step=5, key="sl_temp")
+    conc = st.slider("Concentration (M)", 0.5, 2.0,
+                      st.session_state.opt_conc, step=0.1, key="sl_conc")
+    additive = st.slider("Additive (%)", 0.0, 5.0,
+                          st.session_state.opt_additive, step=0.5, key="sl_additive")
+    sol_ratio = st.slider("Solvent DMF:DMSO", 0.0, 1.0,
+                           st.session_state.opt_sol_ratio, step=0.1, key="sl_sol_ratio")
     st.markdown("#### 🧪 SIBO")
     sibo_iters = st.slider("Bayesian Iterations", 5, 50, 25)
     st.markdown("---")
     run_btn = st.button("▶ Compute", type="primary", use_container_width=True)
 
 # ─── Compute ─────────────────────────────────────────────────
-if run_btn:
+_auto = st.session_state.pop("_auto_compute", False)
+if run_btn or _auto:
     with st.spinner("🧪 Computing full Granas architecture..."):
         comp = GranasComposition()
         optics = OpticsMetrics.from_params(radius, density, 500, comp)
