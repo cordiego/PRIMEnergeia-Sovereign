@@ -609,9 +609,6 @@ with tab4:
     # Simulate current vs target (small random drift from target)
     np.random.seed(int(time.time()) % 10000)
     target_w = data["current_weights"]
-    CAPITAL = 10000.0  # Default simulation capital
-
-    cap_input = st.number_input("Portfolio Capital (USD)", min_value=100.0, max_value=100_000_000.0, value=CAPITAL, step=500.0)
 
     st.markdown("")
 
@@ -627,13 +624,8 @@ with tab4:
         adj_pct = (w_target - w_actual) * 100
 
         action = "HOLD"
-        shares = 0
         if abs(drift_pct) > 5:
-            diff_usd = (w_target - w_actual) * cap_input
-            shares = round(abs(diff_usd) / price)
-            action = "BUY" if diff_usd > 0 else "SELL"
-            if shares == 0:
-                action = "HOLD (sub-lot)"
+            action = "BUY" if adj_pct > 0 else "SELL"
 
         reb_rows.append({
             "Asset": tk,
@@ -641,10 +633,9 @@ with tab4:
             "Target %": f"{w_target*100:.1f}%",
             "Actual %": f"{w_actual*100:.1f}%",
             "Drift": f"{drift_pct:+.1f}%",
-            "Adj %": f"{adj_pct:+.1f}%",
+            "Trade %": f"{abs(adj_pct):.1f}%",
             "Price": f"${price:.2f}",
             "Action": action,
-            "Shares": shares,
         })
 
     # Display table
@@ -664,7 +655,7 @@ with tab4:
     )
 
     # Warnings
-    active_trades = [r for r in reb_rows if r["Action"] not in ["HOLD", "HOLD (sub-lot)"]]
+    active_trades = [r for r in reb_rows if r["Action"] not in ["HOLD"]]
     if active_trades:
         st.warning(f"⚠️ **{len(active_trades)} rebalance signal(s) detected.** Review before execution.")
         st.markdown("""
