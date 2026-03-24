@@ -45,25 +45,38 @@ st.markdown("""
     .metrics-header h1 {
         background: linear-gradient(90deg, #00ff64, #00d1ff);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        font-size: 2rem; font-weight: 700; margin: 0;
+        font-size: 2.2rem; font-weight: 700; margin: 0;
     }
-    .metrics-header p { color: #94a3b8; font-size: 0.95rem; margin: 0.3rem 0 0 0; }
+    .metrics-header p { color: #c8d6e5; font-size: 1.05rem; margin: 0.3rem 0 0 0; }
     div[data-testid="stSidebar"] { background: linear-gradient(180deg, #0a0f1a 0%, #020608 100%); }
+    div[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
+    div[data-testid="stSidebar"] .stMarkdown h3,
+    div[data-testid="stSidebar"] .stMarkdown h4 { color: #00ff64 !important; font-size: 1.1rem; }
     [data-testid="stMetric"] {
         background: linear-gradient(135deg, #0d1520 0%, #111b2a 100%);
-        border: 1px solid #1e2d4a; border-radius: 8px; padding: 16px 20px;
+        border: 1px solid #1e2d4a; border-radius: 10px; padding: 18px 22px;
     }
     div[data-testid="stMetricValue"] {
         color: #00ff64; font-family: 'JetBrains Mono', monospace;
-        font-size: 34px; font-weight: 700;
+        font-size: 40px; font-weight: 700;
         text-shadow: 0 0 12px rgba(0,255,100,0.3);
     }
     div[data-testid="stMetricLabel"] {
-        color: #94a3b8; font-family: 'Inter', sans-serif; font-weight: 600;
-        font-size: 13px; letter-spacing: 1.2px; text-transform: uppercase;
+        color: #c8d6e5; font-family: 'Inter', sans-serif; font-weight: 600;
+        font-size: 14px; letter-spacing: 1px; text-transform: uppercase;
     }
-    .stTabs [data-baseweb="tab"] { color: #94a3b8; font-weight: 500; }
+    .stTabs [data-baseweb="tab"] { color: #c8d6e5; font-weight: 600; font-size: 15px; }
     .stTabs [aria-selected="true"] { color: #00ff64 !important; border-bottom-color: #00ff64 !important; }
+    /* Markdown text readability */
+    .stMarkdown, .stMarkdown p, .stMarkdown li { color: #e2e8f0 !important; font-size: 15px; line-height: 1.7; }
+    .stMarkdown h2, .stMarkdown h3 { color: #00ff64 !important; font-size: 1.4rem; font-weight: 700; margin-top: 1.2rem; }
+    .stMarkdown strong { color: #ffffff !important; }
+    .stMarkdown code { color: #00d1ff !important; background: rgba(0,209,255,0.08); padding: 2px 6px; border-radius: 4px; }
+    /* Table readability */
+    .stMarkdown table { border-collapse: collapse; width: 100%; }
+    .stMarkdown th { color: #00ff64 !important; background: rgba(0,255,100,0.08); font-size: 14px; padding: 10px 14px; text-align: left; }
+    .stMarkdown td { color: #e2e8f0 !important; font-size: 14px; padding: 8px 14px; border-bottom: 1px solid #1e2d4a; }
+    .stMarkdown tr:hover td { background: rgba(0,255,100,0.04); }
 </style>
 """, unsafe_allow_html=True)
 
