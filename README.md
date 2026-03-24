@@ -137,6 +137,7 @@ The `optimization/` module uses **Bayesian Optimization** with Gaussian Process 
 ## Documentation
 
 - 📋 [Executive Brief (ES)](docs/EXECUTIVE_BRIEF.md) — Propuesta de valor para directivos
+- 💰 [Product Catalog](docs/PRODUCT_CATALOG.md) — 5 SBUs, $216M TAM, pricing models
 - 📊 [ROI Analysis](docs/ROI_ANALYSIS.md) — Multi-market revenue projections (~$48M ARR)
 - 🏗️ [Architecture](docs/architecture.md) — System design & control flow
 
