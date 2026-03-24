@@ -278,6 +278,46 @@ with c12:
     """, unsafe_allow_html=True)
     st.page_link("pages/12_📐_Granas_Blueprint.py", label="Open →", icon="📐")
 
+c13, c14, c15 = st.columns(3)
+
+with c13:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00ffcc;'>🧠 PRIME Kernel</div>
+        <div class='product-desc'>Shared IP core. Physics constants, HJB solver, telemetry across all SBUs.</div>
+        <div>
+            <span class='product-badge'>HJB</span>
+            <span class='product-badge'>5 SBUs</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/22_🧠_PRIME_Kernel.py", label="Open →", icon="🧠")
+
+with c14:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #F1C40F;'>📊 CEO Dashboard</div>
+        <div class='product-desc'>Fleet monitor. 22 repos, 5 SBUs, $216M TAM. Git status + LOC + revenue.</div>
+        <div>
+            <span class='product-badge'>FLEET</span>
+            <span class='product-badge'>$216M TAM</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/23_📊_CEO_Dashboard.py", label="Open →", icon="📊")
+
+with c15:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #94a3b8;'>📄 Product Catalog</div>
+        <div class='product-desc'>Investor-facing portfolio. 5 SBUs × pricing models × technical moats.</div>
+        <div>
+            <span class='product-badge'>$216M</span>
+            <span class='product-badge'>5 SBUs</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
 st.markdown("")
 st.divider()
 
@@ -287,9 +327,9 @@ st.divider()
 st.markdown("### Platform Metrics")
 m1, m2, m3, m4, m5 = st.columns(5)
 m1.metric("MARKETS", "3", "SEN · ERCOT · MIBEL")
-m2.metric("ENGINE PAGES", "12", "Full Granas Suite")
-m3.metric("PORTFOLIO ASSETS", "5", "VIX-Regime Managed")
-m4.metric("OPTIMIZATION", "6D", "Perovskite Search Space")
+m2.metric("PAGES", "23", "Full Product Suite")
+m3.metric("SBUs", "5", "$216M TAM")
+m4.metric("REPOS", "22", "Enterprise Fleet")
 m5.metric("FREQUENCY", "50/60 Hz", "Multi-Standard")
 
 st.markdown("")
