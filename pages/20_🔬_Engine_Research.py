@@ -71,14 +71,14 @@ if "A-ICE" in engine:
 
         m1, m2, m3, m4, m5, m6 = st.columns(6)
         m1.metric("Power", f"{op['power_kw']:.1f} kW")
-        m2.metric("Torque", f"{op['torque_Nm']:.0f} Nm")
+        m2.metric("Torque", f"{op['torque_nm']:.0f} Nm")
         m3.metric("BTE", f"{op['bte_pct']:.1f}%")
-        m4.metric("BSFC", f"{op['bsfc_g_kWh']:.0f} g/kWh")
+        m4.metric("BSFC", f"{op['bsfc_g_kwh']:.0f} g/kWh")
         m5.metric("NH₃ Flow", f"{op['nh3_flow_kg_h']:.1f} kg/h")
         m6.metric("CO₂", f"{op['co2_gpkwh']:.0f} g/kWh")
 
-        st.info(f"Exhaust Temp: {op['exhaust_temp_C']:.0f}°C | Lambda: {op['lambda']:.2f} | "
-                f"Tailpipe NOx: {op['tailpipe_nox_ppm']:.1f} ppm (SCR 95%)")
+        st.info(f"Exhaust Temp: {op['exhaust']['temp_c']:.0f}°C | "
+                f"NOx Tailpipe: {op['nox_tailpipe_gpkwh']:.3f} g/kWh (SCR 95%)")
 
     with tab3:
         temps = np.arange(1500, 2200, 10)
