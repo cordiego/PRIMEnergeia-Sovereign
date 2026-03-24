@@ -3,6 +3,7 @@
 ### Intelligent Multi-Market Grid Control That Recovers Lost Capital
 
 [![Live Dashboard](https://img.shields.io/badge/🔴_LIVE_DEMO-Streamlit_Cloud-00d1ff?style=for-the-badge)](https://primenergeia-sovereign.streamlit.app)
+[![Landing Page](https://img.shields.io/badge/🌐_Landing_Page-GitHub_Pages-8b5cf6?style=for-the-badge)](https://cordiego.github.io/PRIMEnergeia-Sovereign)
 [![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)](#license)
 [![Markets](https://img.shields.io/badge/Markets-SEN_|_ERCOT_|_MIBEL-fbc02d?style=for-the-badge)](#markets)
 
@@ -140,6 +141,8 @@ The `optimization/` module uses **Bayesian Optimization** with Gaussian Process 
 - 💰 [Product Catalog](docs/PRODUCT_CATALOG.md) — 5 SBUs, $216M TAM, pricing models
 - 📊 [ROI Analysis](docs/ROI_ANALYSIS.md) — Multi-market revenue projections (~$48M ARR)
 - 🏗️ [Architecture](docs/architecture.md) — System design & control flow
+- 🎯 [Sales Playbook](docs/SALES_PLAYBOOK.md) — Target buyers, outreach templates, 90-day timeline
+- 🌐 [Landing Page](https://cordiego.github.io/PRIMEnergeia-Sovereign) — GitHub Pages pitch site
 
 ---
 
