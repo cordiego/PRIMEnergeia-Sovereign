@@ -42,3 +42,4 @@ state_vector.*
 # Torch model checkpoints
 *.pt
 *.pth
+.github/workflows/ci.yml
