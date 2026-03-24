@@ -243,7 +243,7 @@ with tab1:
     values = [
         min(h.sdl.pce_pct / 38.0 * 100, 100),
         min(h.optics.jsc_mA_cm2 / 44.0 * 100, 100),
-        min(h.sdl.t80_hours / 80000 * 100, 100),
+        min(h.sdl.t80_hours / 262800 * 100, 100),  # 30-year target
         max(0, (1.0 - (h.sdl.junction_temp_C - 25)/50)) * 100,
         min(h.sdl.grain_nm / 500.0 * 100, 100),
         h.sdl.film_quality * 100,
