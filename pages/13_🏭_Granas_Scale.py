@@ -222,43 +222,255 @@ with c2:
 
 st.divider()
 
-# ─── Revenue Waterfall ───
-st.subheader("💰 Lifetime Revenue Projection")
-fig7 = go.Figure()
+# ─── MULTI-REVENUE STREAM ENGINE ───
+st.subheader("💎 Revenue Streams — Beyond Energy")
+st.caption("Carbon credits · Green hydrogen · Green ammonia · Albedo cooling · Energy sales")
+
+# Revenue stream parameters
+GRID_EMISSION_FACTOR = 0.45     # tCO2/MWh (Mexico grid average)
+CARBON_PRICE = 50.0             # $/tCO2 (voluntary market avg)
+CARBON_PRICE_GROWTH = 0.05      # 5%/yr price escalation
+
+ELECTROLYZER_EFF = 0.70         # 70% efficiency (PEM)
+H2_KWH_PER_KG = 55.0           # kWh electricity per kg H2
+H2_PRICE = 4.50                 # $/kg green H2
+H2_SOLAR_FRACTION = 0.15        # 15% of energy diverted to H2
+
+NH3_KG_PER_KG_H2 = 5.67        # kg NH3 per kg H2 (Haber-Bosch)
+NH3_PRICE = 800                 # $/tonne green ammonia
+NH3_CONVERSION = 0.30           # 30% of H2 goes to NH3
+
+ALBEDO_RF_OFFSET = 0.002        # W/m² radiative forcing offset per m² of albedo panel
+ALBEDO_CREDIT = 15.0            # $/tCO2e equivalent for cooling credit
+ALBEDO_TCO2E_PER_M2_YR = 0.01  # tCO2e offset per m² per year
+
+# ─── Calculate all revenue streams ───
+# 1. Energy revenue (already calculated above)
+energy_annual = annual_rev
+
+# 2. Carbon credits
+annual_avoided_co2 = annual_gwh * 1000 * GRID_EMISSION_FACTOR  # tonnes CO2
+carbon_annual = annual_avoided_co2 * CARBON_PRICE / 1e6  # $M
+
+# 3. Green hydrogen
+h2_energy_gwh = annual_gwh * H2_SOLAR_FRACTION
+h2_kg_annual = h2_energy_gwh * 1e6 / H2_KWH_PER_KG  # kg H2
+h2_annual = h2_kg_annual * H2_PRICE / 1e6  # $M
+
+# 4. Green ammonia (from H2)
+nh3_kg_annual = h2_kg_annual * NH3_CONVERSION * NH3_KG_PER_KG_H2
+nh3_annual = nh3_kg_annual * NH3_PRICE / 1e9  # $M (price is per tonne)
+
+# 5. Albedo cooling credits
+albedo_area = total_modules * MODULE_AREA  # m² of reflective surface
+albedo_co2e = albedo_area * ALBEDO_TCO2E_PER_M2_YR  # tCO2e
+albedo_annual = albedo_co2e * ALBEDO_CREDIT / 1e6  # $M
+
+# Total
+total_annual = energy_annual + carbon_annual + h2_annual + nh3_annual + albedo_annual
+
+# ─── Revenue Stream KPIs ───
+r1, r2, r3, r4, r5 = st.columns(5)
+r1.metric("⚡ Energy", f"${energy_annual:,.1f}M/yr", delta=f"{energy_annual/total_annual*100:.0f}%")
+r2.metric("🌱 Carbon", f"${carbon_annual:,.1f}M/yr", delta=f"{annual_avoided_co2:,.0f} tCO2")
+r3.metric("💧 Hydrogen", f"${h2_annual:,.1f}M/yr", delta=f"{h2_kg_annual/1e6:,.1f}M kg")
+r4.metric("🧪 Ammonia", f"${nh3_annual:,.1f}M/yr", delta=f"{nh3_kg_annual/1e6:,.2f}M kg")
+r5.metric("🪞 Albedo", f"${albedo_annual:,.2f}M/yr", delta=f"{albedo_co2e:,.0f} tCO2e")
+
+st.markdown(f"### **Total Annual Revenue: ${total_annual:,.1f}M** — {total_annual/energy_annual:.1f}x energy-only")
+
+# ─── Revenue Breakdown Pie ───
+c1, c2 = st.columns([2, 1])
+with c1:
+    fig_rev = go.Figure(data=[go.Pie(
+        labels=["Energy Sales", "Carbon Credits", "Green Hydrogen", "Green Ammonia", "Albedo Cooling"],
+        values=[energy_annual, carbon_annual, h2_annual, nh3_annual, albedo_annual],
+        hole=0.5, textinfo="label+percent+value",
+        texttemplate="%{label}<br>$%{value:.1f}M<br>%{percent}",
+        marker=dict(colors=["#FFD700", "#00c878", "#00BFFF", "#9370DB", "#FF69B4"]),
+    )])
+    fig_rev.update_layout(
+        title=f"Annual Revenue Mix — {tier_name}",
+        template="plotly_dark", height=450,
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+    )
+    st.plotly_chart(fig_rev, use_container_width=True)
+
+with c2:
+    st.markdown("**Revenue Streams**")
+    streams = [
+        ("⚡ Energy", energy_annual, t["ppa"], "$/MWh PPA"),
+        ("🌱 Carbon", carbon_annual, CARBON_PRICE, "$/tCO2"),
+        ("💧 Hydrogen", h2_annual, H2_PRICE, "$/kg H2"),
+        ("🧪 Ammonia", nh3_annual, NH3_PRICE, "$/tonne"),
+        ("🪞 Albedo", albedo_annual, ALBEDO_CREDIT, "$/tCO2e"),
+    ]
+    for emoji_name, val, price, unit in streams:
+        pct = val / total_annual * 100
+        st.markdown(f"- **{emoji_name}**: ${val:,.1f}M ({pct:.0f}%) @ {price} {unit}")
+    st.markdown(f"---\n**Total: ${total_annual:,.1f}M/yr**")
+
+st.divider()
+
+# ─── 30-Year Multi-Stream Cumulative Revenue ───
+st.subheader("📈 30-Year Cumulative Revenue — All Streams")
+
+fig_multi = go.Figure()
+years = list(range(1, LIFETIME + 1))
+
 for name, cfg in TIERS.items():
     agwh = cfg["mw"] * cfg["cf"] * 8760 / 1000
-    years = list(range(1, LIFETIME + 1))
-    cumrev = [sum(agwh * 1000 * cfg["ppa"] * (1 - ANNUAL_DEG)**yr / 1e6 for yr in range(y)) for y in years]
-    fig7.add_trace(go.Scatter(
-        x=years, y=cumrev, name=name, mode="lines+markers",
+    t_mods = math.ceil(cfg["mw"] * 1e6 / MODULE_WP)
+
+    cum_total = []
+    running = 0
+    for yr in range(LIFETIME):
+        deg = (1 - ANNUAL_DEG) ** yr
+        cp = CARBON_PRICE * (1 + CARBON_PRICE_GROWTH) ** yr  # escalating carbon price
+
+        e_rev = agwh * 1000 * cfg["ppa"] * deg / 1e6
+        c_rev = agwh * 1000 * GRID_EMISSION_FACTOR * cp * deg / 1e6
+        h_gwh = agwh * H2_SOLAR_FRACTION * deg
+        h_kg = h_gwh * 1e6 / H2_KWH_PER_KG
+        h_rev = h_kg * H2_PRICE / 1e6
+        n_kg = h_kg * NH3_CONVERSION * NH3_KG_PER_KG_H2
+        n_rev = n_kg * NH3_PRICE / 1e9
+        a_rev = t_mods * MODULE_AREA * ALBEDO_TCO2E_PER_M2_YR * ALBEDO_CREDIT / 1e6
+
+        running += e_rev + c_rev + h_rev + n_rev + a_rev
+        cum_total.append(running)
+
+    fig_multi.add_trace(go.Scatter(
+        x=years, y=cum_total, name=name, mode="lines",
         line=dict(width=3, color=cfg["color"]),
-        marker=dict(size=4),
     ))
-fig7.update_layout(
+
+fig_multi.update_layout(
     xaxis_title="Year", yaxis_title="Cumulative Revenue ($M)",
     template="plotly_dark", height=450,
     paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+    title="Total Revenue — Energy + Carbon + H2 + NH3 + Albedo",
 )
-st.plotly_chart(fig7, use_container_width=True)
+st.plotly_chart(fig_multi, use_container_width=True)
+
+# ─── Stacked area by stream ───
+st.subheader("🔋 Revenue Stack — Stream Breakdown Over Time")
+fig_stack = go.Figure()
+
+agwh_sel = t["mw"] * t["cf"] * 8760 / 1000
+t_mods_sel = total_modules
+
+streams_data = {"Energy": [], "Carbon": [], "Hydrogen": [], "Ammonia": [], "Albedo": []}
+for yr in range(LIFETIME):
+    deg = (1 - ANNUAL_DEG) ** yr
+    cp = CARBON_PRICE * (1 + CARBON_PRICE_GROWTH) ** yr
+    streams_data["Energy"].append(agwh_sel * 1000 * t["ppa"] * deg / 1e6)
+    streams_data["Carbon"].append(agwh_sel * 1000 * GRID_EMISSION_FACTOR * cp * deg / 1e6)
+    h_gwh = agwh_sel * H2_SOLAR_FRACTION * deg
+    h_kg = h_gwh * 1e6 / H2_KWH_PER_KG
+    streams_data["Hydrogen"].append(h_kg * H2_PRICE / 1e6)
+    n_kg = h_kg * NH3_CONVERSION * NH3_KG_PER_KG_H2
+    streams_data["Ammonia"].append(n_kg * NH3_PRICE / 1e9)
+    streams_data["Albedo"].append(t_mods_sel * MODULE_AREA * ALBEDO_TCO2E_PER_M2_YR * ALBEDO_CREDIT / 1e6)
+
+colors_stack = {"Energy": "#FFD700", "Carbon": "#00c878", "Hydrogen": "#00BFFF", "Ammonia": "#9370DB", "Albedo": "#FF69B4"}
+for stream, vals in streams_data.items():
+    fig_stack.add_trace(go.Scatter(
+        x=years, y=vals, name=stream, stackgroup="one",
+        line=dict(width=0.5, color=colors_stack[stream]),
+    ))
+
+fig_stack.update_layout(
+    title=f"Annual Revenue by Stream — {tier_name}",
+    xaxis_title="Year", yaxis_title="Revenue ($M/yr)",
+    template="plotly_dark", height=450,
+    paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+)
+st.plotly_chart(fig_stack, use_container_width=True)
+
+st.divider()
+
+# ─── Comparative Table ───
+st.subheader("📊 Multi-Stream Comparison — All Tiers")
+comp_data = []
+for name, cfg in TIERS.items():
+    agwh = cfg["mw"] * cfg["cf"] * 8760 / 1000
+    t_mods = math.ceil(cfg["mw"] * 1e6 / MODULE_WP)
+
+    e = agwh * 1000 * cfg["ppa"] / 1e6
+    c = agwh * 1000 * GRID_EMISSION_FACTOR * CARBON_PRICE / 1e6
+    h_gwh = agwh * H2_SOLAR_FRACTION
+    h_kg = h_gwh * 1e6 / H2_KWH_PER_KG
+    h = h_kg * H2_PRICE / 1e6
+    n_kg = h_kg * NH3_CONVERSION * NH3_KG_PER_KG_H2
+    n = n_kg * NH3_PRICE / 1e9
+    a = t_mods * MODULE_AREA * ALBEDO_TCO2E_PER_M2_YR * ALBEDO_CREDIT / 1e6
+    tot = e + c + h + n + a
+
+    comp_data.append({
+        "Tier": name,
+        "Energy ($M)": f"${e:,.1f}",
+        "Carbon ($M)": f"${c:,.1f}",
+        "H2 ($M)": f"${h:,.1f}",
+        "NH3 ($M)": f"${n:,.1f}",
+        "Albedo ($M)": f"${a:,.2f}",
+        "Total ($M)": f"${tot:,.1f}",
+        "Multiplier": f"{tot/e:.1f}x",
+    })
+
+st.table(comp_data)
+
+st.divider()
+
+# ─── BOM Breakdown ───
+st.subheader("📋 Bill of Materials (per module)")
+c1, c2 = st.columns([2, 1])
+with c1:
+    labels = list(BOM.keys())
+    values = list(BOM.values())
+    fig6 = go.Figure(data=[go.Pie(
+        labels=labels, values=values,
+        hole=0.45, textinfo="label+percent",
+        marker=dict(colors=[
+            "#FF6347", "#FFD700", "#00c878", "#00BFFF", "#FF69B4",
+            "#9370DB", "#20B2AA", "#F0E68C", "#DDA0DD", "#87CEEB",
+            "#98FB98", "#FFA07A"
+        ]),
+    )])
+    fig6.update_layout(
+        title=f"BOM Breakdown — ${BOM_TOTAL:.0f}/module",
+        template="plotly_dark", height=450,
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+    )
+    st.plotly_chart(fig6, use_container_width=True)
+
+with c2:
+    st.markdown("**Component Costs**")
+    for comp, cost in sorted(BOM.items(), key=lambda x: -x[1]):
+        pct = cost / BOM_TOTAL * 100
+        st.markdown(f"- **{comp}**: ${cost:.2f} ({pct:.0f}%)")
+    st.markdown(f"---\n**Total: ${BOM_TOTAL:.2f}**")
+
+st.divider()
 
 # ─── Architecture ───
-st.divider()
 st.subheader("🧬 Granas Architecture Stack")
 stack = {
-    "SIBO": "Bayesian optimization · PCE maximization",
-    "Optics": "Photon harvesting · AR coating",
+    "SIBO": "Bayesian optimization - PCE maximization",
+    "Optics": "Photon harvesting - AR coating",
     "SDL": "Self-driving laboratory integration",
-    "CFRP": "Composite frame · structural analysis",
-    "ETFE": "Encapsulation · 30-year durability",
-    "TOPCon": "Si heterojunction · rear contact",
-    "GHB": "Granule Heat Bed · thermal management",
+    "CFRP": "Composite frame - structural analysis",
+    "ETFE": "Encapsulation - 30-year durability",
+    "TOPCon": "Si heterojunction - rear contact",
+    "GHB": "Granule Heat Bed - thermal management",
     "Albedo": "Bifacial albedo gain modeling",
-    "Metrics": "FoM scoring · benchmarking",
+    "Metrics": "FoM scoring - benchmarking",
     "Blueprint": "Full fabrication specification",
-    "Scale": "Industrial scaling · 100MW → 10GW",
+    "Scale": "Industrial scaling - 100MW to 10GW",
 }
 cols = st.columns(4)
 for i, (eng, desc) in enumerate(stack.items()):
     cols[i % 4].markdown(f"**{eng}**  \n{desc}")
 
-st.caption("PRIMEnergeia S.A.S. — Granas Scale Industrial Manufacturing Roadmap")
+st.caption("PRIMEnergeia S.A.S. - Granas Scale Industrial Manufacturing Roadmap")
+
