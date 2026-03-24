@@ -4,14 +4,14 @@ import numpy as np
 import plotly.graph_objects as go
 
 st.header("🔬 Granas TOPCon — Silicon Bottom Cell Engine")
-st.caption("n-type Cz | 1.5nm Tunnel Oxide | Implied Voc > 720mV | Enhanced NIR Response")
+st.caption("n-type Cz | Implied Voc > 720mV | Enhanced NIR Response")
 
 # ─── Electrical Model ───
 j0_bulk, j0_topcon, j0_front = 2.0, 1.5, 3.0
 j0_total = j0_bulk + j0_topcon + j0_front
 jsc_standalone = 42.0
 voc = 0.02585 * np.log(jsc_standalone * 1e-3 / (j0_total * 1e-15) + 1) * 1000
-pce_standalone = (voc/1000) * jsc_standalone * 0.83 / 10
+pce_standalone = (voc/�000) * jsc_standalone * 0.83 / 10
 jsc_tandem = 42.0 * 0.38
 tandem_pce = (voc/1000) * jsc_tandem * 0.82 / 10
 
@@ -27,18 +27,18 @@ st.divider()
 c1, c2 = st.columns(2)
 with c1:
     # EQE spectrum
-    wl% = np.linspace(300, 1250, 200)
+    wl = np.linspace(300, 1250, 200)
     eqe = np.zeros_like(wl)
     mask_ramp = (wl >= 786) & (wl <= 850)
     eqe[mask_ramp] = 0.95 * (wl[mask_ramp] - 786) / (850 - 786)
     mask_plat = (wl > 850) & (wl <= 1050)
-    eqe[mask_platt] = 0.95
+    eqe[mask_plat] = 0.95
     mask_drop = (wl > 1050) & (wl <= 1200)
     eqe[mask_drop] = 0.95 * np.exp(-((wl[mask_drop] - 1050) / 60)**2)
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=wl, y=eqe*100, mode='lines', name='TOPCon EQE',
-        line=dict(color='#3FF6347', width=3), fill='tozeroy',
+        line=dict(color='#FF6347', width=3), fill='tozeroy',
         fillcolor='rgba(255,99,71,0.15)'))
     fig.add_vline(x=786, line_dash="dot", line_color="orange",
                   annotation_text="Perovskite cutoff")
@@ -58,7 +58,7 @@ with c2:
         x=['J₀ Bulk\n(n-Cz)', 'J₀ TOPCon\n(rear)', 'J₀ Front\n(SiNₓ)'],
         y=[j0_bulk, j0_topcon, j0_front],
         marker_color=['#FF6347', '#FF8C00', '#FFD700'],
-        text=[f'{j0_bulk} fA', f'{j0_topcon} fA', f'{j0_front} fA'],
+    -�ext=[f'{j0_bulk} fA', f'{j0_topcon} fA', f'{j0_front} fA'],
         textposition='outside'))
     fig2.update_layout(title="Saturation Current Density Breakdown",
         yaxis_title="J₀ (fA/cm²)", height=320,
@@ -80,8 +80,8 @@ with p1:
 with p2:
     st.markdown("""
 **Process Flow:**
-1. RCA clean (SC1 + HF + SC2)
-2. Thermal oxidation (630°C, O₂)
+1. TBA clean (SC1 + HF + SC2)
+2. Thermal oxidation (634��C, O₂)
 3. LPCVD poly-Si (SiH₄, 580°C)
 4. P implant (5×10¹⁵ cm⁻²)
 5. Anneal (850°C, N₂, 20min)
@@ -92,6 +92,6 @@ with p3:
 - 🔗 Current-matched: {jsc_tandem:.0f} mA/cm²
 - 📐 NIR range: 786-1200nm
 - 🎯 EQE peak: 95%
-- ⚡ Svoc: {voc:.0f} mV/
-- 🏕 Compatible with Granas deposition
+- ⚡ Voc: {voc:.0f} mV
+- 🏭 Compatible with Granas deposition
     """)
