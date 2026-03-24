@@ -83,10 +83,10 @@ with c2:
         margin=dict(t=40, b=40), legend=dict(x=0.6, y=0.98),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(gridcolor='rgba(128,128,128,0.2)'),
-        yaxis=dict(gridcolor='rgba(128,128,128,0.2)'))
+        yaxis=dict(gridcolor='rgba(128,128,0.2)'))
     st.plotly_chart(fig2, use_container_width=True)
 
-# ─── Urban Albedo ───
+# ─── +Urban Albedo ───
 st.subheader("🏢 Urban Cooling Effect")
 u1, u2, u3 = st.columns(3)
 with u1:
