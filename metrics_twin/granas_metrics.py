@@ -427,6 +427,138 @@ class SIBOMetrics:
 
 
 # ═══════════════════════════════════════════════════════════
+# Albedo Model (Green Reflectance Thermal Management)
+# ═══════════════════════════════════════════════════════════
+@dataclass
+class AlbedoMetrics:
+    """Green spectral-selective reflection for junction cooling."""
+    green_reflectance_pct: float = 35.0      # R(535nm) ≈ 35%
+    junction_temp_C: float = 42.0
+    control_temp_C: float = 68.0
+    voc_gain_mV: float = 45.0
+    t80_granas_yr: float = 2.1
+    t80_control_yr: float = 0.3
+    urban_hvac_savings_pct: float = 17.5
+    surface_cooling_C: float = 8.0
+
+    @staticmethod
+    def from_thermal(thermal: ThermalModel, pce_pct: float) -> "AlbedoMetrics":
+        tj = thermal.junction_temp(pce_pct)
+        voc_gain = thermal.voc_gain_mV(tj)
+        t80_h = thermal.t80_hours(tj)
+        t80_ctrl = thermal.t80_hours(68.0)
+        return AlbedoMetrics(
+            green_reflectance_pct=thermal.green_reflectance * 100,
+            junction_temp_C=tj, voc_gain_mV=voc_gain,
+            t80_granas_yr=t80_h / 8760, t80_control_yr=t80_ctrl / 8760,
+        )
+
+
+# ═══════════════════════════════════════════════════════════
+# GHB Model (Green Haber-Bosch Electrochemical NRR)
+# ═══════════════════════════════════════════════════════════
+@dataclass
+class GHBMetrics:
+    """Electrochemical nitrogen reduction powered by Granas solar."""
+    faradaic_efficiency_pct: float = 47.3
+    nh3_yield_umol_h_cm2: float = 12.8
+    cell_voltage_V: float = 1.8
+    current_density_mA_cm2: float = 15.2
+    solar_to_nh3_pct: float = 3.1
+    catalyst: str = "Fe₂O₃/CNT"
+    electrolyte: str = "0.1M Li₂SO₄"
+    temperature_C: float = 25.0
+
+    @staticmethod
+    def from_solar_input(pce_pct: float, jsc: float) -> "GHBMetrics":
+        """Scale NRR metrics by available solar power."""
+        solar_factor = min(pce_pct / 25.0, 1.3)
+        return GHBMetrics(
+            faradaic_efficiency_pct=47.3 * min(solar_factor, 1.1),
+            nh3_yield_umol_h_cm2=12.8 * solar_factor,
+            current_density_mA_cm2=min(jsc * 0.65, 25.0),
+            solar_to_nh3_pct=3.1 * solar_factor,
+        )
+
+
+# ═══════════════════════════════════════════════════════════
+# ETFE Model (Front Encapsulation)
+# ═══════════════════════════════════════════════════════════
+@dataclass
+class ETFEMetrics:
+    """ETFE front encapsulation: 96% transmittance, self-cleaning."""
+    transmittance_pct: float = 96.0
+    ar_gain_pct: float = 5.5
+    haze_factor: float = 1.06
+    weight_kg_m2: float = 0.17
+    glass_weight_kg_m2: float = 8.0
+    weight_ratio: float = 0.021
+    uv_degradation_pct_yr: float = 0.1
+    adhesion_N_cm: float = 15.0
+    thermoform_temp_C: float = 270.0
+    thermoform_pressure_bar: float = 2.0
+
+    def transmittance_at_year(self, year: int) -> float:
+        return self.transmittance_pct * (1 - self.uv_degradation_pct_yr / 100 * year)
+
+    def jsc_gain_pct(self) -> float:
+        return self.ar_gain_pct + (self.haze_factor - 1.0) * 100
+
+
+# ═══════════════════════════════════════════════════════════
+# TOPCon Model (Silicon Bottom Cell)
+# ═══════════════════════════════════════════════════════════
+@dataclass
+class TOPConMetrics:
+    """n-type Cz TOPCon silicon bottom cell for tandem configuration."""
+    implied_voc_mV: float = 720.0
+    j0_fA_cm2: float = 6.5
+    pce_standalone_pct: float = 25.4
+    tandem_jsc_mA_cm2: float = 16.0
+    nir_eqe_peak_pct: float = 95.0
+    wafer_thickness_um: float = 180.0
+    tunnel_oxide_nm: float = 1.5
+    poly_si_nm: float = 200.0
+
+    @staticmethod
+    def from_optics(jsc_total: float) -> "TOPConMetrics":
+        """Adjust TOPCon metrics based on total optical Jsc."""
+        # Current matching: bottom cell gets NIR portion
+        tandem_jsc = min(jsc_total * 0.42, 22.0)
+        return TOPConMetrics(tandem_jsc_mA_cm2=tandem_jsc)
+
+
+# ═══════════════════════════════════════════════════════════
+# Blueprint Model (Master Geometric Engine)
+# ═══════════════════════════════════════════════════════════
+@dataclass
+class BlueprintMetrics:
+    """17×10.5 master geometric engine with edge catalog."""
+    width_units: float = 17.0
+    height_units: float = 10.5
+    peripheral_edges: int = 6
+    peripheral_length: float = 5.5
+    internal_edges: int = 8
+    internal_length: float = 3.5
+    central_edges: int = 12
+    central_length: float = 3.0
+    photon_recycling_pct: float = 89.0
+    rigidity_gain_pct: float = 42.0
+    max_deflection_mm: float = 1.8
+    test_pressure_Pa: float = 5400.0
+    comsol_jsc_mA_cm2: float = 43.9
+    min_absorber_passes: int = 3
+
+    @property
+    def total_edges(self) -> int:
+        return self.peripheral_edges + self.internal_edges + self.central_edges
+
+    @property
+    def module_area_m2(self) -> float:
+        return (self.width_units * 0.1) * (self.height_units * 0.1)
+
+
+# ═══════════════════════════════════════════════════════════
 # Holistic Performance (Full Granas Architecture)
 # ═══════════════════════════════════════════════════════════
 @dataclass
@@ -440,6 +572,13 @@ class HolisticGranas:
     composition: GranasComposition = field(default_factory=GranasComposition)
     thermal: ThermalModel = field(default_factory=ThermalModel)
     cfrp: CFRPModel = field(default_factory=CFRPModel)
+
+    # New engine metrics
+    albedo: AlbedoMetrics = field(default_factory=AlbedoMetrics)
+    ghb: GHBMetrics = field(default_factory=GHBMetrics)
+    etfe: ETFEMetrics = field(default_factory=ETFEMetrics)
+    topcon: TOPConMetrics = field(default_factory=TOPConMetrics)
+    blueprint: BlueprintMetrics = field(default_factory=BlueprintMetrics)
 
     # Holistic composites
     device_pce: float = 0.0
@@ -481,6 +620,13 @@ class HolisticGranas:
 
         # Weight reduction
         self.weight_reduction = (1 - self.cfrp.weight_ratio_vs_glass) * 100
+
+        # Populate new engine metrics
+        self.albedo = AlbedoMetrics.from_thermal(self.thermal, self.sdl.pce_pct)
+        self.ghb = GHBMetrics.from_solar_input(self.sdl.pce_pct, self.optics.jsc_mA_cm2)
+        self.etfe = ETFEMetrics()
+        self.topcon = TOPConMetrics.from_optics(self.optics.jsc_mA_cm2)
+        self.blueprint = BlueprintMetrics()
 
         # TRL estimate (Granas tandem targets)
         if self.sdl.pce_pct > 33:
