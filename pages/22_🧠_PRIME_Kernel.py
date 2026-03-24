@@ -5,9 +5,9 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import sys, os
 
-# Resolve PRIME-Kernel
-_KERNEL = os.path.expanduser("~/PRIME-Kernel")
-sys.path.insert(0, _KERNEL)
+# Resolve PRIME-Kernel (bundled in lib/)
+_LIB = os.path.join(os.path.dirname(os.path.dirname(__file__)), "lib")
+sys.path.insert(0, _LIB)
 
 st.markdown("""<style>
 [data-testid="stMetricValue"] {font-size: 26px !important}
