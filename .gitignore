@@ -43,3 +43,4 @@ state_vector.*
 *.pt
 *.pth
 .github/workflows/ci.yml
+secrets.toml

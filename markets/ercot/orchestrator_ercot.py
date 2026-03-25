@@ -7,7 +7,12 @@ import sys
 # ============================================================
 #  PRIMEnergeia — ERCOT 25-Node Grid Orchestrator
 #  Full ERCOT Weather Zone Coverage
+#  ⚠ [SIMULATION MODE] — Uses synthetic volatility data.
+#  Connect to data_loader.py for real LMP feeds.
 # ============================================================
+
+# Mode flag: set to False when connected to real data pipeline
+SIMULATION_MODE = True
 
 ERCOT_NODES = [
     # (ID, Location, Zone, Capacity GW)
@@ -68,9 +73,12 @@ def coordinate_fleet(q, total_nodes):
     cursor.execute("INSERT INTO fleet_ercot VALUES (1, 0.0)")
 
     total_cap = sum(n[3] for n in ERCOT_NODES)
+    mode_tag = " [SIMULATION]" if SIMULATION_MODE else ""
     print(f"\n{'='*70}")
-    print(f"  PRIMEnergeia — ERCOT GRID ORCHESTRATOR")
+    print(f"  PRIMEnergeia — ERCOT GRID ORCHESTRATOR{mode_tag}")
     print(f"  {total_nodes} Nodes | {total_cap*1000:.0f} MW | 8 Weather Zones")
+    if SIMULATION_MODE:
+        print(f"  ⚠  Data source: synthetic volatility (not connected to real LMPs)")
     print(f"{'='*70}\n")
 
     try:

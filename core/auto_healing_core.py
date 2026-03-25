@@ -5,6 +5,10 @@ import numpy as np
 from torch.distributions import Normal
 import time
 
+# ⚠ [SIMULATION MODE] — DRL networks are NOT trained on real data.
+# Outputs are synthetic demonstrations of the auto-healing architecture.
+SIMULATION_MODE = True
+
 class HJB_Critic(nn.Module):
     def __init__(self, state_dim):
         super(HJB_Critic, self).__init__()
@@ -36,7 +40,11 @@ class PRIMEnergeia_DRL_Core:
         self.critic = HJB_Critic(state_dim)
 
 if __name__ == "__main__":
-    print("\n[+] Inicializando PRIMEnergeia Auto-Healing Core v2.0 en MacBook Pro...")
+    mode_tag = " [SIMULATION]" if SIMULATION_MODE else ""
+    print(f"\n[+] Inicializando PRIMEnergeia Auto-Healing Core v2.0{mode_tag}...")
+    if SIMULATION_MODE:
+        print("    ⚠  Networks are NOT trained — output is synthetic demonstration.")
+        print("    ⚠  Connect real SCADA/frequency data for production use.")
     agent = PRIMEnergeia_DRL_Core(state_dim=4, action_dim=1)
     
     np.random.seed(42)

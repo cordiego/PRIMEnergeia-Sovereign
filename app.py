@@ -1,4 +1,10 @@
 import streamlit as st
+import sys, os
+
+# Ensure project root is on path
+_root = os.path.dirname(os.path.abspath(__file__))
+if _root not in sys.path:
+    sys.path.insert(0, _root)
 
 # ============================================================
 #  PRIMEnergeia Sovereign — Unified Command Center
@@ -11,6 +17,15 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# ─── Authentication Gate ────────────────────────────────────
+from lib.auth_gate import require_auth, logout_button
+require_auth()
+logout_button()
+
+# ─── Mode Banner ───────────────────────────────────────────
+from lib.mode_gate import show_mode_banner
+show_mode_banner()
 
 # Premium CSS
 st.markdown("""
@@ -309,14 +324,15 @@ with c14:
 with c15:
     st.markdown("""
     <div class='product-card'>
-        <div class='product-title' style='color: #94a3b8;'>📄 Product Catalog</div>
-        <div class='product-desc'>Investor-facing portfolio. 5 SBUs × pricing models × technical moats.</div>
+        <div class='product-title' style='color: #00d1ff;'>📂 Data Upload</div>
+        <div class='product-desc'>Upload client CSV. Auto-detect format. Quality report + validation.</div>
         <div>
-            <span class='product-badge'>$216M</span>
-            <span class='product-badge'>5 SBUs</span>
+            <span class='product-badge'>UPLOAD</span>
+            <span class='product-badge'>VALIDATE</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
+    st.page_link("pages/25_📂_Data_Upload.py", label="Open →", icon="📂")
 
 st.markdown("")
 st.divider()

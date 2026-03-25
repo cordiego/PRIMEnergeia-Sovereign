@@ -7,7 +7,12 @@ import sys
 # ============================================================
 #  PRIMEnergeia — SEN 30-Node National Grid Orchestrator
 #  Sistema Eléctrico Nacional — Full CENACE Coverage
+#  ⚠ [SIMULATION MODE] — Uses synthetic volatility data.
+#  Connect to data_loader.py for real PML feeds.
 # ============================================================
+
+# Mode flag: set to False when connected to real data pipeline
+SIMULATION_MODE = True
 
 SEN_NODES = [
     # (ID, Location, CENACE Region, Capacity GW)
@@ -74,9 +79,12 @@ def coordinar_flota(q, total_nodos):
     cursor.execute("INSERT INTO fleet_sen VALUES (1, 0.0)")
 
     total_cap = sum(n[3] for n in SEN_NODES)
+    mode_tag = " [SIMULATION]" if SIMULATION_MODE else ""
     print(f"\n{'='*70}")
-    print(f"  PRIMEnergeia — SEN GRID ORCHESTRATOR")
+    print(f"  PRIMEnergeia — SEN GRID ORCHESTRATOR{mode_tag}")
     print(f"  {total_nodos} Nodos | {total_cap*1000:.0f} MW | 9 Regiones CENACE")
+    if SIMULATION_MODE:
+        print(f"  ⚠  Data source: synthetic volatility (not connected to real PMLs)")
     print(f"{'='*70}\n")
 
     try:
