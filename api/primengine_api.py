@@ -9,6 +9,7 @@ PRIMEnergeia S.A.S. — Grid Optimization Division
 
 Endpoints:
     POST /v1/dispatch/optimize    — Run HJB dispatch optimization
+    POST /v1/dispatch/cooptimize   — DA/RT co-optimization with battery degradation
     POST /v1/dispatch/sessions    — Create persistent session
     GET  /v1/dispatch/sessions/{id}/status  — Session progress
     GET  /v1/dispatch/sessions/{id}/results — Full dispatch results
@@ -57,14 +58,23 @@ except ImportError:
 try:
     from ercot.physics_ercot import ERCOTGridPhysics
     from sen.physics_sen import SENGridPhysics
+    from mibel.physics_mibel import MIBELGridPhysics
     GRID_PHYSICS_AVAILABLE = True
 except ImportError:
     GRID_PHYSICS_AVAILABLE = False
 
+try:
+    from ercot.dispatch_ercot import run_ercot_coopt
+    from sen.dispatch_sen import run_sen_coopt
+    from mibel.dispatch_mibel import run_mibel_coopt
+    COOPT_AVAILABLE = True
+except ImportError:
+    COOPT_AVAILABLE = False
+
 # ============================================================
 #  Configuration
 # ============================================================
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 API_TITLE = "PRIMEngine API — Grid Dispatch Optimization"
 DATA_DIR = os.environ.get("PRIMENGINE_DATA_DIR", os.path.expanduser("~/.prime_api"))
 
@@ -485,6 +495,8 @@ async def simulate_grid(
         grid = ERCOTGridPhysics()
     elif market == "sen":
         grid = SENGridPhysics()
+    elif market == "mibel":
+        grid = MIBELGridPhysics()
     else:
         raise HTTPException(status_code=400, detail=f"Grid simulation not available for {market}")
 
@@ -503,8 +515,8 @@ async def simulate_grid(
         rocof_history.append(round(float(dfdt), 6))
         control_history.append(round(float(u_control), 4))
 
-        penalty_threshold = 59.97 if market == "ercot" else 59.97
-        penalty_rate = 300000 if market == "ercot" else 250000
+        penalty_threshold = 49.96 if market == "mibel" else 59.97
+        penalty_rate = 280000 if market == "mibel" else (300000 if market == "ercot" else 250000)
         if f < penalty_threshold:
             savings += abs(error) * penalty_rate
 
@@ -523,6 +535,93 @@ async def simulate_grid(
         },
         "penalties_avoided_usd": round(savings, 2),
     }
+
+
+# --- Co-Optimization (DA/RT + Battery Degradation) ---
+class CoOptRequest(BaseModel):
+    market: str = Field("ercot", description="Target market: ercot, sen, or mibel")
+    fleet_mw: float = Field(100.0, ge=1, le=10000, description="Fleet capacity (MW)")
+    battery_mwh: float = Field(400.0, ge=0, le=20000, description="Battery storage (MWh)")
+    hours: int = Field(24, ge=1, le=168, description="Optimization horizon (hours)")
+
+
+@app.post("/v1/dispatch/cooptimize")
+async def cooptimize_dispatch(req: CoOptRequest, auth: dict = Depends(get_api_config)):
+    """Run day-ahead + real-time co-optimization with battery degradation tracking.
+
+    Returns market-specific results including energy revenue, battery SOH,
+    degradation cost, hourly strategy, and carbon/CEL credit tracking.
+    """
+    check_rate_limit(auth["key"], auth)
+    check_market_access(req.market, auth)
+
+    if not COOPT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Co-optimization engine not available")
+
+    t_start = time.time()
+
+    if req.market == "ercot":
+        result = run_ercot_coopt(fleet_mw=req.fleet_mw, battery_mwh=req.battery_mwh, hours=req.hours)
+        return {
+            "market": "ercot", "currency": "USD", "hours": result.hours,
+            "energy_revenue": result.energy_revenue_usd,
+            "ancillary_revenue": result.ancillary_revenue_usd,
+            "total_revenue": result.total_revenue_usd,
+            "baseline_revenue": result.baseline_revenue_usd,
+            "uplift_pct": result.uplift_pct,
+            "degradation_cost": result.degradation_cost_usd,
+            "net_profit": result.net_profit_usd,
+            "battery_soh_start": result.battery_soh_start,
+            "battery_soh_end": result.battery_soh_end,
+            "dispatch_mw": [round(float(d), 1) for d in result.dispatch_mw],
+            "battery_soc": [round(float(s), 4) for s in result.battery_soc],
+            "strategy": result.strategy,
+            "solver_time_ms": round((time.time() - t_start) * 1000, 1),
+        }
+
+    elif req.market == "sen":
+        result = run_sen_coopt(fleet_mw=req.fleet_mw, battery_mwh=req.battery_mwh, hours=req.hours)
+        return {
+            "market": "sen", "currency": "MXN", "hours": result.hours,
+            "energy_revenue_mxn": result.energy_revenue_mxn,
+            "cel_revenue_mxn": result.cel_revenue_mxn,
+            "total_revenue_mxn": result.total_revenue_mxn,
+            "total_revenue_usd": result.total_revenue_usd,
+            "baseline_revenue_mxn": result.baseline_revenue_mxn,
+            "uplift_pct": result.uplift_pct,
+            "degradation_cost_mxn": result.degradation_cost_mxn,
+            "net_profit_usd": result.net_profit_usd,
+            "battery_soh_start": result.battery_soh_start,
+            "battery_soh_end": result.battery_soh_end,
+            "dispatch_mw": [round(float(d), 1) for d in result.dispatch_mw],
+            "battery_soc": [round(float(s), 4) for s in result.battery_soc],
+            "strategy": result.strategy,
+            "region": result.region,
+            "solver_time_ms": round((time.time() - t_start) * 1000, 1),
+        }
+
+    elif req.market == "mibel":
+        result = run_mibel_coopt(fleet_mw=req.fleet_mw, battery_mwh=req.battery_mwh, hours=req.hours)
+        return {
+            "market": "mibel", "currency": "EUR", "hours": result.hours,
+            "energy_revenue_eur": result.energy_revenue_eur,
+            "carbon_savings_eur": result.carbon_savings_eur,
+            "total_revenue_eur": result.total_revenue_eur,
+            "baseline_revenue_eur": result.baseline_revenue_eur,
+            "uplift_pct": result.uplift_pct,
+            "degradation_cost_eur": result.degradation_cost_eur,
+            "net_profit_eur": result.net_profit_eur,
+            "co2_displaced_tonnes": result.co2_displaced_tonnes,
+            "battery_soh_start": result.battery_soh_start,
+            "battery_soh_end": result.battery_soh_end,
+            "dispatch_mw": [round(float(d), 1) for d in result.dispatch_mw],
+            "battery_soc": [round(float(s), 4) for s in result.battery_soc],
+            "strategy": result.strategy,
+            "zone": result.zone,
+            "solver_time_ms": round((time.time() - t_start) * 1000, 1),
+        }
+
+    raise HTTPException(status_code=400, detail=f"Unknown market: {req.market}")
 
 
 # ============================================================
