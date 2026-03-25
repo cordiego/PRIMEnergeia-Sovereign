@@ -251,10 +251,21 @@ class TestExport:
 
     def test_export_json(self, initialized_state, capsys):
         cmd_tell([1.0, 0.5, 2.0, 3000], 15.0)
+        # Clear any tell output
+        capsys.readouterr()
         result = cmd_export("json")
         assert result == 0
         captured = capsys.readouterr()
-        data = json.loads(captured.out.split("\n#")[0])  # Strip trailing comment
+        # Find the JSON array in the output (starts with '[' and ends with ']')
+        lines = captured.out.strip().split("\n")
+        json_text = ""
+        for line in lines:
+            stripped = line.strip()
+            if stripped.startswith("[") or stripped.startswith("{") or json_text:
+                json_text += stripped
+                if stripped.endswith("]"):
+                    break
+        data = json.loads(json_text)
         assert len(data) == 1
         assert data[0]["pce"] == 15.0
 
@@ -270,11 +281,26 @@ class TestAskTellCycle:
     """Full Ask→Tell integration loop."""
 
     def test_five_iteration_cycle(self, initialized_state, capsys):
-        """Run 5 ask→tell iterations and verify convergence tracking."""
+        """Run 5 ask->tell iterations and verify convergence tracking."""
         for i in range(5):
+            # clear buffer before ask
+            capsys.readouterr()
             cmd_ask()
             captured = capsys.readouterr()
-            data_lines = [l for l in captured.out.strip().split("\n") if not l.startswith("#")]
+            # Data line format: "X.XXXX X.XXXX X.XXXX NNNNN"
+            # Filter: must have 4 space-separated tokens, no letters except in '#' lines
+            data_lines = []
+            for l in captured.out.strip().split("\n"):
+                if l.startswith("#"):
+                    continue
+                parts = l.strip().split()
+                if len(parts) == 4:
+                    try:
+                        [float(p) for p in parts]
+                        data_lines.append(l)
+                    except ValueError:
+                        continue
+            assert len(data_lines) >= 1, f"No data line found in: {captured.out}"
             values = [float(v) for v in data_lines[0].split()]
 
             # Simulate a PCE measurement

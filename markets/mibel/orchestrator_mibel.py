@@ -7,7 +7,11 @@ import sys
 # ============================================================
 #  PRIMEnergeia — MIBEL 20-Node Grid Orchestrator
 #  Mercado Ibérico de Electricidad (Spain + Portugal)
+#
+#  [SIMULATION MODE] — Uses random.uniform(), NOT real OMIE data.
+#  Connect to OMIE API for production use.
 # ============================================================
+SIMULATION_MODE = True
 
 MIBEL_NODES = [
     # (ID, Location, Zone, Capacity GW)
@@ -62,9 +66,12 @@ def coordinate_fleet(q, total_nodes):
     cursor.execute("INSERT INTO fleet_mibel VALUES (1, 0.0)")
 
     total_cap = sum(n[3] for n in MIBEL_NODES)
+    mode_tag = " [SIMULATION]" if SIMULATION_MODE else ""
     print(f"\n{'='*70}")
-    print(f"  PRIMEnergeia — MIBEL GRID ORCHESTRATOR")
+    print(f"  PRIMEnergeia — MIBEL GRID ORCHESTRATOR{mode_tag}")
     print(f"  {total_nodes} Nodes | {total_cap*1000:.0f} MW | Spain + Portugal")
+    if SIMULATION_MODE:
+        print(f"  WARNING: Using random.uniform() — NOT real OMIE settlement data")
     print(f"{'='*70}\n")
 
     try:

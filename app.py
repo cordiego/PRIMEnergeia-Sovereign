@@ -107,6 +107,42 @@ div[data-testid="stMetricLabel"] {
     animation: pulse 2s infinite;
 }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+/* Animated welcome typing caret */
+.hero-tagline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: #00d1ff;
+    white-space: nowrap;
+    overflow: hidden;
+    border-right: 2px solid #00d1ff;
+    animation: typing 3.5s steps(55, end), blink-caret 0.75s step-end infinite;
+    max-width: fit-content;
+}
+@keyframes typing { from { max-width: 0 } to { max-width: 100% } }
+@keyframes blink-caret { 50% { border-color: transparent; } }
+
+/* Glow card hover effect */
+.product-card { transition: border-color 0.3s, box-shadow 0.3s, transform 0.2s; }
+.product-card:hover {
+    border-color: #00d1ff;
+    box-shadow: 0 0 20px rgba(0,209,255,0.12);
+    transform: translateY(-2px);
+}
+
+/* Flagship CTA card */
+.cta-card {
+    background: linear-gradient(135deg, #0d1a30, #1a1040);
+    border: 1px solid rgba(99,102,241,0.4);
+    border-radius: 14px;
+    padding: 32px;
+    text-align: center;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.cta-card:hover {
+    border-color: #818cf8;
+    box-shadow: 0 0 30px rgba(99,102,241,0.15);
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -116,12 +152,27 @@ div[data-testid="stMetricLabel"] {
 h1, h2 = st.columns([3, 1])
 with h1:
     st.markdown("# ⚡ PRIMEnergeia Sovereign")
-    st.caption("UNIFIED COMMAND CENTER — ENERGY · FINANCE · MATERIALS SCIENCE")
+    st.markdown("<div class='hero-tagline'>Dispatching the future of energy — one HJB solve at a time.</div>", unsafe_allow_html=True)
 with h2:
     st.markdown("<span class='status-live'>● SYSTEMS ONLINE</span>", unsafe_allow_html=True)
     st.link_button("🌐 PRIME Platform ↗", "https://cordiego.github.io/PRIME-Platform/", type="primary")
 
 st.divider()
+
+# ─── Sidebar Quick-Launch ──────────────────────────────────
+st.sidebar.markdown("### 🚀 Quick Launch")
+_quick = {
+    "⚡ Co-Optimization": "pages/24_⚡_Co_Optimization.py",
+    "⚡ Grid Control":    "pages/1_⚡_Grid_Control.py",
+    "🧪 Granas Optimizer":"pages/3_🧪_Granas_Optimizer.py",
+    "🧠 HJB Control":     "pages/19_🧠_HJB_Control.py",
+    "🏭 PRIMStack":       "pages/21_🏭_PRIMStack.py",
+    "🔬 Engine Research":  "pages/20_🔬_Engine_Research.py",
+    "📂 Data Upload":     "pages/25_📂_Data_Upload.py",
+}
+for _label, _page in _quick.items():
+    st.sidebar.page_link(_page, label=_label)
+st.sidebar.divider()
 
 # ============================================================
 #  PRODUCT CARDS
@@ -293,9 +344,144 @@ with c12:
     """, unsafe_allow_html=True)
     st.page_link("pages/12_📐_Granas_Blueprint.py", label="Open →", icon="📐")
 
+# ────────────────────────────────────────────────────────────
+#  ROW 5 — Industrial / Optimization
+# ────────────────────────────────────────────────────────────
 c13, c14, c15 = st.columns(3)
 
 with c13:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #FF8C00;'>🏭 Granas Scale</div>
+        <div class='product-desc'>Industrial scaling 100MW→10GW. BOM, LCOE, multi-revenue streams.</div>
+        <div>
+            <span class='product-badge'>100MW→10GW</span>
+            <span class='product-badge'>BOM</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/13_🏭_Granas_Scale.py", label="Open →", icon="🏭")
+
+with c14:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #E040FB;'>🧠 SIBO API</div>
+        <div class='product-desc'>Sol-Ink Bayesian Optimizer. GP Matern 5/2 + EI acquisition. SaaS-ready.</div>
+        <div>
+            <span class='product-badge'>GP</span>
+            <span class='product-badge'>SaaS</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/14_🧠_SIBO_API.py", label="Open →", icon="🧠")
+
+with c15:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #26C6DA;'>🔋 Battery Storage</div>
+        <div class='product-desc'>LFP / Solid-State / Flow. 400 MWh grid-scale. Degradation + revenue.</div>
+        <div>
+            <span class='product-badge'>LFP</span>
+            <span class='product-badge'>400 MWh</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/15_PRIMEnergeia_Battery.py", label="Open →", icon="🔋")
+
+# ────────────────────────────────────────────────────────────
+#  ROW 6 — Circular / Wind / Propulsion
+# ────────────────────────────────────────────────────────────
+c16, c17, c18 = st.columns(3)
+
+with c16:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #66BB6A;'>♻️ PRIMEcycle</div>
+        <div class='product-desc'>Circular economy. 97.3% material recovery. Zero-waste perovskite EOL.</div>
+        <div>
+            <span class='product-badge'>RECYCLE</span>
+            <span class='product-badge'>97.3%</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/16_PRIMEcycle.py", label="Open →", icon="♻️")
+
+with c17:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #42A5F5;'>🌊 PRIM Wind</div>
+        <div class='product-desc'>Offshore + onshore. 15 MW direct-drive turbines. Green H₂ integration.</div>
+        <div>
+            <span class='product-badge'>15 MW</span>
+            <span class='product-badge'>H₂ READY</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/17_PRIM_Wind.py", label="Open →", icon="🌊")
+
+with c18:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #EF5350;'>🚀 PRIMEngines</div>
+        <div class='product-desc'>Zero-carbon propulsion. NH₃ ICE · PEM fuel cell · H₂ turbine. 9+ sectors.</div>
+        <div>
+            <span class='product-badge'>NH₃/H₂</span>
+            <span class='product-badge'>ZERO CO₂</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/18_PRIMEngines.py", label="Open →", icon="🚀")
+
+# ────────────────────────────────────────────────────────────
+#  ROW 7 — Controls / Research / Integration
+# ────────────────────────────────────────────────────────────
+c19, c20, c21 = st.columns(3)
+
+with c19:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #AB47BC;'>🧠 HJB Control</div>
+        <div class='product-desc'>Hamilton-Jacobi-Bellman dispatch optimizer. Min-fuel engine scheduling.</div>
+        <div>
+            <span class='product-badge'>HJB</span>
+            <span class='product-badge'>DISPATCH</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/19_🧠_HJB_Control.py", label="Open →", icon="🧠")
+
+with c20:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #FFA726;'>🔬 Engine Research</div>
+        <div class='product-desc'>Live physics lab. Performance maps, polarization curves, Brayton cycles.</div>
+        <div>
+            <span class='product-badge'>6 ENGINES</span>
+            <span class='product-badge'>PHYSICS</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/20_🔬_Engine_Research.py", label="Open →", icon="🔬")
+
+with c21:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #78909C;'>🏭 PRIMStack</div>
+        <div class='product-desc'>Unified plant integrator. Solar+Wind+Engines+BESS+H₂ as one system.</div>
+        <div>
+            <span class='product-badge'>STACK</span>
+            <span class='product-badge'>MULTI-HJB</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/21_🏭_PRIMStack.py", label="Open →", icon="🏭")
+
+# ────────────────────────────────────────────────────────────
+#  ROW 8 — Platform Core (Kernel, CEO, Data, Co-Opt CTA)
+# ────────────────────────────────────────────────────────────
+c22, c23, c24 = st.columns(3)
+
+with c22:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #00ffcc;'>🧠 PRIME Kernel</div>
@@ -308,7 +494,7 @@ with c13:
     """, unsafe_allow_html=True)
     st.page_link("pages/22_🧠_PRIME_Kernel.py", label="Open →", icon="🧠")
 
-with c14:
+with c23:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #F1C40F;'>📊 CEO Dashboard</div>
@@ -321,7 +507,7 @@ with c14:
     """, unsafe_allow_html=True)
     st.page_link("pages/23_📊_CEO_Dashboard.py", label="Open →", icon="📊")
 
-with c15:
+with c24:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #00d1ff;'>📂 Data Upload</div>
@@ -334,6 +520,27 @@ with c15:
     """, unsafe_allow_html=True)
     st.page_link("pages/25_📂_Data_Upload.py", label="Open →", icon="📂")
 
+# ────────────────────────────────────────────────────────────
+#  FLAGSHIP CTA — Co-Optimization
+# ────────────────────────────────────────────────────────────
+st.markdown("")
+st.markdown("""
+<div class='cta-card'>
+    <div style='font-family: JetBrains Mono; font-size: 11px; color: #818cf8;
+                letter-spacing: 2px; font-weight: 600; margin-bottom: 8px;'>FLAGSHIP TOOL</div>
+    <div style='font-family: JetBrains Mono; font-size: 22px; font-weight: 700;
+                color: white; margin-bottom: 8px;'>⚡ Multi-Market Co-Optimization Engine</div>
+    <div style='color: #94a3b8; font-size: 14px; margin-bottom: 16px;'>
+        55.7% dispatch uplift · 36.9× price spread · 25% value share<br>
+        ERCOT · SEN · MIBEL — Configure your fleet and see your ROI in seconds.
+    </div>
+    <span class='product-badge'>HJB TWO-PASS</span>
+    <span class='product-badge'>3 MARKETS</span>
+    <span class='product-badge'>BACKTEST-VALIDATED</span>
+</div>
+""", unsafe_allow_html=True)
+st.page_link("pages/24_⚡_Co_Optimization.py", label="🚀 Launch Co-Optimizer →", icon="⚡")
+
 st.markdown("")
 st.divider()
 
@@ -341,12 +548,13 @@ st.divider()
 #  KEY METRICS
 # ============================================================
 st.markdown("### Platform Metrics")
-m1, m2, m3, m4, m5 = st.columns(5)
+m1, m2, m3, m4, m5, m6 = st.columns(6)
 m1.metric("MARKETS", "3", "SEN · ERCOT · MIBEL")
-m2.metric("PAGES", "23", "Full Product Suite")
+m2.metric("PAGES", "25", "Full Product Suite")
 m3.metric("SBUs", "5", "$216M TAM")
-m4.metric("REPOS", "22", "Enterprise Fleet")
-m5.metric("FREQUENCY", "50/60 Hz", "Multi-Standard")
+m4.metric("ENGINES", "6", "NH₃ · H₂ · Turbine")
+m5.metric("REPOS", "22", "Enterprise Fleet")
+m6.metric("FREQUENCY", "50/60 Hz", "Multi-Standard")
 
 st.markdown("")
 

@@ -44,7 +44,7 @@ except Exception:
 # ═══════════════════════════════════════════════════════════════
 #  PAGE CONFIG & STYLES
 # ═══════════════════════════════════════════════════════════════
-st.set_page_config(page_title="PRIMEngine — Co-Optimization", page_icon="⚡", layout="wide")
+# page_config handled by app.py — do not call set_page_config in sub-pages
 
 st.markdown("""<style>
 [data-testid="stMetricValue"] {font-size: 24px !important; font-weight: 700}
