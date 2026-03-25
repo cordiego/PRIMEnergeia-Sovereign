@@ -237,6 +237,112 @@ def run_ercot_coopt(fleet_mw: float = 100.0, battery_mwh: float = 400.0,
     return optimizer.optimize(hours)
 
 
+def run_ercot_backtest(da_prices: np.ndarray, rt_prices: np.ndarray,
+                       fleet_mw: float = 100.0, battery_mwh: float = 400.0) -> CoOptResult:
+    """Run ERCOT co-optimization against REAL price data.
+
+    Unlike run_ercot_coopt(), this accepts actual DA/RT price arrays
+    from historical data instead of generating synthetic prices.
+
+    Parameters
+    ----------
+    da_prices : np.ndarray
+        Day-ahead LMP prices ($/MWh), one per hour.
+    rt_prices : np.ndarray
+        Real-time LMP prices ($/MWh), one per hour.
+    fleet_mw : float
+        Fleet capacity in MW.
+    battery_mwh : float
+        Battery storage in MWh.
+    """
+    hours = len(da_prices)
+    assert len(rt_prices) == hours, "DA and RT price arrays must have same length"
+
+    optimizer = ERCOTCoOptimizer(fleet_mw, battery_mwh)
+
+    # Inject real prices directly (bypass synthetic generation)
+    battery = optimizer.battery
+    dispatch = np.zeros(hours)
+    soc_trajectory = np.zeros(hours + 1)
+    soc_trajectory[0] = battery.soc
+    strategies = []
+    energy_revenue = 0.0
+    ancillary_revenue = 0.0
+    soh_start = battery.soh
+
+    # Ancillary prices derived from real DA
+    rrs_price = np.maximum(da_prices * 0.08, 5.0)
+
+    # Daily rolling strategy — rank prices within each 24h day
+    # This enables multiple charge/discharge cycles per day
+    for h in range(hours):
+        price = rt_prices[h]
+        day_start = (h // 24) * 24
+        day_end = min(day_start + 24, hours)
+        day_da = da_prices[day_start:day_end]
+
+        # Rank this hour within its day
+        day_rank = np.argsort(day_da)
+        hour_in_day = h - day_start
+        day_hours = len(day_da)
+
+        is_cheap = hour_in_day in day_rank[:day_hours // 3]
+        is_expensive = hour_in_day in day_rank[-day_hours // 3:]
+
+        # Force discharge during extreme spikes regardless of ranking
+        is_spike = da_prices[h] > 200.0
+
+        if is_cheap and not is_spike and battery.soc < 0.95:
+            charge_mw = battery.max_charge_mw
+            _, energy = battery.charge(charge_mw, 1.0)
+            dispatch[h] = -charge_mw
+            energy_revenue -= charge_mw * price
+            strategies.append("CHARGE")
+        elif (is_expensive or is_spike) and battery.soc > 0.10:
+            discharge_mw = battery.max_discharge_mw
+            _, energy = battery.discharge(discharge_mw, 1.0)
+            dispatch[h] = discharge_mw
+            energy_revenue += discharge_mw * price
+            strategies.append("DISCHARGE")
+        else:
+            as_capacity = min(fleet_mw * 0.2, battery.max_discharge_mw * 0.3)
+            ancillary_revenue += as_capacity * rrs_price[h]
+            dispatch[h] = 0
+            strategies.append("HOLD+AS")
+
+        soc_trajectory[h + 1] = battery.soc
+
+    soh_end = battery.soh
+    soh_loss = soh_start - soh_end
+    degradation_cost = soh_loss * optimizer.battery_replacement_cost
+
+    total_revenue = energy_revenue + ancillary_revenue
+    net_profit = total_revenue - degradation_cost
+
+    avg_price = np.mean(rt_prices)
+    baseline_revenue = fleet_mw * 0.5 * avg_price * hours * 0.3
+
+    uplift = ((total_revenue - baseline_revenue) / max(1, baseline_revenue)) * 100
+
+    return CoOptResult(
+        hours=hours,
+        da_prices=da_prices,
+        rt_prices=rt_prices,
+        dispatch_mw=dispatch,
+        battery_soc=soc_trajectory,
+        battery_soh_start=round(soh_start, 6),
+        battery_soh_end=round(soh_end, 6),
+        energy_revenue_usd=round(energy_revenue, 2),
+        ancillary_revenue_usd=round(ancillary_revenue, 2),
+        total_revenue_usd=round(total_revenue, 2),
+        baseline_revenue_usd=round(baseline_revenue, 2),
+        uplift_pct=round(uplift, 2),
+        degradation_cost_usd=round(degradation_cost, 2),
+        net_profit_usd=round(net_profit, 2),
+        strategy=strategies,
+    )
+
+
 if __name__ == "__main__":
     result = run_ercot_coopt()
     print(f"\n{'='*60}")
@@ -251,3 +357,4 @@ if __name__ == "__main__":
     print(f"  Uplift:            {result.uplift_pct:>11.1f}%")
     print(f"  Battery SOH:       {result.battery_soh_start:.4f} → {result.battery_soh_end:.4f}")
     print(f"{'='*60}")
+
