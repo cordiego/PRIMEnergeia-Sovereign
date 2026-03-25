@@ -1,0 +1,31 @@
+# PRIMEngine — Local Development Stack
+# docker-compose up to run API + database locally
+
+version: "3.8"
+
+services:
+  primengine-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.aws
+    ports:
+      - "8081:8081"
+    environment:
+      - PRIMENGINE_DATA_DIR=/data/primengine
+      - PRIME_API_KEY_PILOT=prime_pilot_key
+      - PRIME_API_KEY_DASHBOARD=prime_dashboard_key
+      - PRIME_API_KEY_API=prime_api_key
+      - PRIME_API_KEY_ENTERPRISE=prime_enterprise_key
+      - PRIME_TELEGRAM_BOT_TOKEN=${PRIME_TELEGRAM_BOT_TOKEN:-}
+      - PRIME_TELEGRAM_CHAT_ID=${PRIME_TELEGRAM_CHAT_ID:-}
+    volumes:
+      - primengine-data:/data/primengine
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8081/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  primengine-data:
