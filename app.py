@@ -104,7 +104,7 @@ with h1:
     st.caption("UNIFIED COMMAND CENTER — ENERGY · FINANCE · MATERIALS SCIENCE")
 with h2:
     st.markdown("<span class='status-live'>● SYSTEMS ONLINE</span>", unsafe_allow_html=True)
-    st.caption("Navigate using the sidebar →")
+    st.link_button("🌐 PRIME Platform ↗", "https://cordiego.github.io/PRIME-Platform/", type="primary")
 
 st.divider()
 
@@ -341,6 +341,7 @@ st.divider()
 st.markdown("""
 <div style='text-align: center; color: #3a4a6b; font-family: JetBrains Mono; font-size: 11px; padding: 16px 0;'>
     PRIMEnergeia S.A.S. | Lead Computational Physicist: Diego Córdoba Urrutia<br>
-    Soberanía Energética Global ⚡🇲🇽🇺🇸🇪🇸🇵🇹
+    <a href="https://cordiego.github.io/PRIME-Platform/" target="_blank" style="color: #00d1ff; text-decoration: none; font-weight: 600;">🌐 PRIME Platform</a>
+    &nbsp;·&nbsp; Soberanía Energética Global ⚡🇲🇽🇺🇸🇪🇸🇵🇹
 </div>
 """, unsafe_allow_html=True)
