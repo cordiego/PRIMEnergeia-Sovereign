@@ -273,32 +273,53 @@ def run_ercot_backtest(da_prices: np.ndarray, rt_prices: np.ndarray,
     # Ancillary prices derived from real DA
     rrs_price = np.maximum(da_prices * 0.08, 5.0)
 
-    # Daily rolling strategy — rank prices within each 24h day
-    # This enables multiple charge/discharge cycles per day
+    # TWO-PASS LOOKAHEAD STRATEGY
+    # Pass 1: For each day, identify the optimal charge/discharge hours
+    # Pass 2: Execute the schedule with battery constraints
+
+    # Pre-compute daily schedules
+    hourly_action = ["HOLD"] * hours  # Default action
+
+    for day in range(0, hours, 24):
+        day_end = min(day + 24, hours)
+        day_prices = da_prices[day:day_end]
+        day_len = len(day_prices)
+
+        # How many hours can we discharge? (battery capacity / discharge rate)
+        max_discharge_hours = int(battery.capacity_mwh / battery.max_discharge_mw)  # 4h for 400MWh/100MW
+        max_charge_hours = max_discharge_hours + 2  # Charge slightly more to account for efficiency
+
+        # Sort hours by price within the day
+        sorted_idx = np.argsort(day_prices)
+
+        # Also include ANY hour with spike > $100 as a discharge hour
+        spike_idx = set(np.where(day_prices > 100)[0])
+
+        # Top N most expensive hours = discharge (plus any spikes)
+        discharge_set = set(sorted_idx[-max_discharge_hours:]) | spike_idx
+        # Bottom N cheapest hours = charge (excluding any that are also discharge)
+        charge_candidates = [i for i in sorted_idx[:max_charge_hours + len(spike_idx)]
+                            if i not in discharge_set]
+        charge_set = set(charge_candidates[:max_charge_hours])
+
+        for i in range(day_len):
+            if i in charge_set:
+                hourly_action[day + i] = "CHARGE"
+            elif i in discharge_set:
+                hourly_action[day + i] = "DISCHARGE"
+
+    # Pass 2: Execute with battery constraints
     for h in range(hours):
         price = rt_prices[h]
-        day_start = (h // 24) * 24
-        day_end = min(day_start + 24, hours)
-        day_da = da_prices[day_start:day_end]
+        action = hourly_action[h]
 
-        # Rank this hour within its day
-        day_rank = np.argsort(day_da)
-        hour_in_day = h - day_start
-        day_hours = len(day_da)
-
-        is_cheap = hour_in_day in day_rank[:day_hours // 3]
-        is_expensive = hour_in_day in day_rank[-day_hours // 3:]
-
-        # Force discharge during extreme spikes regardless of ranking
-        is_spike = da_prices[h] > 200.0
-
-        if is_cheap and not is_spike and battery.soc < 0.95:
+        if action == "CHARGE" and battery.soc < 0.95:
             charge_mw = battery.max_charge_mw
             _, energy = battery.charge(charge_mw, 1.0)
             dispatch[h] = -charge_mw
             energy_revenue -= charge_mw * price
             strategies.append("CHARGE")
-        elif (is_expensive or is_spike) and battery.soc > 0.10:
+        elif action == "DISCHARGE" and battery.soc > 0.05:
             discharge_mw = battery.max_discharge_mw
             _, energy = battery.discharge(discharge_mw, 1.0)
             dispatch[h] = discharge_mw
