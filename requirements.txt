@@ -1,12 +1,12 @@
 # PRIMEnergeia-Sovereign — Pinned Dependencies
-# Generated: 2026-03-25 — Lock file for guaranteed reproducibility
-streamlit==1.37.1
-numpy==1.26.4
-pandas==2.2.2
-plotly==5.24.1
-matplotlib==3.9.2
-fpdf==1.7.2
-scipy==1.13.1
-scikit-optimize==0.10.2
-yfinance==1.2.0
-pytest==7.4.4
+# Generated: 2026-03-26 — Compatible-release pins for Py 3.12
+streamlit~=1.37.1
+numpy~=1.26.4
+pandas~=2.2.2
+plotly~=5.24.1
+matplotlib~=3.9.2
+fpdf~=1.7.2
+scipy~=1.13.1
+scikit-optimize~=0.10.2
+yfinance~=1.2.0
+pytest~=7.4.4
