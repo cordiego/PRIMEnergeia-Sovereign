@@ -175,10 +175,24 @@ for _label, _page in _quick.items():
 st.sidebar.divider()
 
 # ============================================================
-#  PRODUCT CARDS
+#  PRODUCT SUITE — ORGANIZED BY DIVISION
 # ============================================================
-st.markdown("### Product Suite")
-st.markdown("")
+
+# ────────────────────────────────────────────────────────────
+#  ⚡ DIVISION 1: GRID CONTROL & ENERGY
+# ────────────────────────────────────────────────────────────
+st.markdown("""
+<div style='margin-top: 24px; margin-bottom: 20px; padding: 16px 24px;
+     background: linear-gradient(135deg, #0a1628 0%, #0d1f3c 100%);
+     border: 1px solid rgba(0, 209, 255, 0.25); border-radius: 12px;'>
+    <div style='font-family: JetBrains Mono; font-size: 11px; color: #00d1ff;
+                letter-spacing: 2px; font-weight: 600; margin-bottom: 4px;'>DIVISION 1</div>
+    <div style='font-size: 20px; font-weight: 700; color: white;'>⚡ Grid Control & Energy</div>
+    <div style='color: #94a3b8; font-size: 13px; margin-top: 4px;'>
+        HJB-optimal dispatch across ERCOT · SEN · MIBEL — the revenue engine.
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 c1, c2, c3 = st.columns(3)
 
@@ -198,186 +212,6 @@ with c1:
 with c2:
     st.markdown("""
     <div class='product-card'>
-        <div class='product-title' style='color: #F1C40F;'>🏛️ Eureka Sovereign</div>
-        <div class='product-desc'>VIX-Regime Volatility Targeting. 5-asset allocation.</div>
-        <div>
-            <span class='product-badge'>VIX</span>
-            <span class='product-badge'>5 ASSETS</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/2_🏛️_Eureka_Sovereign.py", label="Open →", icon="🏛️")
-
-with c3:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #00ff88;'>🧪 Granas Optimizer</div>
-        <div class='product-desc'>Bayesian perovskite optimizer. 6D GP + EI acquisition.</div>
-        <div>
-            <span class='product-badge'>BAYESIAN</span>
-            <span class='product-badge'>6D</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/3_🧪_Granas_Optimizer.py", label="Open →", icon="🧪")
-
-c4, c5, c6 = st.columns(3)
-
-with c4:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #8a2be2;'>🔬 Granas Optics</div>
-        <div class='product-desc'>Mie + TMM light-trapping. AM1.5G + HJB optimizer.</div>
-        <div>
-            <span class='product-badge'>MIE + TMM</span>
-            <span class='product-badge'>HJB</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/4_🔬_Granas_Optics.py", label="Open →", icon="🔬")
-
-with c5:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #00ffcc;'>🧬 Granas SDL</div>
-        <div class='product-desc'>Self-Driving Lab. HJB fabrication + active learning.</div>
-        <div>
-            <span class='product-badge'>HJB</span>
-            <span class='product-badge'>SDL</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/5_🧬_Granas_SDL.py", label="Open →", icon="🧬")
-
-with c6:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #ffd700;'>📊 Granas Metrics</div>
-        <div class='product-desc'>Holistic twin. Cross-product performance analytics.</div>
-        <div>
-            <span class='product-badge'>RADAR</span>
-            <span class='product-badge'>PARETO</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/6_📊_Granas_Metrics.py", label="Open →", icon="📊")
-
-c7, c8, c9 = st.columns(3)
-
-with c7:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #00c878;'>🏗️ Granas CFRP</div>
-        <div class='product-desc'>Structural skeleton. Kirchhoff orthotropic plate + photon recycling ridges.</div>
-        <div>
-            <span class='product-badge'>KIRCHHOFF</span>
-            <span class='product-badge'>17×10.5</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/7_🏗️_Granas_CFRP.py", label="Open →", icon="🏗️")
-
-with c8:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #7B68EE;'>⚗️ Granas GHB</div>
-        <div class='product-desc'>Green Haber-Bosch NRR. Mo-N₄ single-site catalyst + decentralized NH₃.</div>
-        <div>
-            <span class='product-badge'>NRR</span>
-            <span class='product-badge'>Mo-N₄</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/8_⚗️_Granas_GHB.py", label="Open →", icon="⚗️")
-
-with c9:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #2ecc71;'>🌿 Granas Albedo</div>
-        <div class='product-desc'>535nm spectral selection. Junction cooling + Arrhenius degradation control.</div>
-        <div>
-            <span class='product-badge'>ALBEDO</span>
-            <span class='product-badge'>ARRHENIUS</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/9_🌿_Granas_Albedo.py", label="Open →", icon="🌿")
-
-c10, c11, c12 = st.columns(3)
-
-with c10:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #00BFFF;'>🛡️ Granas ETFE</div>
-        <div class='product-desc'>96% transmittance front encapsulation. Self-cleaning lotus effect.</div>
-        <div>
-            <span class='product-badge'>ETFE</span>
-            <span class='product-badge'>96% T</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/10_🛡️_Granas_ETFE.py", label="Open →", icon="🛡️")
-
-with c11:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #FF6347;'>🔬 Granas TOPCon</div>
-        <div class='product-desc'>n-type Cz silicon bottom cell. 1.5nm tunnel oxide + >720mV Voc.</div>
-        <div>
-            <span class='product-badge'>TOPCon</span>
-            <span class='product-badge'>n-Cz</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/11_🔬_Granas_TOPCon.py", label="Open →", icon="🔬")
-
-with c12:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #00c878;'>📐 Granas Blueprint</div>
-        <div class='product-desc'>Master geometric engine. COMSOL-validated optomechanics + continuous fiber RTM.</div>
-        <div>
-            <span class='product-badge'>COMSOL</span>
-            <span class='product-badge'>RTM</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/12_📐_Granas_Blueprint.py", label="Open →", icon="📐")
-
-# ────────────────────────────────────────────────────────────
-#  ROW 5 — Industrial / Optimization
-# ────────────────────────────────────────────────────────────
-c13, c14, c15 = st.columns(3)
-
-with c13:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #FF8C00;'>🏭 Granas Scale</div>
-        <div class='product-desc'>Industrial scaling 100MW→10GW. BOM, LCOE, multi-revenue streams.</div>
-        <div>
-            <span class='product-badge'>100MW→10GW</span>
-            <span class='product-badge'>BOM</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/13_🏭_Granas_Scale.py", label="Open →", icon="🏭")
-
-with c14:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #E040FB;'>🧠 SIBO API</div>
-        <div class='product-desc'>Sol-Ink Bayesian Optimizer. GP Matern 5/2 + EI acquisition. SaaS-ready.</div>
-        <div>
-            <span class='product-badge'>GP</span>
-            <span class='product-badge'>SaaS</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/14_🧠_SIBO_API.py", label="Open →", icon="🧠")
-
-with c15:
-    st.markdown("""
-    <div class='product-card'>
         <div class='product-title' style='color: #26C6DA;'>🔋 Battery Storage</div>
         <div class='product-desc'>LFP / Solid-State / Flow. 400 MWh grid-scale. Degradation + revenue.</div>
         <div>
@@ -388,25 +222,7 @@ with c15:
     """, unsafe_allow_html=True)
     st.page_link("pages/15_PRIMEnergeia_Battery.py", label="Open →", icon="🔋")
 
-# ────────────────────────────────────────────────────────────
-#  ROW 6 — Circular / Wind / Propulsion
-# ────────────────────────────────────────────────────────────
-c16, c17, c18 = st.columns(3)
-
-with c16:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #66BB6A;'>♻️ PRIMEcycle</div>
-        <div class='product-desc'>Circular economy. 97.3% material recovery. Zero-waste perovskite EOL.</div>
-        <div>
-            <span class='product-badge'>RECYCLE</span>
-            <span class='product-badge'>97.3%</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/16_PRIMEcycle.py", label="Open →", icon="♻️")
-
-with c17:
+with c3:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #42A5F5;'>🌊 PRIM Wind</div>
@@ -419,25 +235,9 @@ with c17:
     """, unsafe_allow_html=True)
     st.page_link("pages/17_PRIM_Wind.py", label="Open →", icon="🌊")
 
-with c18:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #EF5350;'>🚀 PRIMEngines</div>
-        <div class='product-desc'>Zero-carbon propulsion. NH₃ ICE · PEM fuel cell · H₂ turbine. 9+ sectors.</div>
-        <div>
-            <span class='product-badge'>NH₃/H₂</span>
-            <span class='product-badge'>ZERO CO₂</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/18_PRIMEngines.py", label="Open →", icon="🚀")
+c4, c5, c6 = st.columns(3)
 
-# ────────────────────────────────────────────────────────────
-#  ROW 7 — Controls / Research / Integration
-# ────────────────────────────────────────────────────────────
-c19, c20, c21 = st.columns(3)
-
-with c19:
+with c4:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #AB47BC;'>🧠 HJB Control</div>
@@ -450,20 +250,7 @@ with c19:
     """, unsafe_allow_html=True)
     st.page_link("pages/19_🧠_HJB_Control.py", label="Open →", icon="🧠")
 
-with c20:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #FFA726;'>🔬 Engine Research</div>
-        <div class='product-desc'>Live physics lab. Performance maps, polarization curves, Brayton cycles.</div>
-        <div>
-            <span class='product-badge'>6 ENGINES</span>
-            <span class='product-badge'>PHYSICS</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/20_🔬_Engine_Research.py", label="Open →", icon="🔬")
-
-with c21:
+with c5:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #78909C;'>🏭 PRIMStack</div>
@@ -476,38 +263,7 @@ with c21:
     """, unsafe_allow_html=True)
     st.page_link("pages/21_🏭_PRIMStack.py", label="Open →", icon="🏭")
 
-# ────────────────────────────────────────────────────────────
-#  ROW 8 — Platform Core (Kernel, CEO, Data, Co-Opt CTA)
-# ────────────────────────────────────────────────────────────
-c22, c23, c24 = st.columns(3)
-
-with c22:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #00ffcc;'>🧠 PRIME Kernel</div>
-        <div class='product-desc'>Shared IP core. Physics constants, HJB solver, telemetry across all SBUs.</div>
-        <div>
-            <span class='product-badge'>HJB</span>
-            <span class='product-badge'>5 SBUs</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/22_🧠_PRIME_Kernel.py", label="Open →", icon="🧠")
-
-with c23:
-    st.markdown("""
-    <div class='product-card'>
-        <div class='product-title' style='color: #F1C40F;'>📊 CEO Dashboard</div>
-        <div class='product-desc'>Fleet monitor. 22 repos, 5 SBUs, $216M TAM. Git status + LOC + revenue.</div>
-        <div>
-            <span class='product-badge'>FLEET</span>
-            <span class='product-badge'>$216M TAM</span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.page_link("pages/23_📊_CEO_Dashboard.py", label="Open →", icon="📊")
-
-with c24:
+with c6:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #00d1ff;'>📂 Data Upload</div>
@@ -520,9 +276,7 @@ with c24:
     """, unsafe_allow_html=True)
     st.page_link("pages/25_📂_Data_Upload.py", label="Open →", icon="📂")
 
-# ────────────────────────────────────────────────────────────
-#  FLAGSHIP CTA — Co-Optimization
-# ────────────────────────────────────────────────────────────
+# ── Flagship CTA — Co-Optimization ──
 st.markdown("")
 st.markdown("""
 <div class='cta-card'>
@@ -540,6 +294,310 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 st.page_link("pages/24_⚡_Co_Optimization.py", label="🚀 Launch Co-Optimizer →", icon="⚡")
+
+# ────────────────────────────────────────────────────────────
+#  🏛️ DIVISION 2: EUREKA TRADING
+# ────────────────────────────────────────────────────────────
+st.markdown("")
+st.markdown("""
+<div style='margin-top: 32px; margin-bottom: 20px; padding: 16px 24px;
+     background: linear-gradient(135deg, #1a1a0a 0%, #2a2200 100%);
+     border: 1px solid rgba(241, 196, 15, 0.25); border-radius: 12px;'>
+    <div style='font-family: JetBrains Mono; font-size: 11px; color: #F1C40F;
+                letter-spacing: 2px; font-weight: 600; margin-bottom: 4px;'>DIVISION 2</div>
+    <div style='font-size: 20px; font-weight: 700; color: white;'>🏛️ Eureka Trading</div>
+    <div style='color: #94a3b8; font-size: 13px; margin-top: 4px;'>
+        VIX-regime volatility targeting. Automated daily signals & portfolio allocation.
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+eu1, eu2 = st.columns([2, 1])
+
+with eu1:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #F1C40F;'>🏛️ Eureka Sovereign</div>
+        <div class='product-desc'>VIX-Regime Volatility Targeting. 5-asset allocation (equities, bonds, commodities, crypto, alternatives). GBM simulation + Markowitz optimization + Kelly criterion. Automated daily signals via Telegram.</div>
+        <div>
+            <span class='product-badge'>VIX REGIME</span>
+            <span class='product-badge'>5 ASSETS</span>
+            <span class='product-badge'>KELLY</span>
+            <span class='product-badge'>TELEGRAM</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/2_🏛️_Eureka_Sovereign.py", label="Open Eureka →", icon="🏛️")
+
+with eu2:
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #1a1a0a, #2a2200);
+         border: 1px solid rgba(241, 196, 15, 0.15); border-radius: 12px;
+         padding: 24px; text-align: center;'>
+        <div style='font-size: 36px; margin-bottom: 8px;'>📈</div>
+        <div style='font-family: JetBrains Mono; font-size: 13px; color: #F1C40F;
+                    font-weight: 600;'>Model: 2/20</div>
+        <div style='color: #94a3b8; font-size: 12px; margin-top: 4px;'>
+            2% management + 20% performance
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ────────────────────────────────────────────────────────────
+#  🔬 DIVISION 3: MATERIALS, ENGINES & RESEARCH
+# ────────────────────────────────────────────────────────────
+st.markdown("")
+st.markdown("""
+<div style='margin-top: 32px; margin-bottom: 20px; padding: 16px 24px;
+     background: linear-gradient(135deg, #0a1a0f 0%, #0d2a1a 100%);
+     border: 1px solid rgba(0, 255, 136, 0.20); border-radius: 12px;'>
+    <div style='font-family: JetBrains Mono; font-size: 11px; color: #00ff88;
+                letter-spacing: 2px; font-weight: 600; margin-bottom: 4px;'>DIVISION 3</div>
+    <div style='font-size: 20px; font-weight: 700; color: white;'>🔬 Materials, Engines & Research</div>
+    <div style='color: #94a3b8; font-size: 13px; margin-top: 4px;'>
+        Granas perovskite suite · PRIMEngines propulsion · Circular economy · Platform core
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# Granas Row 1
+g1, g2, g3 = st.columns(3)
+
+with g1:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00ff88;'>🧪 Granas Optimizer</div>
+        <div class='product-desc'>Bayesian perovskite optimizer. 6D GP + EI acquisition.</div>
+        <div>
+            <span class='product-badge'>BAYESIAN</span>
+            <span class='product-badge'>6D</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/3_🧪_Granas_Optimizer.py", label="Open →", icon="🧪")
+
+with g2:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #8a2be2;'>🔬 Granas Optics</div>
+        <div class='product-desc'>Mie + TMM light-trapping. AM1.5G + HJB optimizer.</div>
+        <div>
+            <span class='product-badge'>MIE + TMM</span>
+            <span class='product-badge'>HJB</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/4_🔬_Granas_Optics.py", label="Open →", icon="🔬")
+
+with g3:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00ffcc;'>🧬 Granas SDL</div>
+        <div class='product-desc'>Self-Driving Lab. HJB fabrication + active learning.</div>
+        <div>
+            <span class='product-badge'>HJB</span>
+            <span class='product-badge'>SDL</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/5_🧬_Granas_SDL.py", label="Open →", icon="🧬")
+
+# Granas Row 2
+g4, g5, g6 = st.columns(3)
+
+with g4:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #ffd700;'>📊 Granas Metrics</div>
+        <div class='product-desc'>Holistic twin. Cross-product performance analytics.</div>
+        <div>
+            <span class='product-badge'>RADAR</span>
+            <span class='product-badge'>PARETO</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/6_📊_Granas_Metrics.py", label="Open →", icon="📊")
+
+with g5:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00c878;'>🏗️ Granas CFRP</div>
+        <div class='product-desc'>Structural skeleton. Kirchhoff orthotropic plate + photon recycling.</div>
+        <div>
+            <span class='product-badge'>KIRCHHOFF</span>
+            <span class='product-badge'>17×10.5</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/7_🏗️_Granas_CFRP.py", label="Open →", icon="🏗️")
+
+with g6:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #7B68EE;'>⚗️ Granas GHB</div>
+        <div class='product-desc'>Green Haber-Bosch NRR. Mo-N₄ catalyst + decentralized NH₃.</div>
+        <div>
+            <span class='product-badge'>NRR</span>
+            <span class='product-badge'>Mo-N₄</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/8_⚗️_Granas_GHB.py", label="Open →", icon="⚗️")
+
+# Granas Row 3
+g7, g8, g9 = st.columns(3)
+
+with g7:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #2ecc71;'>🌿 Granas Albedo</div>
+        <div class='product-desc'>535nm spectral selection. Junction cooling + Arrhenius control.</div>
+        <div>
+            <span class='product-badge'>ALBEDO</span>
+            <span class='product-badge'>ARRHENIUS</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/9_🌿_Granas_Albedo.py", label="Open →", icon="🌿")
+
+with g8:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00BFFF;'>🛡️ Granas ETFE</div>
+        <div class='product-desc'>96% transmittance front encapsulation. Self-cleaning lotus.</div>
+        <div>
+            <span class='product-badge'>ETFE</span>
+            <span class='product-badge'>96% T</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/10_🛡️_Granas_ETFE.py", label="Open →", icon="🛡️")
+
+with g9:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #FF6347;'>🔬 Granas TOPCon</div>
+        <div class='product-desc'>n-type Cz silicon bottom cell. 1.5nm tunnel oxide + >720mV Voc.</div>
+        <div>
+            <span class='product-badge'>TOPCon</span>
+            <span class='product-badge'>n-Cz</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/11_🔬_Granas_TOPCon.py", label="Open →", icon="🔬")
+
+# Granas Row 4 + Engines
+g10, g11, g12 = st.columns(3)
+
+with g10:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00c878;'>📐 Granas Blueprint</div>
+        <div class='product-desc'>Master geometric engine. COMSOL-validated optomechanics.</div>
+        <div>
+            <span class='product-badge'>COMSOL</span>
+            <span class='product-badge'>RTM</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/12_📐_Granas_Blueprint.py", label="Open →", icon="📐")
+
+with g11:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #FF8C00;'>🏭 Granas Scale</div>
+        <div class='product-desc'>Industrial scaling 100MW→10GW. BOM, LCOE, multi-revenue.</div>
+        <div>
+            <span class='product-badge'>100MW→10GW</span>
+            <span class='product-badge'>BOM</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/13_🏭_Granas_Scale.py", label="Open →", icon="🏭")
+
+with g12:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #E040FB;'>🧠 SIBO API</div>
+        <div class='product-desc'>Sol-Ink Bayesian Optimizer. GP Matern 5/2 + EI. SaaS-ready.</div>
+        <div>
+            <span class='product-badge'>GP</span>
+            <span class='product-badge'>SaaS</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/14_🧠_SIBO_API.py", label="Open →", icon="🧠")
+
+# Engines + Circular + Platform
+g13, g14, g15 = st.columns(3)
+
+with g13:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #EF5350;'>🚀 PRIMEngines</div>
+        <div class='product-desc'>Zero-carbon propulsion. NH₃ ICE · PEM fuel cell · H₂ turbine.</div>
+        <div>
+            <span class='product-badge'>NH₃/H₂</span>
+            <span class='product-badge'>ZERO CO₂</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/18_PRIMEngines.py", label="Open →", icon="🚀")
+
+with g14:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #FFA726;'>🔬 Engine Research</div>
+        <div class='product-desc'>Live physics lab. Performance maps, polarization curves, Brayton.</div>
+        <div>
+            <span class='product-badge'>6 ENGINES</span>
+            <span class='product-badge'>PHYSICS</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/20_🔬_Engine_Research.py", label="Open →", icon="🔬")
+
+with g15:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #66BB6A;'>♻️ PRIMEcycle</div>
+        <div class='product-desc'>Circular economy. 97.3% material recovery. Zero-waste EOL.</div>
+        <div>
+            <span class='product-badge'>RECYCLE</span>
+            <span class='product-badge'>97.3%</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/16_PRIMEcycle.py", label="Open →", icon="♻️")
+
+# Platform Core
+g16, g17 = st.columns([1, 1])
+
+with g16:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00ffcc;'>🧠 PRIME Kernel</div>
+        <div class='product-desc'>Shared IP core. Physics constants, HJB solver, telemetry across all SBUs.</div>
+        <div>
+            <span class='product-badge'>HJB</span>
+            <span class='product-badge'>5 SBUs</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/22_🧠_PRIME_Kernel.py", label="Open →", icon="🧠")
+
+with g17:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #F1C40F;'>📊 CEO Dashboard</div>
+        <div class='product-desc'>Fleet monitor. 22 repos, 5 SBUs, $216M TAM. Git status + LOC + revenue.</div>
+        <div>
+            <span class='product-badge'>FLEET</span>
+            <span class='product-badge'>$216M TAM</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/23_📊_CEO_Dashboard.py", label="Open →", icon="📊")
 
 st.markdown("")
 st.divider()

@@ -91,6 +91,150 @@ with default_cols[2]:
         st.info("Data cleared")
         st.rerun()
 
+# ─── Fetch Live Market Data (Multi-Market) ──────────────────
+st.markdown("---")
+st.markdown("### ⚡ Fetch Live Market Data")
+st.markdown(
+    "Download **real** settlement prices directly from public market sources. "
+    "No API key required. Data is cached locally after first download."
+)
+
+market_tab_ercot, market_tab_sen, market_tab_mibel = st.tabs([
+    "🇺🇸 ERCOT (Texas)", "🇲🇽 SEN (Mexico)", "🇪🇸🇵🇹 MIBEL (Iberia)"
+])
+
+# ── ERCOT Tab ──
+with market_tab_ercot:
+    ec1, ec2, ec3 = st.columns([2, 1, 1])
+    with ec1:
+        ercot_hub = st.selectbox(
+            "Trading Hub",
+            ["HB_HOUSTON", "HB_NORTH", "HB_SOUTH", "HB_WEST", "HB_BUSAVG"],
+            format_func=lambda h: {
+                "HB_HOUSTON": "🏙️ Houston Hub",
+                "HB_NORTH": "📍 North Hub (DFW)",
+                "HB_SOUTH": "📍 South Hub (SA/Austin)",
+                "HB_WEST": "🏜️ West Hub (Permian)",
+                "HB_BUSAVG": "📊 Bus Average (system-wide)",
+            }.get(h, h),
+            key="ercot_hub",
+        )
+    with ec2:
+        ercot_days = st.selectbox("History", [7, 14, 30, 60, 90], index=2,
+                                   format_func=lambda d: f"{d} days", key="ercot_days")
+    with ec3:
+        ercot_fetch = st.button("⚡ Fetch ERCOT", use_container_width=True, type="primary")
+
+    if ercot_fetch:
+        with st.spinner(f"Downloading {ercot_days} days of ERCOT {ercot_hub}..."):
+            try:
+                from fetch_ercot_real import fetch_ercot_data
+                csv_path = fetch_ercot_data(days=ercot_days, hub=ercot_hub)
+                is_proxy = "PROXY" in os.path.basename(csv_path).upper()
+                source_label = (f"ERCOT PROXY {ercot_hub} ({ercot_days}d)" if is_proxy
+                                else f"ERCOT Live {ercot_hub} ({ercot_days}d)")
+                ds = load_dataset(filepath=csv_path, market="ercot")
+                st.session_state["prime_dataset"] = ds
+                st.session_state["prime_data_source"] = source_label
+                if is_proxy:
+                    st.warning(f"⚠ Proxy data loaded — {ds.hours} intervals. Install `gridstatus` for real prices.")
+                else:
+                    st.success(f"✅ **{ds.hours} ERCOT intervals loaded!** DA mean: ${float(np.nanmean(ds.da_prices)):.2f}/MWh")
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ Fetch failed: {e}")
+
+# ── SEN Tab ──
+with market_tab_sen:
+    sc1, sc2, sc3 = st.columns([2, 1, 1])
+    with sc1:
+        sen_nodes = [
+            "05-VZA-400", "07-HER-230", "04-MTY-400", "03-GDL-400",
+            "01-QRO-230", "02-OAX-230", "10-MER-230", "08-TIJ-230",
+            "05-CHI-400", "06-SLP-400", "09-LAP-115", "08-MXL-230",
+        ]
+        sen_labels = {
+            "05-VZA-400": "⭐ VZA-400 ($231K validated)",
+            "07-HER-230": "🏜️ Hermosillo (Noroeste)",
+            "04-MTY-400": "🏭 Monterrey (Noreste)",
+            "03-GDL-400": "🌮 Guadalajara (Occidental)",
+            "01-QRO-230": "🏛️ Querétaro (Central)",
+            "02-OAX-230": "🌿 Oaxaca (Oriental)",
+            "10-MER-230": "🏖️ Mérida (Peninsular)",
+            "08-TIJ-230": "🌉 Tijuana (Baja California)",
+            "05-CHI-400": "🏔️ Chihuahua (Norte)",
+            "06-SLP-400": "⛰️ San Luis Potosí",
+            "09-LAP-115": "🌊 La Paz (BCS)",
+            "08-MXL-230": "🌵 Mexicali (BC)",
+        }
+        sen_node = st.selectbox("SEN Node", sen_nodes,
+                                 format_func=lambda n: sen_labels.get(n, n),
+                                 key="sen_node")
+    with sc2:
+        sen_days = st.selectbox("History", [7, 14, 30, 60], index=2,
+                                 format_func=lambda d: f"{d} days", key="sen_days")
+    with sc3:
+        sen_fetch = st.button("⚡ Fetch SEN", use_container_width=True, type="primary")
+
+    if sen_fetch:
+        with st.spinner(f"Loading SEN {sen_node} data..."):
+            try:
+                from fetch_sen_real import fetch_sen_data
+                csv_path = fetch_sen_data(node_id=sen_node, days=sen_days)
+                is_proxy = "PROXY" in os.path.basename(csv_path).upper()
+                source_label = (f"SEN PROXY {sen_node} ({sen_days}d)" if is_proxy
+                                else f"SEN Live {sen_node}")
+                ds = load_dataset(filepath=csv_path, market="sen")
+                st.session_state["prime_dataset"] = ds
+                st.session_state["prime_data_source"] = source_label
+                if is_proxy:
+                    st.warning(f"⚠ Proxy data — {ds.hours} intervals. Real nodo CSVs load automatically when available.")
+                else:
+                    st.success(f"✅ **{ds.hours} SEN intervals loaded!** PML mean: ${float(np.nanmean(ds.da_prices)):.2f}/MWh")
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ Fetch failed: {e}")
+
+# ── MIBEL Tab ──
+with market_tab_mibel:
+    mc1, mc2, mc3 = st.columns([2, 1, 1])
+    with mc1:
+        mibel_zones = ["ES", "PT", "ES_NORTE", "ES_SUR", "BALEARES"]
+        mibel_labels = {
+            "ES": "🇪🇸 España (Spain)",
+            "PT": "🇵🇹 Portugal",
+            "ES_NORTE": "📍 España Norte",
+            "ES_SUR": "☀️ España Sur (Andalucía)",
+            "BALEARES": "🏝️ Islas Baleares",
+        }
+        mibel_zone = st.selectbox("Zone", mibel_zones,
+                                   format_func=lambda z: mibel_labels.get(z, z),
+                                   key="mibel_zone")
+    with mc2:
+        mibel_days = st.selectbox("History", [7, 14, 30, 60, 90], index=2,
+                                   format_func=lambda d: f"{d} days", key="mibel_days")
+    with mc3:
+        mibel_fetch = st.button("⚡ Fetch MIBEL", use_container_width=True, type="primary")
+
+    if mibel_fetch:
+        with st.spinner(f"Downloading {mibel_days} days of MIBEL {mibel_zone}..."):
+            try:
+                from fetch_mibel_real import fetch_mibel_data
+                csv_path = fetch_mibel_data(days=mibel_days, zone=mibel_zone)
+                is_proxy = "PROXY" in os.path.basename(csv_path).upper()
+                source_label = (f"MIBEL PROXY {mibel_zone} ({mibel_days}d)" if is_proxy
+                                else f"MIBEL Live {mibel_zone} ({mibel_days}d)")
+                ds = load_dataset(filepath=csv_path, market="mibel")
+                st.session_state["prime_dataset"] = ds
+                st.session_state["prime_data_source"] = source_label
+                if is_proxy:
+                    st.warning(f"⚠ Proxy data — {ds.hours} intervals. Connect OMIE/ENTSO-E for real prices.")
+                else:
+                    st.success(f"✅ **{ds.hours} MIBEL intervals loaded!** DA mean: €{float(np.nanmean(ds.da_prices)):.2f}/MWh")
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ Fetch failed: {e}")
+
 # ─── Process Uploaded File ──────────────────────────────────
 if uploaded is not None:
     # Write to temp file for data_loader

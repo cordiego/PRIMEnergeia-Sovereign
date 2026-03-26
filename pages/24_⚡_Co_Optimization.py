@@ -131,13 +131,20 @@ if run_clicked:
 
         if "ERCOT" in market:
             if use_real_data and REAL_DATA:
-                dataset = load_ercot_csv()
+                # Priority 1: Session-state dataset (from Data Upload / Fetch Live)
+                session_ds = st.session_state.get("prime_dataset")
+                if session_ds and session_ds.market == "ercot":
+                    dataset = session_ds
+                    data_label = f"📂 {st.session_state.get('prime_data_source', 'Live Data')}"
+                else:
+                    dataset = load_ercot_csv()
+                    data_label = "📂 Historical (File)"
                 result = run_ercot_backtest(
                     da_prices=dataset.da_prices[:hours],
                     rt_prices=dataset.rt_prices[:hours],
                     fleet_mw=fleet_mw, battery_mwh=battery_mwh,
                 )
-                data_label = "📂 Historical (Aug 2023 Heat Wave)"
+
             else:
                 result = run_ercot_coopt(fleet_mw=fleet_mw, battery_mwh=battery_mwh, hours=hours)
                 data_label = "🔮 Simulated"
