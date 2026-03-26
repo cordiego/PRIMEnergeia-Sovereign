@@ -20,6 +20,11 @@ import json
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Tuple
 
+try:
+    from power_electronics import InverterModel, InverterSpec, RectifierModel, RectifierSpec, INVERTER_PRESETS
+except ImportError:
+    from lib.engines.power_electronics import InverterModel, InverterSpec, RectifierModel, RectifierSpec, INVERTER_PRESETS
+
 # ============================================================
 #  CELL CHEMISTRY MODELS
 # ============================================================
@@ -179,6 +184,21 @@ class DispatchOptimizer:
     def __init__(self, spec: BESSSpec, cell: CellChemistry):
         self.spec = spec
         self.cell = cell
+        # Power electronics models for charge/discharge paths
+        inv_spec = InverterSpec(
+            name="BESS-INV", rated_power_kw=spec.power_mw * 1000,
+            peak_efficiency=spec.inverter_efficiency,
+            standby_power_w=spec.power_mw * 50,  # Scale standby with size
+            tare_loss_pct=0.0018, switching_loss_pct=0.0035,
+            apparent_power_kva=spec.power_mw * 1100,
+        )
+        self.inverter = InverterModel(inv_spec)
+        self.rectifier = RectifierModel(RectifierSpec(
+            rated_power_kw=spec.power_mw * 1000,
+            peak_efficiency=spec.inverter_efficiency,
+            standby_power_w=spec.power_mw * 40,
+            tare_loss_pct=0.0020, switching_loss_pct=0.0040,
+        ))
 
     def daily_arbitrage(self, prices_24h: List[float], soc_init: float = 0.5) -> dict:
         """
@@ -210,16 +230,22 @@ class DispatchOptimizer:
                 action = "charge"
                 energy_available = (self.cell.max_soc - soc) * self.spec.energy_mwh
                 energy_mwh = min(self.spec.power_mw, energy_available)
+                # Apply rectifier loss (AC→DC path for charging)
+                load_frac = energy_mwh / self.spec.power_mw
+                rect_result = self.rectifier.dc_output(energy_mwh * 1000)
+                rect_eta = rect_result["efficiency"] if rect_result["efficiency"] > 0 else 0.98
                 soc += energy_mwh / self.spec.energy_mwh
                 power_mw = -energy_mwh  # Negative = charging
-                charge_cost += energy_mwh * price
+                charge_cost += (energy_mwh / rect_eta) * price  # Grid draws more
 
             elif hour in discharge_hours and soc > self.cell.min_soc:
                 action = "discharge"
                 energy_available = (soc - self.cell.min_soc) * self.spec.energy_mwh
                 energy_mwh = min(self.spec.power_mw, energy_available)
                 soc -= energy_mwh / self.spec.energy_mwh
-                power_mw = energy_mwh * self.cell.round_trip_eff
+                # Apply inverter loss (DC→AC path for discharge)
+                inv_result = self.inverter.ac_output(energy_mwh * 1000)
+                power_mw = inv_result["ac_power_kw"] / 1000  # MW delivered to grid
                 discharge_revenue += power_mw * price
 
             schedule.append({
@@ -261,9 +287,18 @@ class RevenueModel:
         deg = self.degradation.total_degradation(year)
         soh = deg["soh_pct"] / 100
 
-        # Energy arbitrage (spread × energy × days × RTE × SOH)
+        # Energy arbitrage (spread × energy × days × inverter η × RTE × SOH)
+        # Use inverter model at typical 50% cycling depth
+        inv_spec = InverterSpec(
+            name="BESS-INV", rated_power_kw=self.spec.power_mw * 1000,
+            peak_efficiency=self.spec.inverter_efficiency,
+            standby_power_w=self.spec.power_mw * 50,
+            tare_loss_pct=0.0018, switching_loss_pct=0.0035,
+        )
+        inv = InverterModel(inv_spec)
+        avg_inverter_eta = inv.efficiency(0.5)  # Typical dispatch load fraction
         arbitrage = (energy_price_spread * self.spec.energy_mwh *
-                     365 * self.cell.round_trip_eff * soh / 1e6)
+                     365 * self.cell.round_trip_eff * avg_inverter_eta * soh / 1e6)
 
         # Capacity payments ($/kW-yr × power MW × 1000 × SOH)
         capacity = capacity_price_kw_yr * self.spec.power_mw * 1000 * soh / 1e6

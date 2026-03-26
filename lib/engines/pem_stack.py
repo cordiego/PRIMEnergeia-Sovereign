@@ -20,6 +20,11 @@ import json
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Tuple
 
+try:
+    from power_electronics import InverterModel, InverterSpec, INVERTER_PRESETS
+except ImportError:
+    from lib.engines.power_electronics import InverterModel, InverterSpec, INVERTER_PRESETS
+
 # ============================================================
 #  STACK SPECIFICATION
 # ============================================================
@@ -171,6 +176,8 @@ class PEMSystem:
     def __init__(self, spec: PEMSpec = None):
         self.spec = spec or PEMSpec()
         self.echem = PEMElectrochemistry(self.spec)
+        # DC→AC inverter for grid connection (fuel cell outputs DC natively)
+        self.inverter = InverterModel(preset="pem_50kw")
 
     def parasitic_power(self, gross_power_kw: float) -> Dict[str, float]:
         """BoP parasitic loads (kW)."""
@@ -207,7 +214,11 @@ class PEMSystem:
         parasitic = self.parasitic_power(gross_power)
         eta_bop = 1 - parasitic["total_parasitic_kw"] / max(0.1, gross_power)
 
-        eta_system = eta_voltage * eta_fuel * eta_bop
+        # Inverter efficiency (DC→AC, load-dependent)
+        load_frac = gross_power / max(0.1, self.spec.rated_power_kw)
+        eta_inverter = self.inverter.efficiency(load_frac)
+
+        eta_system = eta_voltage * eta_fuel * eta_bop * eta_inverter
         return round(max(0, min(0.65, eta_system)), 4)
 
     def h2_consumption(self, net_power_kw: float, efficiency: float = None) -> float:
@@ -233,6 +244,11 @@ class PEMSystem:
         efficiency = self.system_efficiency(j)
         h2_rate = self.h2_consumption(net_power, efficiency)
 
+        # DC→AC inverter conversion
+        inv_result = self.inverter.ac_output(net_power)
+        ac_power = inv_result["ac_power_kw"]
+        inverter_loss = inv_result["losses_kw"]
+
         # Thermal — waste heat = fuel energy in - electrical energy out
         # Fuel energy = net_power / efficiency, waste = fuel_energy - net_power
         heat_generated = net_power * (1 / max(0.1, efficiency) - 1) if efficiency > 0 else 0
@@ -243,11 +259,15 @@ class PEMSystem:
             "cell_voltage_V": v_cell,
             "stack_voltage_V": round(v_cell * self.spec.num_cells, 1),
             "gross_power_kW": round(gross_power, 2),
-            "net_power_kW": round(net_power, 2),
+            "net_dc_power_kW": round(net_power, 2),
+            "ac_power_kW": round(ac_power, 2),
+            "inverter_efficiency_pct": round(inv_result["efficiency"] * 100, 1),
+            "inverter_loss_kW": round(inverter_loss, 2),
             "system_efficiency_pct": round(efficiency * 100, 1),
             "h2_consumption_kg_h": h2_rate,
-            "h2_per_kwh_g": round(h2_rate * 1000 / max(0.1, net_power), 1),
+            "h2_per_kwh_g": round(h2_rate * 1000 / max(0.1, ac_power), 1),
             "heat_generated_kW": round(heat_generated, 1),
+            "reactive_available_kvar": inv_result["reactive_available_kvar"],
             "parasitic": parasitic,
             "exhaust": "H₂O (liquid + vapor)",
             "co2_g_kwh": 0.0,

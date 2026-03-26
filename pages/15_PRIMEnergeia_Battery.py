@@ -13,6 +13,14 @@ import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+try:
+    from lib.engines.power_electronics import InverterModel, InverterSpec, RectifierModel, RectifierSpec
+except Exception:
+    try:
+        from power_electronics import InverterModel, InverterSpec, RectifierModel, RectifierSpec
+    except Exception:
+        InverterModel = None
+
 # CEO Styling
 st.markdown("""<style>
 [data-testid="stMetricValue"] {font-size: 26px !important}
@@ -29,7 +37,7 @@ k1.metric("Chemistry", "LFP / SSB")
 k2.metric("System Cap.", "400 MWh")
 k3.metric("Cycle Life", "6,000+")
 k4.metric("Duration", "4 hr")
-k5.metric("RTE", "92.5%")
+k5.metric("Inverter η", "98.5%")
 k6.metric("Degradation", "2%/yr")
 
 st.divider()
@@ -55,7 +63,7 @@ t6.metric("Warranty", f"{td['warranty']} yr")
 
 st.divider()
 
-tab1, tab2, tab3, tab4 = st.tabs(["Degradation", "Solar-Storage", "Revenue", "Chemistry"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Degradation", "Solar-Storage", "Revenue", "Chemistry", "⚡ Power Electronics"])
 
 with tab1:
     years = np.arange(0, 26)
@@ -154,5 +162,72 @@ with tab4:
     | **Scalability** | GW-scale | MW-scale | GW-scale | GW-scale |
     | **Granas Fit** | Primary | Future | Auxiliary | Legacy |
     """)
+
+with tab5:
+    st.subheader("⚡ DC-AC Power Conversion — Inverter & Rectifier")
+    st.caption("Physics-based model: η(P) = P / (P + k₀ + k₁P + k₂P²) | PRIMEnergeia Power Electronics Division")
+
+    if InverterModel is not None:
+        # Build models matching BESS spec
+        inv = InverterModel(InverterSpec(
+            name="BESS-INV", rated_power_kw=td['power'],
+            peak_efficiency=0.985, standby_power_w=td['power'] * 0.05,
+            tare_loss_pct=0.0018, switching_loss_pct=0.0035,
+            apparent_power_kva=td['power'] * 1.1,
+        ))
+        rect = RectifierModel(RectifierSpec(
+            rated_power_kw=td['power'],
+            peak_efficiency=0.985, standby_power_w=td['power'] * 0.04,
+            tare_loss_pct=0.0020, switching_loss_pct=0.0040,
+        ))
+
+        # KPIs
+        pe1, pe2, pe3, pe4 = st.columns(4)
+        pe1.metric("Peak Inverter η", f"{inv.efficiency(0.5)*100:.1f}%")
+        pe2.metric("Peak Rectifier η", f"{rect.efficiency(0.5)*100:.1f}%")
+        pe3.metric("10% Load η", f"{inv.efficiency(0.1)*100:.1f}%", delta=f"{(inv.efficiency(0.1)-0.985)*100:+.1f}pp vs flat")
+        pe4.metric("Derating Threshold", "45°C")
+
+        # Part-load efficiency curves
+        loads = np.arange(5, 105, 5)
+        inv_etas = [inv.efficiency(l/100) * 100 for l in loads]
+        rect_etas = [rect.efficiency(l/100) * 100 for l in loads]
+        flat_line = [98.5] * len(loads)
+
+        fig_pe = go.Figure()
+        fig_pe.add_trace(go.Scatter(x=loads, y=inv_etas, name="Inverter (DC→AC)",
+            line=dict(color="#00BFFF", width=3)))
+        fig_pe.add_trace(go.Scatter(x=loads, y=rect_etas, name="Rectifier (AC→DC)",
+            line=dict(color="#FFD700", width=3)))
+        fig_pe.add_trace(go.Scatter(x=loads, y=flat_line, name="Old Flat Constant",
+            line=dict(color="#888", width=2, dash="dash")))
+        fig_pe.update_layout(template="plotly_dark", height=400,
+            title="Inverter / Rectifier Efficiency vs Load",
+            xaxis_title="Load (%)", yaxis_title="Efficiency (%)",
+            yaxis=dict(range=[90, 100]),
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(size=14))
+        st.plotly_chart(fig_pe, use_container_width=True)
+
+        # Temperature derating
+        temps = np.arange(20, 65, 1)
+        deratings = [inv.temperature_derating(t) * 100 for t in temps]
+        ac_outputs = [inv.ac_output(td['power'], ambient_c=t)["ac_power_kw"] for t in temps]
+
+        fig_td = make_subplots(specs=[[{"secondary_y": True}]])
+        fig_td.add_trace(go.Scatter(x=temps, y=deratings, name="Derating Factor (%)",
+            fill="tozeroy", fillcolor="rgba(255,99,71,0.15)",
+            line=dict(color="#FF6347", width=3)), secondary_y=False)
+        fig_td.add_trace(go.Scatter(x=temps, y=ac_outputs, name="AC Output (kW)",
+            line=dict(color="#00BFFF", width=2, dash="dash")), secondary_y=True)
+        fig_td.add_vline(x=45, line_dash="dot", line_color="red", annotation_text="Derating Threshold")
+        fig_td.update_layout(template="plotly_dark", height=400,
+            title="Temperature Derating — Summer Performance Impact",
+            xaxis_title="Ambient Temperature (°C)",
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(size=14))
+        fig_td.update_yaxes(title_text="Derating (%)", secondary_y=False)
+        fig_td.update_yaxes(title_text="AC Output (kW)", secondary_y=True)
+        st.plotly_chart(fig_td, use_container_width=True)
+    else:
+        st.warning("Power electronics module not available. Install PRIME-PowerElectronics.")
 
 st.caption("PRIMEnergeia S.A.S. - Battery Division | Grid-Scale Energy Storage for Perovskite Solar Integration")

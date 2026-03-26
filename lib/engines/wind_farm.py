@@ -20,6 +20,11 @@ import json
 from dataclasses import dataclass, asdict
 from typing import List, Dict, Tuple
 
+try:
+    from power_electronics import InverterModel, InverterSpec, INVERTER_PRESETS
+except ImportError:
+    from lib.engines.power_electronics import InverterModel, InverterSpec, INVERTER_PRESETS
+
 # ============================================================
 #  TURBINE SPECIFICATION
 # ============================================================
@@ -112,6 +117,14 @@ class PowerCurveModel:
     def __init__(self, turbine: TurbineSpec):
         self.t = turbine
         self.rho = 1.225  # Air density (kg/m³) at sea level
+        # Full converter model for generator → grid
+        self.converter = InverterModel(InverterSpec(
+            name="WIND-CONV", rated_power_kw=turbine.rated_power_kw,
+            peak_efficiency=turbine.converter_efficiency,
+            standby_power_w=turbine.rated_power_kw * 0.03,  # 0.003% of rated
+            tare_loss_pct=0.0020, switching_loss_pct=0.0040,
+            apparent_power_kva=turbine.rated_power_kw * 1.1,
+        ))
 
     def power_available(self, wind_speed_ms: float) -> float:
         """Available wind power (kW)."""
@@ -139,7 +152,10 @@ class PowerCurveModel:
             return 0.0
 
         p_aero = self.power_available(wind_speed_ms) * self.power_coefficient(wind_speed_ms)
-        p_elec = p_aero * self.t.generator_efficiency * self.t.converter_efficiency
+        p_generator = p_aero * self.t.generator_efficiency
+        # Apply load-dependent converter efficiency (DC→AC)
+        conv_result = self.converter.ac_output(p_generator)
+        p_elec = conv_result["ac_power_kw"]
 
         return min(self.t.rated_power_kw, round(p_elec, 1))
 

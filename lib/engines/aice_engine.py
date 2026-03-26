@@ -17,6 +17,11 @@ Reference: Valera-Medina et al., Progress in Energy & Combustion Science (2018)
 import math
 import json
 from dataclasses import dataclass, field, asdict
+
+try:
+    from power_electronics import InverterModel, InverterSpec, INVERTER_PRESETS
+except ImportError:
+    from lib.engines.power_electronics import InverterModel, InverterSpec, INVERTER_PRESETS
 from typing import List, Dict, Optional, Tuple
 
 # ============================================================
@@ -57,6 +62,10 @@ class AICESpec:
     length_mm: float = 1250
     width_mm: float = 980
     height_mm: float = 1100
+
+    # Generator / Inverter (genset mode)
+    generator_efficiency: float = 0.95
+    inverter_enabled: bool = False        # True = genset mode (mech → elec)
 
     # Thermal
     coolant_temp_c: float = 90.0
@@ -325,6 +334,11 @@ class AICESimulator:
         self.nox = NOxModel(scr_efficiency=0.95)
         self.thermal = ThermalModel(self.spec)
         self.nh3 = NH3Properties()
+        # Inverter for genset mode
+        if self.spec.inverter_enabled:
+            self.inverter = InverterModel(preset="aice_genset_335kw")
+        else:
+            self.inverter = None
 
     def operating_point(self, rpm: int, load_pct: float, ambient_c: float = 25.0) -> dict:
         """Compute all outputs at a single operating point."""
@@ -339,7 +353,19 @@ class AICESimulator:
         thermal_state = self.thermal.compute_state(rpm, load_pct, ambient_c)
         heat_rej = self.thermal.heat_rejection_kw(power, bte)
 
-        return {
+        # Genset mode: generator + inverter chain
+        if self.inverter is not None:
+            p_generator = power * self.spec.generator_efficiency
+            inv_result = self.inverter.ac_output(p_generator, ambient_c)
+            electrical_kw = inv_result["ac_power_kw"]
+            inverter_eta = inv_result["efficiency"]
+            reactive_kvar = inv_result["reactive_available_kvar"]
+        else:
+            electrical_kw = None
+            inverter_eta = None
+            reactive_kvar = None
+
+        result = {
             "rpm": rpm,
             "load_pct": load_pct,
             "torque_nm": torque,
@@ -364,6 +390,15 @@ class AICESimulator:
                 "heat_rejection_kw": heat_rej,
             },
         }
+
+        # Add electrical output fields if genset mode
+        if electrical_kw is not None:
+            result["electrical_power_kw"] = round(electrical_kw, 1)
+            result["generator_efficiency_pct"] = round(self.spec.generator_efficiency * 100, 1)
+            result["inverter_efficiency_pct"] = round(inverter_eta * 100, 1) if inverter_eta else None
+            result["reactive_available_kvar"] = reactive_kvar
+
+        return result
 
     def full_map(self, rpm_range: range = None, load_range: range = None) -> List[dict]:
         """Generate full engine performance map."""

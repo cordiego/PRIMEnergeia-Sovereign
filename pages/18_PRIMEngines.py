@@ -13,6 +13,14 @@ import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+try:
+    from lib.engines.power_electronics import InverterModel, InverterSpec, INVERTER_PRESETS
+except Exception:
+    try:
+        from power_electronics import InverterModel, InverterSpec, INVERTER_PRESETS
+    except Exception:
+        InverterModel = None
+
 st.markdown("""<style>
 [data-testid="stMetricValue"] {font-size: 26px !important}
 [data-testid="stMetricLabel"] {font-size: 13px !important; font-weight: 600}
@@ -69,7 +77,7 @@ else:
 st.info(desc)
 st.divider()
 
-tab1, tab2, tab3, tab4 = st.tabs(["📊 Efficiency", "💰 TCO", "🎯 Applications", "🗺️ Roadmap"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Efficiency", "💰 TCO", "🎯 Applications", "🗺️ Roadmap", "⚡ Power Electronics"])
 
 with tab1:
     load = np.arange(10, 101, 2)
@@ -150,5 +158,66 @@ with tab4:
 | **Phase 5** | 2029-2030 | Series production ramp (all 3 engines) | ⚪ Future |
 | **Phase 6** | 2030+ | Aviation certification (HY-P100) | ⚪ Future |
 """)
+
+with tab5:
+    st.subheader("⚡ DC-AC Power Conversion — Engine Inverter Models")
+    st.caption("Physics-based model: η(P) = P / (P + k₀ + k₁P + k₂P²) | PRIMEnergeia Power Electronics Division")
+
+    if InverterModel is not None:
+        inv_pem = InverterModel(preset="pem_50kw")
+        inv_hyp = InverterModel(preset="h2_turbine_100kw")
+        inv_aice = InverterModel(preset="aice_genset_335kw")
+
+        pe1, pe2, pe3 = st.columns(3)
+        pe1.metric("PEM-PB-50 Inv η", f"{inv_pem.efficiency(0.5)*100:.1f}%",
+            delta="NEW — was missing", delta_color="normal")
+        pe2.metric("HY-P100 Inv η", f"{inv_hyp.efficiency(0.5)*100:.1f}%",
+            delta=f"{(inv_hyp.efficiency(0.5)-0.98)*100:+.1f}pp vs old")
+        pe3.metric("A-ICE-G1 Genset η", f"{inv_aice.efficiency(0.5)*100:.1f}%",
+            delta="NEW — genset mode")
+
+        loads = np.arange(5, 105, 5)
+        pem_etas = [inv_pem.efficiency(l/100) * 100 for l in loads]
+        hyp_etas = [inv_hyp.efficiency(l/100) * 100 for l in loads]
+        aice_etas = [inv_aice.efficiency(l/100) * 100 for l in loads]
+
+        fig_pe = go.Figure()
+        fig_pe.add_trace(go.Scatter(x=loads, y=pem_etas, name="PEM-PB-50 (50 kW)",
+            line=dict(color="#00BFFF", width=3)))
+        fig_pe.add_trace(go.Scatter(x=loads, y=hyp_etas, name="HY-P100 (100 kW)",
+            line=dict(color="#FFD700", width=3)))
+        fig_pe.add_trace(go.Scatter(x=loads, y=aice_etas, name="A-ICE-G1 Genset (335 kW)",
+            line=dict(color="#00c878", width=3)))
+        fig_pe.add_hline(y=98, line_dash="dash", line_color="#888",
+            annotation_text="Old flat constant (98%)")
+        fig_pe.update_layout(template="plotly_dark", height=400,
+            title="Inverter Efficiency vs Load — All Engines",
+            xaxis_title="Load (%)", yaxis_title="Inverter η (%)",
+            yaxis=dict(range=[90, 100]),
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(size=14))
+        st.plotly_chart(fig_pe, use_container_width=True)
+
+        st.info("**PEM Fuel Cell impact**: The PEM-PB-50 previously reported raw DC stack output as final power. "
+                "A 2.5% inverter loss is now correctly modeled, meaning 50 kW DC → 48.75 kW AC delivered to grid.")
+
+        temps = np.arange(20, 65, 1)
+        fig_td = go.Figure()
+        for name, model, color in [
+            ("PEM-PB-50", inv_pem, "#00BFFF"),
+            ("HY-P100", inv_hyp, "#FFD700"),
+            ("A-ICE-G1", inv_aice, "#00c878"),
+        ]:
+            deratings = [model.temperature_derating(t) * 100 for t in temps]
+            fig_td.add_trace(go.Scatter(x=temps, y=deratings, name=name,
+                line=dict(color=color, width=3)))
+        fig_td.add_vline(x=45, line_dash="dot", line_color="red", annotation_text="Derating Threshold")
+        fig_td.update_layout(template="plotly_dark", height=350,
+            title="Temperature Derating — Summer Performance",
+            xaxis_title="Ambient °C", yaxis_title="Max Output (%)",
+            yaxis=dict(range=[50, 105]),
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(size=14))
+        st.plotly_chart(fig_td, use_container_width=True)
+    else:
+        st.warning("Power electronics module not available.")
 
 st.caption("PRIMEnergeia S.A.S. — PRIMEngines Division | Zero-Carbon Propulsion for Every Application")

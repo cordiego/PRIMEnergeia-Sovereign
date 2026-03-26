@@ -20,6 +20,11 @@ import json
 from dataclasses import dataclass, asdict
 from typing import List, Dict
 
+try:
+    from power_electronics import InverterModel, InverterSpec, INVERTER_PRESETS
+except ImportError:
+    from lib.engines.power_electronics import InverterModel, InverterSpec, INVERTER_PRESETS
+
 # ============================================================
 #  TURBINE SPECIFICATION
 # ============================================================
@@ -90,6 +95,8 @@ class BraytonCycle:
 
     def __init__(self, spec: HYP100Spec):
         self.spec = spec
+        # Power electronics model for generator → inverter → grid
+        self.inverter = InverterModel(preset="h2_turbine_100kw")
 
     def compressor_outlet_temp(self, t_inlet_k: float, pr: float = None) -> float:
         """Compressor discharge temperature (K)."""
@@ -144,9 +151,11 @@ class BraytonCycle:
         # Gross shaft power
         p_shaft = w_net * m_dot  # kW
 
-        # Mechanical / generator / inverter losses
-        eta_gen = self.spec.generator_efficiency * self.spec.inverter_efficiency
-        p_electrical = p_shaft * 0.98 * eta_gen  # 2% mechanical loss
+        # Mechanical / generator losses
+        p_generator = p_shaft * 0.98 * self.spec.generator_efficiency  # 2% mech loss
+        # Inverter DC→AC conversion (load-dependent efficiency)
+        inv_result = self.inverter.ac_output(p_generator)
+        p_electrical = inv_result["ac_power_kw"]
 
         # Thermal efficiency
         eta_thermal = w_net / q_in

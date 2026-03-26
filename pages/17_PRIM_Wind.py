@@ -13,6 +13,14 @@ import numpy as np
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+try:
+    from lib.engines.power_electronics import InverterModel, InverterSpec
+except Exception:
+    try:
+        from power_electronics import InverterModel, InverterSpec
+    except Exception:
+        InverterModel = None
+
 st.markdown("""<style>
 [data-testid="stMetricValue"] {font-size: 26px !important}
 [data-testid="stMetricLabel"] {font-size: 13px !important; font-weight: 600}
@@ -26,7 +34,7 @@ k1.metric("Class", "IEC I/II")
 k2.metric("Rated", "15 MW")
 k3.metric("Rotor", "236 m")
 k4.metric("CF", "48%")
-k5.metric("H2 Ready", "YES")
+k5.metric("Conv. η", "98.0%")
 k6.metric("Hub Height", "150 m")
 
 st.divider()
@@ -50,7 +58,7 @@ t6.metric("Direct Jobs", f"{td['jobs']}")
 
 st.divider()
 
-tab1, tab2, tab3, tab4 = st.tabs(["Power Curve", "Hybrid", "Revenue", "Wind Map"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Power Curve", "Hybrid", "Revenue", "Wind Map", "⚡ Power Electronics"])
 
 with tab1:
     ws = np.arange(0, 30, 0.5)
@@ -139,5 +147,78 @@ with tab4:
     | **Patagonia (ARG)** | Onshore | 12.0 | 55% | Prospecting |
     | **Australia (WA)** | Offshore | 10.0 | 46% | Prospecting |
     """)
+
+with tab5:
+    st.subheader("⚡ Full-Converter Power Electronics")
+    st.caption("Direct-drive PMG → Full converter (AC-DC-AC) → Grid | PRIMEnergeia Power Electronics Division")
+
+    if InverterModel is not None:
+        conv = InverterModel(InverterSpec(
+            name="WIND-CONV", rated_power_kw=15000,
+            peak_efficiency=0.98, standby_power_w=450,
+            tare_loss_pct=0.0020, switching_loss_pct=0.0040,
+            apparent_power_kva=16500,
+        ))
+
+        pc1, pc2, pc3, pc4 = st.columns(4)
+        pc1.metric("Peak Conv. η", f"{conv.efficiency(0.5)*100:.1f}%")
+        pc2.metric("10% Load η", f"{conv.efficiency(0.1)*100:.1f}%")
+        pc3.metric("VAR Capacity", f"{conv.reactive_power_capability(7500)['q_max_kvar']:.0f} kVAR")
+        pc4.metric("Derating", "45°C threshold")
+
+        # Converter efficiency vs wind speed
+        ws = np.arange(3, 26, 0.5)
+        conv_etas = []
+        old_etas = []
+        for w in ws:
+            if w < 3 or w > 25:
+                conv_etas.append(0)
+                old_etas.append(0)
+            elif w < 12:
+                p_frac = ((w - 3) / 9) ** 3
+                conv_etas.append(conv.efficiency(p_frac) * 100)
+                old_etas.append(98.0)
+            else:
+                conv_etas.append(conv.efficiency(1.0) * 100)
+                old_etas.append(98.0)
+
+        fig_pe = go.Figure()
+        fig_pe.add_trace(go.Scatter(x=ws, y=conv_etas, name="New: Load-Dependent η",
+            line=dict(color="#00BFFF", width=3)))
+        fig_pe.add_trace(go.Scatter(x=ws, y=old_etas, name="Old: Flat 98%",
+            line=dict(color="#888", width=2, dash="dash")))
+        fig_pe.add_vline(x=12, line_dash="dot", line_color="#00c878", annotation_text="Rated (12 m/s)")
+        fig_pe.update_layout(template="plotly_dark", height=400,
+            title="Converter Efficiency vs Wind Speed",
+            xaxis_title="Wind Speed (m/s)", yaxis_title="Converter η (%)",
+            yaxis=dict(range=[88, 100]),
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(size=14))
+        st.plotly_chart(fig_pe, use_container_width=True)
+
+        st.info("**Low-wind impact**: Below rated wind speed, the converter operates at partial load "
+                "where fixed losses (fans, control boards) represent a larger fraction of output. "
+                "At 5 m/s (~15% load), converter η drops to ~96% vs the old flat 98%.")
+
+        # Temperature derating
+        temps = np.arange(20, 65, 1)
+        deratings = [conv.temperature_derating(t) * 100 for t in temps]
+        max_outputs = [conv.temperature_derating(t) * 15 for t in temps]
+
+        fig_td = make_subplots(specs=[[{"secondary_y": True}]])
+        fig_td.add_trace(go.Scatter(x=temps, y=max_outputs, name="Max Output (MW)",
+            fill="tozeroy", fillcolor="rgba(0,191,255,0.15)",
+            line=dict(color="#00BFFF", width=3)), secondary_y=False)
+        fig_td.add_trace(go.Scatter(x=temps, y=deratings, name="Derating (%)",
+            line=dict(color="#FF6347", width=2, dash="dash")), secondary_y=True)
+        fig_td.add_vline(x=45, line_dash="dot", line_color="red", annotation_text="Threshold")
+        fig_td.update_layout(template="plotly_dark", height=350,
+            title="Temperature Derating — Nacelle Inverter",
+            xaxis_title="Ambient °C",
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", font=dict(size=14))
+        fig_td.update_yaxes(title_text="Max Output (MW)", secondary_y=False)
+        fig_td.update_yaxes(title_text="Derating (%)", range=[50, 105], secondary_y=True)
+        st.plotly_chart(fig_td, use_container_width=True)
+    else:
+        st.warning("Power electronics module not available.")
 
 st.caption("PRIMEnergeia S.A.S. - PRIM Wind Division | Hydrogen-Ready Wind Energy Systems")
