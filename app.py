@@ -189,7 +189,7 @@ st.markdown("""
                 letter-spacing: 2px; font-weight: 600; margin-bottom: 4px;'>DIVISION 1</div>
     <div style='font-size: 20px; font-weight: 700; color: white;'>⚡ Grid Control & Energy</div>
     <div style='color: #94a3b8; font-size: 13px; margin-top: 4px;'>
-        HJB-optimal dispatch across ERCOT · SEN · MIBEL — the revenue engine.
+        HJB-optimal dispatch across 17 global markets — 1,700+ GW coverage.
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -200,10 +200,10 @@ with c1:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #00d1ff;'>⚡ Grid Control</div>
-        <div class='product-desc'>HJB frequency control. SEN 🇲🇽 ERCOT 🇺🇸 MIBEL 🇪🇸🇵🇹</div>
+        <div class='product-desc'>HJB frequency control. 17 global ISOs — 1,700+ GW</div>
         <div>
             <span class='product-badge'>HJB</span>
-            <span class='product-badge'>3 MARKETS</span>
+            <span class='product-badge'>17 MARKETS</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -286,10 +286,10 @@ st.markdown("""
                 color: white; margin-bottom: 8px;'>⚡ Multi-Market Co-Optimization Engine</div>
     <div style='color: #94a3b8; font-size: 14px; margin-bottom: 16px;'>
         55.7% dispatch uplift · 36.9× price spread · 25% value share<br>
-        ERCOT · SEN · MIBEL — Configure your fleet and see your ROI in seconds.
+        17 global markets · 1,700+ GW — Configure your fleet and see your ROI in seconds.
     </div>
     <span class='product-badge'>HJB TWO-PASS</span>
-    <span class='product-badge'>3 MARKETS</span>
+    <span class='product-badge'>17 MARKETS</span>
     <span class='product-badge'>BACKTEST-VALIDATED</span>
 </div>
 """, unsafe_allow_html=True)
@@ -577,10 +577,10 @@ with g16:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #00ffcc;'>🧠 PRIME Kernel</div>
-        <div class='product-desc'>Shared IP core. Physics constants, HJB solver, telemetry across all SBUs.</div>
+        <div class='product-desc'>Shared IP core. Physics constants, HJB solver, telemetry across all divisions.</div>
         <div>
             <span class='product-badge'>HJB</span>
-            <span class='product-badge'>5 SBUs</span>
+            <span class='product-badge'>3 DIVS</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -590,10 +590,10 @@ with g17:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #F1C40F;'>📊 CEO Dashboard</div>
-        <div class='product-desc'>Fleet monitor. 22 repos, 5 SBUs, $216M TAM. Git status + LOC + revenue.</div>
+        <div class='product-desc'>Fleet monitor. 22 repos, 3 divisions, $5B+ TAM. Git status + LOC + revenue.</div>
         <div>
             <span class='product-badge'>FLEET</span>
-            <span class='product-badge'>$216M TAM</span>
+            <span class='product-badge'>$5B+ TAM</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -607,9 +607,9 @@ st.divider()
 # ============================================================
 st.markdown("### Platform Metrics")
 m1, m2, m3, m4, m5, m6 = st.columns(6)
-m1.metric("MARKETS", "3", "SEN · ERCOT · MIBEL")
+m1.metric("MARKETS", "17", "1,700+ GW Global")
 m2.metric("PAGES", "25", "Full Product Suite")
-m3.metric("SBUs", "5", "$216M TAM")
+m3.metric("DIVISIONS", "3", "Grid · Eureka · Research")
 m4.metric("ENGINES", "6", "NH₃ · H₂ · Turbine")
 m5.metric("REPOS", "22", "Enterprise Fleet")
 m6.metric("FREQUENCY", "50/60 Hz", "Multi-Standard")

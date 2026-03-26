@@ -6,7 +6,7 @@
 ┌─────────────────────────────────────────────────┐
 │               DASHBOARD LAYER                    │
 │  Unified Streamlit SCADA — Market Selector      │
-│  SEN 🇲🇽 │ ERCOT 🇺🇸 │ MIBEL 🇪🇸🇵🇹              │
+│  17 Global ISOs — 1,700+ GW coverage            │
 │  (dashboard/ + markets/)                         │
 ├─────────────────────────────────────────────────┤
 │           MARKET ENGINES LAYER                   │
@@ -15,7 +15,7 @@
 │  (markets/{sen,ercot,mibel}/)                    │
 ├─────────────────────────────────────────────────┤
 │            SHARED CONFIG LAYER                   │
-│  market_config.py — 72 node definitions,        │
+│  market_config.py — 17 ISO definitions,          │
 │  grid physics params, regulatory standards      │
 │  (markets/market_config.py)                      │
 ├─────────────────────────────────────────────────┤
@@ -51,6 +51,8 @@
 | Penalty Threshold | ±0.05 Hz | ±0.03 Hz | ±0.04 Hz |
 | Nodes | 30 | 22 | 20 |
 
+> **Note:** In addition to the 3 core markets above, PRIMEnergeia now supports **14 additional ISOs** via `fetch_global_markets.py`: PJM, CAISO, MISO, SPP, NYISO, ISONE, IESO, AESO, EPEX (DE/FR), Nord Pool, Elexon, NEM, JEPX.
+
 ## Control Flow
 
 1. **Market selection** — Sidebar selector loads market-specific config (physics, pricing, nodes)
@@ -58,7 +60,7 @@
 3. **Swing Equation solve** — Market-tuned physics engine (50 or 60 Hz) integrates frequency dynamics
 4. **HJB control** — Optimal control law computes reactive power injection u*(x)
 5. **Auto-healing** — DRL actor-critic for self-repair on frequency excursions
-6. **Orchestration** — Per-market orchestrators coordinate across all nodes (22–30 per market)
+6. **Orchestration** — Per-market orchestrators coordinate across all nodes
 7. **Financial engine** — Market-specific pricing (PML/LMP/Pool) calculates capital recovery
 8. **Dashboard** — Unified 6-tab SCADA visualization renders all markets with dynamic theming
 

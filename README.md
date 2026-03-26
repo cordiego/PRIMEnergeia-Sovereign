@@ -5,12 +5,12 @@
 [![Live Dashboard](https://img.shields.io/badge/🔴_LIVE_DEMO-Streamlit_Cloud-00d1ff?style=for-the-badge)](https://primenergeia-sovereign.streamlit.app)
 [![Landing Page](https://img.shields.io/badge/🌐_Landing_Page-GitHub_Pages-8b5cf6?style=for-the-badge)](https://cordiego.github.io/PRIMEnergeia-Sovereign)
 [![License](https://img.shields.io/badge/License-Proprietary-red?style=for-the-badge)](#license)
-[![Markets](https://img.shields.io/badge/Markets-SEN_|_ERCOT_|_MIBEL-fbc02d?style=for-the-badge)](#markets)
+[![Markets](https://img.shields.io/badge/Markets-17_Global_ISOs-fbc02d?style=for-the-badge)](#markets)
 
 ---
 
 > **$231,243 USD** in capital recovered at a single node (VZA-400) through optimal frequency control.  
-> **72 nodes** across **3 international markets** — SEN 🇲🇽 · ERCOT 🇺🇸 · MIBEL 🇪🇸🇵🇹  
+> **17 global markets** covering **1,700+ GW** — ERCOT · PJM · CAISO · MISO · SPP · NYISO · ISONE · IESO · AESO · SEN · MIBEL · EPEX · Nord Pool · Elexon · NEM · JEPX  
 > **~$48M USD** projected annual recurring revenue.
 
 ---
@@ -39,19 +39,27 @@ V_t + min_u { L(x, u) + ∇V · f(x, u) } = 0
 
 ## Markets
 
-The unified dashboard includes a **sidebar market selector** to switch between all three markets in real-time.
+The unified dashboard includes a **sidebar market selector** to switch between all 17 global markets.
 
-| Market | Country | Frequency | Nodes | Pricing | THD Standard | Accent |
-|--------|---------|-----------|-------|---------|-------------|--------|
-| **SEN** | 🇲🇽 Mexico | 60 Hz | 30 | PML / CENACE | Código de Red (≤5%) | Cyan |
-| **ERCOT** | 🇺🇸 Texas | 60 Hz | 22 | LMP ($5k cap) | IEEE 519 (≤5%) | Orange |
-| **MIBEL** | 🇪🇸🇵🇹 Iberian | 50 Hz | 20 | OMIE Pool (EUR) | EN 50160 (≤8%) | Gold |
+| Region | Markets | Capacity | Source |
+|--------|---------|----------|--------|
+| 🇺🇸 **US ISOs** | ERCOT · PJM · CAISO · MISO · SPP · NYISO · ISONE | ~665 GW | gridstatus |
+| 🇨🇦 **Canada** | IESO (Ontario) · AESO (Alberta) | ~55 GW | gridstatus |
+| 🇲🇽 **México** | SEN / CENACE (30 nodos, 9 regions) | ~75 GW | CENACE API |
+| 🇪🇸🇵🇹 **Iberia** | MIBEL / OMIE (5 zones) | ~110 GW | OMIE/ENTSO-E |
+| 🇪🇺 **Europe** | EPEX (DE) · EPEX (FR) · Nord Pool · Elexon (UK) | ~530 GW | ENTSO-E |
+| 🇦🇺🇯🇵 **Asia-Pacific** | NEM (Australia) · JEPX (Japan) | ~335 GW | Proxy |
+
+**Total: 17 markets · 1,770 GW**
 
 ### Key Differences
 
 - **ERCOT** — Islanded grid, lower inertia (H=4.5s), higher volatility, $5,000/MWh scarcity cap
+- **PJM** — Largest US ISO (180 GW), 13 states, capacity market
+- **CAISO** — Duck curve, negative prices, high solar penetration
 - **SEN** — 9 CENACE regions, 15-min settlement, Código de Red compliance
 - **MIBEL** — 50 Hz ENTSO-E grid, higher inertia (H=6.0s), OMIE pool pricing in EUR
+- **NEM** — $17,500/MWh price cap, extreme volatility
 
 ---
 
@@ -76,8 +84,8 @@ The unified dashboard includes a **sidebar market selector** to switch between a
 │  (dashboard/ + markets/)                         │
 ├─────────────────────────────────────────────────┤
 │           MARKET ENGINES LAYER                   │
-│  SEN (30 nodes) │ ERCOT (22 nodes) │ MIBEL (20)│
-│  (markets/sen/  │  markets/ercot/  │  mibel/)   │
+│  17 Global ISOs · 1,700+ GW                     │
+│  gridstatus + CENACE + OMIE + ENTSO-E           │
 ├─────────────────────────────────────────────────┤
 │               CORE LAYER                         │
 │  HJB Solver │ DRL Auto-Healing │ Price Engine   │
@@ -99,7 +107,8 @@ The unified dashboard includes a **sidebar market selector** to switch between a
 | Module | Description |
 |--------|-------------|
 | `dashboard/dashboard_primenergeia.py` | Unified multi-market SCADA dashboard with sidebar selector |
-| `markets/market_config.py` | Shared market configuration dataclasses (all 72 nodes) |
+| `markets/market_config.py` | Shared market configuration dataclasses (17 global ISOs) |
+| `fetch_global_markets.py` | Unified fetcher for all 17 markets (gridstatus + ENTSO-E + proxy) |
 | `markets/ercot/` | ERCOT physics, orchestrator, standalone dashboard |
 | `markets/sen/` | SEN physics, orchestrator, standalone dashboard |
 | `markets/mibel/` | MIBEL physics (50 Hz), orchestrator, standalone dashboard |
@@ -138,7 +147,7 @@ The `optimization/` module uses **Bayesian Optimization** with Gaussian Process 
 ## Documentation
 
 - 📋 [Executive Brief (ES)](docs/EXECUTIVE_BRIEF.md) — Propuesta de valor para directivos
-- 💰 [Product Catalog](docs/PRODUCT_CATALOG.md) — 5 SBUs, $216M TAM, pricing models
+- 💰 [Product Catalog](docs/PRODUCT_CATALOG.md) — 3 Divisions, $5B+ TAM, pricing models
 - 📊 [ROI Analysis](docs/ROI_ANALYSIS.md) — Multi-market revenue projections (~$48M ARR)
 - 🏗️ [Architecture](docs/architecture.md) — System design & control flow
 - 🎯 [Sales Playbook](docs/SALES_PLAYBOOK.md) — Target buyers, outreach templates, 90-day timeline
@@ -155,4 +164,4 @@ This software is the intellectual property of PRIMEnergeia S.A.S. Unauthorized c
 ---
 
 **PRIMEnergeia S.A.S.** | Lead Computational Physicist: Diego Córdoba Urrutia  
-*Soberanía Energética Global* ⚡🇲🇽🇺🇸🇪🇸🇵🇹
+*Soberanía Energética Global* ⚡🇲🇽🇺🇸🇪🇺🇦🇺🇯🇵

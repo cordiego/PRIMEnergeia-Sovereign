@@ -114,7 +114,7 @@ Every dispatch decision made by PRIMEngine is logged with the following fields:
 | Field | Type | Description |
 |-------|------|-------------|
 | `timestamp` | ISO 8601 | Decision timestamp (market-local TZ) |
-| `market` | string | ERCOT / SEN / MIBEL |
+| `market` | string | ERCOT / PJM / CAISO / MISO / SPP / NYISO / ISONE / IESO / AESO / SEN / MIBEL / EPEX / Nord Pool / Elexon / NEM / JEPX |
 | `node_id` | string | Settlement node identifier |
 | `da_price` | float | Day-ahead price at node ($/MWh or €/MWh) |
 | `rt_price` | float | Real-time price at node |

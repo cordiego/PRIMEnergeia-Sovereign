@@ -28,7 +28,7 @@ st.markdown("""<style>
 </style>""", unsafe_allow_html=True)
 
 st.header("📊 CEO Executive Dashboard")
-st.caption("Fleet Monitor — 22 Repos · 5 SBUs · $216M TAM | PRIMEnergeia S.A.S.")
+st.caption("Fleet Monitor — 22 Repos · 3 Divisions · $5B+ TAM | PRIMEnergeia S.A.S.")
 
 st.divider()
 

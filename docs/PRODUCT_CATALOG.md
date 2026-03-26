@@ -11,7 +11,7 @@
 | Specification | Detail |
 |--------------|--------|
 | **Product** | Real-time HJB frequency control + exergy recovery |
-| **Markets** | SEN 🇲🇽 (30 nodes), ERCOT 🇺🇸 (22 nodes), MIBEL 🇪🇸🇵🇹 (20 nodes) |
+| **Markets** | 17 global ISOs — 1,700+ GW (ERCOT, PJM, CAISO, MISO, SPP, NYISO, ISONE, IESO, AESO, SEN, MIBEL, EPEX, EPEX_FR, Nord Pool, Elexon, NEM, JEPX) |
 | **Proven ROI** | $231,243 USD rescued at VZA-400 (proof of concept) |
 | **Pricing** | $50K deployment + 25% royalty on capital rescued |
 | **Latency** | < 0.5 ms control loop |
@@ -102,27 +102,25 @@ Three engine control systems — sell the software, not the hardware:
 
 ## 🧠 PRIME Kernel — Shared IP Core
 
-The hidden value multiplier. Every improvement to the kernel propagates across all 5 SBUs:
+The hidden value multiplier. Every improvement to the kernel propagates across all 3 divisions:
 
 - **`constants.py`** — Physics + market + engine constants (single source of truth)
 - **`hjb_solver.py`** — Generic HJB optimal control (Grid + Materials share this)
-- **`telemetry.py`** — Unified notifications + metrics (all SBUs)
+- **`telemetry.py`** — Unified notifications + metrics (all divisions)
 
 ---
 
 ## Portfolio Summary
 
-| SBU | TAM | Model | Status |
-|-----|-----|-------|--------|
-| 🔌 PRIME Grid | $48M | Enterprise Contracts | 🟢 LIVE |
-| ⚡ PRIME Power | $25M | IP Licensing | 🟢 LIVE |
-| ♻️ PRIME Circular | $8M | Carbon Credits | 🟡 ACTIVE |
-| 📈 PRIME Quant | $15M | Fund Management | 🟢 LIVE |
-| 🧪 PRIME Materials | $120M | Deep Tech Patents | 🔵 R&D |
-| **TOTAL** | **$216M** | | |
+| Division | TAM | Model | Status |
+|----------|-----|-------|--------|
+| ⚡ Grid Control & Energy | $5B+ | Enterprise + 25% Value Share | 🟢 LIVE |
+| 🏛️ Eureka Trading | $15M | 2/20 Fund Management | 🟢 LIVE |
+| 🔬 Materials, Engines & Research | $120M | IP Licensing + Deep Tech | 🟡 ACTIVE |
+| **TOTAL** | **$5B+** | | |
 
 ---
 
 **PRIMEnergeia S.A.S.**  
 Diego Córdoba Urrutia — Lead Computational Physicist  
-*Soberanía Energética Global* ⚡🇲🇽🇺🇸🇪🇸🇵🇹
+*Soberanía Energética Global* ⚡🇲🇽🇺🇸🇪🇺🇦🇺🇯🇵

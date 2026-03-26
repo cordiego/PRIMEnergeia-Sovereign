@@ -97,8 +97,15 @@ preset = preset_col.selectbox("Client Profile", list(CLIENT_PRESETS.keys()),
 p = CLIENT_PRESETS[preset]
 
 c1, c2, c3, c4 = st.columns(4)
-market = c1.selectbox("Market", ["ERCOT (Texas)", "SEN (Mexico)", "MIBEL (Iberia)"],
-                       index=["ERCOT (Texas)", "SEN (Mexico)", "MIBEL (Iberia)"].index(p["market"]))
+market = c1.selectbox("Market", [
+    "ERCOT (Texas)", "PJM (US East)", "CAISO (California)", "MISO (Midwest)",
+    "SPP (Central)", "NYISO (New York)", "ISONE (New England)",
+    "IESO (Ontario)", "AESO (Alberta)",
+    "SEN (Mexico)", "MIBEL (Iberia)",
+    "EPEX (Germany)", "EPEX (France)", "Nord Pool (Nordics)", "Elexon (UK)",
+    "NEM (Australia)", "JEPX (Japan)"
+],
+                       index=0)
 fleet_mw = c2.number_input("Fleet Capacity (MW)", min_value=1, max_value=50000,
                             value=p["fleet_mw"], step=10)
 battery_mwh = c3.number_input("Battery Storage (MWh)", min_value=1, max_value=100000,
@@ -567,7 +574,7 @@ else:
     e1, e2, e3 = st.columns(3)
     e1.markdown("""
     **1. Configure Your Fleet**
-    - Select your market (ERCOT, SEN, MIBEL)
+    - Select your market (17 global ISOs supported)
     - Set your battery capacity
     - Choose from client presets
     """)
