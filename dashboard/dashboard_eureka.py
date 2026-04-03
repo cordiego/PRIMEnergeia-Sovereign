@@ -42,7 +42,7 @@ st.markdown("""
 div[data-testid="stMetricValue"] {
     color: #00d1ff;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 26px;
+    font-size: 40px;
     font-weight: 700;
     text-shadow: 0 0 12px rgba(0,209,255,0.3);
 }
@@ -138,36 +138,52 @@ div[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 #  LIVE DATA ENGINE — yfinance + VIX Regime Classification
 # ============================================================
 
-EUREKA_UNIVERSE = ["IAU", "GEV", "VGSH", "VTIP", "VIXM"]
+EUREKA_CORE = ["VTIP"]
+GAINS_SATELLITES = ["IAU", "GEV", "KMLM", "VGSH"]
+EUREKA_UNIVERSE = EUREKA_CORE
 BENCHMARK = "SPY"
 VIX_TICKER = "^VIX"
-ALL_TICKERS = EUREKA_UNIVERSE + [BENCHMARK, VIX_TICKER]
+ALL_TICKERS = EUREKA_CORE + GAINS_SATELLITES + [BENCHMARK, VIX_TICKER]
 
-# Regime definitions
-REGIMES = {
-    "RISK-ON":     {"vix_range": (0, 18),   "color": "#00ff88", "weights": {"IAU": 0.35, "GEV": 0.35, "VGSH": 0.125, "VTIP": 0.125, "VIXM": 0.05}},
-    "TRANSITION":  {"vix_range": (18, 28),  "color": "#fbc02d", "weights": {"IAU": 0.20, "GEV": 0.20, "VGSH": 0.20,  "VTIP": 0.20,  "VIXM": 0.20}},
-    "CRISIS":      {"vix_range": (28, 100), "color": "#ff4b4b", "weights": {"IAU": 0.10, "GEV": 0.10, "VGSH": 0.25,  "VTIP": 0.25,  "VIXM": 0.30}},
-}
+# Core allocation — 100% VTIP anchor
+TARGET_WEIGHTS = {"VTIP": 1.0}
 
-# Asset metadata for decay & analytics
+# Asset metadata for analytics
 ASSET_META = {
-    "IAU":  {"desc": "Gold Trust",           "lever": 1.0, "category": "Commodity"},
-    "GEV":  {"desc": "GE Vernova",           "lever": 1.0, "category": "Energy"},
-    "VGSH": {"desc": "Short-Term Treasury",  "lever": 1.0, "category": "Fixed Income"},
-    "VTIP": {"desc": "TIPS Bond",            "lever": 1.0, "category": "Inflation Hedge"},
-    "VIXM": {"desc": "Mid-Term VIX Futures", "lever": 1.0, "category": "Volatility"},
+    "VTIP": {"desc": "TIPS Bond",            "lever": 1.0, "category": "Core Anchor"},
+    "IAU":  {"desc": "Gold",                 "lever": 1.0, "category": "Satellite"},
+    "GEV":  {"desc": "Nuclear Energy",        "lever": 1.0, "category": "Satellite"},
+    "KMLM": {"desc": "Managed Futures",       "lever": 1.0, "category": "Satellite"},
+    "VGSH": {"desc": "Short-Term Treasury",   "lever": 1.0, "category": "Satellite"},
 }
 
 
-def classify_regime(vix_level):
-    """Classify VIX level into a regime."""
+def classify_vix(vix_level):
+    """Classify VIX level for display."""
     if vix_level < 18:
-        return "RISK-ON"
+        return "LOW"
     elif vix_level <= 28:
-        return "TRANSITION"
+        return "ELEVATED"
     else:
-        return "CRISIS"
+        return "HIGH"
+
+
+def _safe_close(df, ticker):
+    """Safely extract Close prices regardless of yfinance column format."""
+    try:
+        if isinstance(df.columns, pd.MultiIndex):
+            if ('Close', ticker) in df.columns:
+                return df[('Close', ticker)]
+            close_cols = df['Close']
+            if ticker in close_cols.columns:
+                return close_cols[ticker]
+            if len(close_cols.columns) == 1:
+                return close_cols.iloc[:, 0]
+        elif 'Close' in df.columns:
+            return df['Close']
+    except Exception:
+        pass
+    return None
 
 
 @st.cache_data(ttl=300)
@@ -175,18 +191,23 @@ def load_market_data():
     """Download live market data and compute all analytics."""
     all_data = {}
     for t in ALL_TICKERS:
-        try:
-            df = yf.download(t, start="2024-04-02", progress=False)
-            if df.empty:
-                continue
-            if isinstance(df.columns, pd.MultiIndex):
-                s = df['Close'][t]
-            else:
-                s = df['Close']
-            s.name = t
-            all_data[t] = s
-        except Exception:
-            continue
+        for attempt in range(3):
+            try:
+                df = yf.download(t, start="2024-04-02", progress=False)
+                if df.empty:
+                    break
+                s = _safe_close(df, t)
+                if s is None or s.dropna().empty:
+                    if attempt < 2:
+                        time.sleep(1)
+                    continue
+                s = s.dropna()
+                s.name = t
+                all_data[t] = s
+                break
+            except Exception:
+                if attempt < 2:
+                    time.sleep(1)
 
     if not all_data or VIX_TICKER not in all_data:
         return None
@@ -197,28 +218,13 @@ def load_market_data():
 
     returns = prices.pct_change().dropna()
 
-    # --- Compute portfolio returns with regime switching ---
+    # --- Compute portfolio returns — 100% VTIP ---
     vix_series = prices[VIX_TICKER]
-    port_returns = []
-    regime_history = []
-    weight_history = {tk: [] for tk in EUREKA_UNIVERSE}
-
-    for i in range(len(returns)):
-        idx = returns.index[i]
-        v = vix_series.loc[idx] if idx in vix_series.index else vix_series.iloc[min(i + 1, len(vix_series) - 1)]
-        regime = classify_regime(v)
-        regime_history.append(regime)
-        w = REGIMES[regime]["weights"]
-
-        for tk in EUREKA_UNIVERSE:
-            weight_history[tk].append(w.get(tk, 0))
-
-        day_ret = sum(returns[tk].iloc[i] * w.get(tk, 0) for tk in w if tk in returns.columns)
-        port_returns.append(day_ret)
-
-    port_returns = pd.Series(port_returns, index=returns.index)
+    port_returns = returns["VTIP"].copy()
     cum_returns = (1 + port_returns).cumprod()
+    weight_history = {"VTIP": [1.0] * len(returns)}
     spy_cum = (1 + returns[BENCHMARK]).cumprod()
+
 
     # --- Rolling analytics ---
     rolling_vol_20 = port_returns.rolling(20).std() * np.sqrt(252)
@@ -243,8 +249,8 @@ def load_market_data():
 
     # Current state
     current_vix = vix_series.iloc[-1]
-    current_regime = classify_regime(current_vix)
-    current_weights = REGIMES[current_regime]["weights"]
+    vix_label = classify_vix(current_vix)
+    current_weights = TARGET_WEIGHTS
 
     # Weight history as DataFrame
     weight_df = pd.DataFrame(weight_history, index=returns.index)
@@ -252,9 +258,9 @@ def load_market_data():
     # Correlation matrix
     corr_matrix = returns[EUREKA_UNIVERSE].corr()
 
-    # Individual asset stats
+    # Individual asset stats — core + satellites
     asset_stats = {}
-    for tk in EUREKA_UNIVERSE:
+    for tk in EUREKA_CORE + GAINS_SATELLITES:
         if tk in returns.columns:
             r = returns[tk]
             asset_stats[tk] = {
@@ -275,8 +281,7 @@ def load_market_data():
         "max_dd": max_dd, "ann_vol": ann_vol, "sharpe": sharpe, "alpha": alpha,
         "var_95": var_95, "cvar_95": cvar_95,
         "vix_series": vix_series, "current_vix": current_vix,
-        "current_regime": current_regime, "current_weights": current_weights,
-        "regime_history": pd.Series(regime_history, index=returns.index),
+        "vix_label": vix_label, "current_weights": current_weights,
         "weight_df": weight_df,
         "corr_matrix": corr_matrix, "asset_stats": asset_stats,
         "n_days": len(returns),
@@ -301,14 +306,13 @@ with h1:
     st.markdown("# 🏛️ Eureka Sovereign")
     st.caption("DYNAMIC VIX-REGIME VOLATILITY TARGETING ENGINE")
 with h2:
-    regime = data["current_regime"]
-    regime_class = {"RISK-ON": "regime-riskon", "TRANSITION": "regime-transition", "CRISIS": "regime-crisis"}[regime]
-    regime_icon = {"RISK-ON": "●", "TRANSITION": "◆", "CRISIS": "⚠"}[regime]
-    st.markdown(f"<p class='{regime_class}' style='font-size:18px; margin-top:20px;'>{regime_icon} {regime}</p>", unsafe_allow_html=True)
-    st.caption(f"Protocol: EUREKA-VOL-v2.3-HJB")
+    vix_label = data["vix_label"]
+    vix_color = {"LOW": "#00ff88", "ELEVATED": "#fbc02d", "HIGH": "#ff4b4b"}[vix_label]
+    st.markdown(f"<p style='font-family: JetBrains Mono; font-size:18px; font-weight:700; color:{vix_color}; margin-top:20px;'>VIX: {vix_label}</p>", unsafe_allow_html=True)
+    st.caption(f"100% VTIP | Gains → IAU · KMLM · GEV · VGSH")
 with h3:
     st.markdown(f"<p style='font-family: JetBrains Mono; color: #6b7fa3; margin-top:20px; font-size:14px;'>{now.strftime('%Y-%m-%d %H:%M:%S')} CST</p>", unsafe_allow_html=True)
-    st.caption(f"Data Lag: 5min | Universe: {len(EUREKA_UNIVERSE)} Assets")
+    st.caption(f"Data Lag: 5min | Core: VTIP | Satellites: {len(GAINS_SATELLITES)}")
 
 st.divider()
 
@@ -316,8 +320,8 @@ st.divider()
 #  PRIMARY KPI BAR
 # ============================================================
 k1, k2, k3, k4, k5, k6, k7 = st.columns(7)
-k1.metric("VIX LEVEL", f"{data['current_vix']:.2f}", f"{'Low' if data['current_vix'] < 18 else 'Elevated' if data['current_vix'] <= 28 else 'High'}")
-k2.metric("REGIME", regime, f"VIX {'<18' if regime == 'RISK-ON' else '18-28' if regime == 'TRANSITION' else '>28'}")
+k1.metric("VIX LEVEL", f"{data['current_vix']:.2f}", f"{data['vix_label']}")
+k2.metric("ALLOCATION", "100% VTIP", "Core Anchor")
 k3.metric("PORTFOLIO", f"{data['total_return']:+.2f}%", f"vs SPY {data['spy_return']:+.1f}%")
 k4.metric("MAX DRAWDOWN", f"{data['max_dd']:.2f}%", "Peak-to-Trough")
 k5.metric("SHARPE RATIO", f"{data['sharpe']:.3f}", "Annualized")
@@ -348,8 +352,8 @@ with tab1:
 
     st.markdown("""
     <div class='math-block'>
-    <strong>Portfolio Construction:</strong>&nbsp;&nbsp; R<sub>p,t</sub> = Σ w<sub>i</sub>(VIX<sub>t</sub>) · r<sub>i,t</sub><br>
-    <strong>Regime Function:</strong>&nbsp;&nbsp; w(VIX) = { w<sub>risk-on</sub> if VIX < 18 &nbsp;|&nbsp; w<sub>transition</sub> if 18 ≤ VIX ≤ 28 &nbsp;|&nbsp; w<sub>crisis</sub> if VIX > 28 }
+    <strong>Portfolio Construction:</strong>&nbsp;&nbsp; R<sub>p,t</sub> = 1.0 · r<sub>VTIP</sub><br>
+    <strong>Gains Destination:</strong>&nbsp;&nbsp; IAU · KMLM · GEV · VGSH — gains redistributed equally to satellites
     </div>
     """, unsafe_allow_html=True)
 
@@ -424,31 +428,32 @@ with tab1:
 #  TAB 2: VOL-TARGETING ENGINE
 # ═══════════════════════════════════════════════
 with tab2:
-    st.markdown("<div class='section-header'>VIX-REGIME VOLATILITY TARGETING — DYNAMIC ALLOCATION</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>PORTFOLIO ALLOCATION — STATIC WEIGHTS</div>", unsafe_allow_html=True)
 
     st.markdown("""
     <div class='math-block'>
-    <strong>Regime Classifier:</strong>&nbsp;&nbsp; Φ(VIX) = { RISK-ON if VIX < 18 &nbsp;|&nbsp; TRANSITION if 18 ≤ VIX ≤ 28 &nbsp;|&nbsp; CRISIS if VIX > 28 }<br>
-    <strong>Objective:</strong>&nbsp;&nbsp; Maximize E[R<sub>p</sub>] subject to σ<sub>target</sub> via regime-dependent weight vectors
+    <strong>Allocation:</strong>&nbsp;&nbsp; 100% VTIP (Core Anchor)<br>
+    <strong>Gains Destinations:</strong>&nbsp;&nbsp; IAU · KMLM · GEV · VGSH — gains redistributed equally
     </div>
     """, unsafe_allow_html=True)
 
-    # Regime cards
-    rc1, rc2, rc3 = st.columns(3)
-    for col, (rname, rdata) in zip([rc1, rc2, rc3], REGIMES.items()):
+    # Weight display cards — VTIP core + 4 satellites
+    wc1, wc2, wc3, wc4, wc5 = st.columns(5)
+    weight_data = [
+        ("VTIP", 100.0, "#a78bfa"), ("IAU", 0.0, "#FFD700"), ("GEV", 0.0, "#00ff88"),
+        ("KMLM", 0.0, "#22d3ee"), ("VGSH", 0.0, "#00d1ff"),
+    ]
+    for col, (tk, pct, color) in zip([wc1, wc2, wc3, wc4, wc5], weight_data):
         with col:
-            is_active = rname == data["current_regime"]
-            active_class = "regime-active" if is_active else ""
-            badge = " ◀ ACTIVE" if is_active else ""
-            w_str = " | ".join([f"{tk}: {w*100:.0f}%" for tk, w in rdata["weights"].items()])
-            lo, hi = rdata["vix_range"]
+            label = f"{pct:.0f}% CORE" if tk == "VTIP" else "💰 GAINS"
+            desc = ASSET_META.get(tk, {}).get("desc", tk)
             st.markdown(f"""
-            <div class='regime-card {active_class}'>
+            <div class='regime-card'>
                 <div style='display:flex; justify-content:space-between; align-items:center;'>
-                    <span style='font-family:JetBrains Mono; font-size:16px; font-weight:700; color:{rdata["color"]};'>{rname}{badge}</span>
-                    <span style='font-family:JetBrains Mono; font-size:13px; color:#94a3b8;'>VIX {lo}-{hi}</span>
+                    <span style='font-family:JetBrains Mono; font-size:16px; font-weight:700; color:{color};'>{tk}</span>
+                    <span style='font-family:JetBrains Mono; font-size:16px; color:#e0e6ed;'>{label}</span>
                 </div>
-                <div style='font-size:12px; color:#c8d6e5; margin-top:10px; font-family:JetBrains Mono;'>{w_str}</div>
+                <div style='font-size:12px; color:#94a3b8; margin-top:8px;'>{desc}</div>
             </div>
             """, unsafe_allow_html=True)
 
@@ -476,13 +481,13 @@ with tab2:
 
     # Stacked weights
     weight_colors_rgba = {
-        "IAU": "rgba(241, 196, 15, 0.66)",
-        "GEV": "rgba(0, 209, 255, 0.66)",
-        "VGSH": "rgba(0, 255, 136, 0.66)",
         "VTIP": "rgba(167, 139, 250, 0.66)",
-        "VIXM": "rgba(255, 107, 107, 0.66)"
+        "IAU":  "rgba(255, 215, 0, 0.66)",
+        "GEV":  "rgba(0, 255, 136, 0.66)",
+        "KMLM": "rgba(34, 211, 238, 0.66)",
+        "VGSH": "rgba(0, 209, 255, 0.66)",
     }
-    for tk in EUREKA_UNIVERSE:
+    for tk in EUREKA_CORE:
         fig_vix.add_trace(go.Scatter(
             x=data["weight_df"].index, y=data["weight_df"][tk].values * 100,
             name=f"{tk} ({ASSET_META[tk]['desc']})",
@@ -504,13 +509,7 @@ with tab2:
 
     st.plotly_chart(fig_vix, use_container_width=True)
 
-    # Regime distribution
-    regime_counts = data["regime_history"].value_counts()
-    rd1, rd2, rd3 = st.columns(3)
-    for col, rname in zip([rd1, rd2, rd3], ["RISK-ON", "TRANSITION", "CRISIS"]):
-        count = regime_counts.get(rname, 0)
-        pct = count / len(data["regime_history"]) * 100 if len(data["regime_history"]) > 0 else 0
-        col.metric(f"{rname} DAYS", f"{count}", f"{pct:.1f}% of history")
+
 
 
 # ═══════════════════════════════════════════════
@@ -614,7 +613,7 @@ with tab4:
 
     # Build rebalance table
     reb_rows = []
-    for tk in EUREKA_UNIVERSE:
+    for tk in EUREKA_CORE:
         w_target = target_w.get(tk, 0)
         drift_noise = np.random.normal(0, 0.04)
         w_actual = max(0, w_target + drift_noise)
@@ -696,11 +695,11 @@ with tab5:
     st.markdown("<div class='section-header'>INDIVIDUAL ASSET ANALYTICS & CORRELATION STRUCTURE</div>", unsafe_allow_html=True)
 
     # Asset stats cards
-    for i in range(0, len(EUREKA_UNIVERSE), 2):
+    for i in range(0, len(EUREKA_CORE + GAINS_SATELLITES), 2):
         cols = st.columns(2)
         for j, col in enumerate(cols):
-            if i + j < len(EUREKA_UNIVERSE):
-                tk = EUREKA_UNIVERSE[i + j]
+            if i + j < len(EUREKA_CORE + GAINS_SATELLITES):
+                tk = (EUREKA_CORE + GAINS_SATELLITES)[i + j]
                 stats = data["asset_stats"].get(tk, {})
                 if not stats:
                     continue
@@ -743,7 +742,7 @@ with tab5:
         template="plotly_dark", height=420,
         paper_bgcolor="#050810", plot_bgcolor="#0a0f1a",
         margin=dict(l=60, r=20, t=20, b=40),
-        font=dict(family="JetBrains Mono", size=14, color="#94a3b8"),
+        font=dict(family="JetBrains Mono", size=13, color="#6b7fa3"),
         xaxis=dict(side="bottom"), yaxis=dict(autorange="reversed")
     )
     st.plotly_chart(fig_corr, use_container_width=True)
@@ -752,7 +751,7 @@ with tab5:
     st.markdown("<div class='section-header'>CURRENT ALLOCATION — TREEMAP</div>", unsafe_allow_html=True)
     w_labels = list(data["current_weights"].keys())
     w_values = [v * 100 for v in data["current_weights"].values()]
-    treemap_colors = {"IAU": "#F1C40F", "GEV": "#00d1ff", "VGSH": "#00ff88", "VTIP": "#a78bfa", "VIXM": "#ff6b6b"}
+    treemap_colors = {"VTIP": "#a78bfa", "IAU": "#FFD700", "GEV": "#00ff88", "KMLM": "#22d3ee", "VGSH": "#00d1ff"}
     w_colors = [treemap_colors.get(tk, "#ffffff") for tk in w_labels]
 
     fig_tree = go.Figure(go.Treemap(
@@ -777,32 +776,18 @@ with tab5:
 with tab6:
     st.markdown("<div class='section-header'>SYSTEM AUDIT LOG — REGIME TRANSITIONS & TRADE HISTORY</div>", unsafe_allow_html=True)
 
-    # Generate audit entries
-    regime_hist = data["regime_history"]
-    transitions = []
-    prev_regime = None
-    for dt, r in regime_hist.items():
-        if r != prev_regime and prev_regime is not None:
-            transitions.append({
-                "Timestamp": dt.strftime("%Y-%m-%d"),
-                "Event": f"Regime change: {prev_regime} → {r}",
-                "Severity": "ACTION",
-                "VIX": f"{data['vix_series'].loc[dt]:.2f}" if dt in data['vix_series'].index else "N/A"
-            })
-        prev_regime = r
-
-    # Add simulated events
+    # Generate audit entries from current session
     audit_events = [
         {"Timestamp": now.strftime("%Y-%m-%d %H:%M:%S"), "Event": "Dashboard initialized — live data loaded", "Severity": "INFO", "VIX": f"{data['current_vix']:.2f}"},
-        {"Timestamp": now.strftime("%Y-%m-%d %H:%M:%S"), "Event": f"Current regime: {data['current_regime']}", "Severity": "REGIME", "VIX": f"{data['current_vix']:.2f}"},
+        {"Timestamp": now.strftime("%Y-%m-%d %H:%M:%S"), "Event": f"VIX regime: {data['vix_label']}", "Severity": "REGIME", "VIX": f"{data['current_vix']:.2f}"},
         {"Timestamp": now.strftime("%Y-%m-%d %H:%M:%S"), "Event": f"Portfolio return: {data['total_return']:+.2f}%", "Severity": "FINANCIAL", "VIX": "—"},
         {"Timestamp": now.strftime("%Y-%m-%d %H:%M:%S"), "Event": f"Sharpe ratio: {data['sharpe']:.3f}", "Severity": "FINANCIAL", "VIX": "—"},
         {"Timestamp": now.strftime("%Y-%m-%d %H:%M:%S"), "Event": f"Max drawdown: {data['max_dd']:.2f}%", "Severity": "WARNING" if data['max_dd'] < -10 else "INFO", "VIX": "—"},
         {"Timestamp": now.strftime("%Y-%m-%d %H:%M:%S"), "Event": "Risk limits verified — all within tolerance", "Severity": "COMPLIANCE", "VIX": "—"},
     ]
 
-    # Combine: regime transitions (most recent first) + current events
-    all_audit = audit_events + sorted(transitions, key=lambda x: x["Timestamp"], reverse=True)[:20]
+    # Combine: current events
+    all_audit = audit_events
     df_audit = pd.DataFrame(all_audit)
 
     def color_severity(val):
@@ -832,7 +817,7 @@ with fc1:
     st.caption("Proprietary Vol-Targeting Protocol")
 with fc2:
     st.caption("Architect: Diego Córdoba Urrutia")
-    st.caption("Regime Function: Φ(VIX) → w*(t) | Dynamic Allocation Over Volatility Surface")
+    st.caption("100% VTIP Core Anchor | Gains → IAU · KMLM · GEV · VGSH")
 with fc3:
     st.caption("Soberanía Financiera 🇲🇽")
     st.caption(f"Build: EUREKA-VOL-v2.3-HJB | {now.strftime('%Y')}")

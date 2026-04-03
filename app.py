@@ -164,6 +164,7 @@ st.sidebar.markdown("### 🚀 Quick Launch")
 _quick = {
     "⚡ Co-Optimization": "pages/24_⚡_Co_Optimization.py",
     "⚡ Grid Control":    "pages/1_⚡_Grid_Control.py",
+    "🔌 Grid Outputs":    "pages/26_🔌_Grid_Outputs.py",
     "🧪 Granas Optimizer":"pages/3_🧪_Granas_Optimizer.py",
     "🧠 HJB Control":     "pages/19_🧠_HJB_Control.py",
     "🏭 PRIMStack":       "pages/21_🏭_PRIMStack.py",
@@ -276,6 +277,22 @@ with c6:
     """, unsafe_allow_html=True)
     st.page_link("pages/25_📂_Data_Upload.py", label="Open →", icon="📂")
 
+c7_go, _, _ = st.columns(3)
+
+with c7_go:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #10b981;'>🔌 Grid Outputs</div>
+        <div class='product-desc'>Integration-ready outputs for SCADA · EMS · BMS. Dispatch, frequency, prices, battery, AS bids.</div>
+        <div>
+            <span class='product-badge'>CSV</span>
+            <span class='product-badge'>JSON</span>
+            <span class='product-badge'>API</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/26_🔌_Grid_Outputs.py", label="Open →", icon="🔌")
+
 # ── Flagship CTA — Co-Optimization ──
 st.markdown("")
 st.markdown("""
@@ -318,7 +335,7 @@ with eu1:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #F1C40F;'>🏛️ Eureka Sovereign</div>
-        <div class='product-desc'>VIX-Regime Volatility Targeting. 5-asset allocation (equities, bonds, commodities, crypto, alternatives). GBM simulation + Markowitz optimization + Kelly criterion. Automated daily signals via Telegram.</div>
+        <div class='product-desc'>100% VTIP Core Anchor with monthly gains sweep to satellites. IAU · KMLM · GEV · VGSH (25% each). Geometric return adjustment + Monte Carlo + automated daily Telegram signals.</div>
         <div>
             <span class='product-badge'>VIX REGIME</span>
             <span class='product-badge'>5 ASSETS</span>
@@ -608,7 +625,7 @@ st.divider()
 st.markdown("### Platform Metrics")
 m1, m2, m3, m4, m5, m6 = st.columns(6)
 m1.metric("MARKETS", "17", "1,700+ GW Global")
-m2.metric("PAGES", "25", "Full Product Suite")
+m2.metric("PAGES", "26", "Full Product Suite")
 m3.metric("DIVISIONS", "3", "Grid · Eureka · Research")
 m4.metric("ENGINES", "6", "NH₃ · H₂ · Turbine")
 m5.metric("REPOS", "22", "Enterprise Fleet")
