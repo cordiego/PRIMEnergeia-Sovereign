@@ -534,7 +534,7 @@ MARKETS = {
 #  SIDEBAR — Market Selector
 # ============================================================
 st.sidebar.markdown("## ⚡ Market Selector")
-market_key = st.sidebar.radio("Select Market", list(MARKETS.keys()), index=0)
+market_key = st.sidebar.selectbox("Select Market", list(MARKETS.keys()), index=0)
 M = MARKETS[market_key]
 st.sidebar.divider()
 st.sidebar.markdown(f"**{M['full']}**")
@@ -555,43 +555,116 @@ def hex_to_rgba(hex_color, alpha):
     r, g, b = int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16)
     return f'rgba({r},{g},{b},{alpha})'
 
-# --- DYNAMIC CSS ---
+# --- DYNAMIC CSS — HIGH-CONTRAST READABILITY ---
 st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
-.main {{ background-color: #050810; color: #e0e6ed; font-family: 'Inter', sans-serif; }}
+
+/* ─── Base ─── */
+.main {{ background-color: #050810; color: #f1f5f9; font-family: 'Inter', sans-serif; }}
 [data-testid="stHeader"] {{ background-color: #050810; }}
 [data-testid="stSidebar"] {{ background-color: #0a0f1a; }}
+
+/* ─── Global text — force white/light on dark ─── */
+.stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown span {{
+    color: #f1f5f9 !important;
+    font-size: 15px !important;
+    line-height: 1.6 !important;
+}}
+h1, h2, h3, h4, h5, h6 {{ color: #ffffff !important; }}
+.stCaption, [data-testid="stCaptionContainer"] p {{
+    color: #cbd5e1 !important;
+    font-size: 13px !important;
+}}
+
+/* ─── Sidebar readability ─── */
+div[data-testid="stSidebar"] * {{ color: #f1f5f9 !important; }}
+div[data-testid="stSidebar"] p {{ font-size: 14px !important; line-height: 1.7 !important; }}
+div[data-testid="stSidebar"] .stSelectbox label {{ color: #cbd5e1 !important; font-weight: 600 !important; }}
+div[data-testid="stSidebar"] code {{
+    color: {AC} !important;
+    background: rgba(255,255,255,0.06) !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 13px !important;
+}}
+
+/* ─── Metric cards ─── */
 [data-testid="stMetric"] {{
     background: linear-gradient(135deg, #0d1520 0%, #111b2a 100%);
     border: 1px solid {M['border']}; border-radius: 8px; padding: 18px 20px;
     box-shadow: 0 4px 20px rgba(0,0,0,0.15);
 }}
-div[data-testid="stMetricValue"] {{ color: {AC}; font-family: 'JetBrains Mono', monospace; font-size: 26px; font-weight: 700; text-shadow: 0 0 12px rgba(0,209,255,0.3); }}
-div[data-testid="stMetricDelta"] {{ font-family: 'JetBrains Mono', monospace; color: #c8d6e5; }}
+div[data-testid="stMetricValue"] {{
+    color: {AC} !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    text-shadow: 0 0 12px rgba(0,209,255,0.3);
+}}
+div[data-testid="stMetricDelta"] {{
+    font-family: 'JetBrains Mono', monospace !important;
+    color: #cbd5e1 !important;
+    font-size: 13px !important;
+}}
 div[data-testid="stMetricLabel"] {{
-    color: #c8d6e5;
-    font-family: 'Inter', sans-serif;
-    font-weight: 600;
-    font-size: 14px;
+    color: #e2e8f0 !important;
+    font-family: 'Inter', sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
     letter-spacing: 1px;
     text-transform: uppercase;
 }}
+
+/* ─── Tabs ─── */
 .stTabs [data-baseweb="tab-list"] {{ gap: 0px; background-color: #0a0f1a; border-radius: 8px; padding: 4px; }}
-.stTabs [data-baseweb="tab"] {{ color: #c8d6e5; font-weight: 600; font-size: 15px; border-radius: 6px; padding: 10px 20px; }}
+.stTabs [data-baseweb="tab"] {{ color: #e2e8f0 !important; font-weight: 600; font-size: 14px; border-radius: 6px; padding: 10px 16px; }}
 .stTabs [aria-selected="true"] {{ background: linear-gradient(135deg, {AC}22, {M['accent2']}22); color: {AC} !important; }}
+
+/* ─── Status animations ─── */
 .status-nominal {{ color: #00ff88; font-weight: 700; font-family: 'JetBrains Mono'; animation: pulse 2s infinite; }}
 .status-alert {{ color: #ff4b4b; font-weight: 700; font-family: 'JetBrains Mono'; animation: blink 0.8s infinite; }}
 @keyframes pulse {{ 0%,100% {{ opacity: 1; }} 50% {{ opacity: 0.6; }} }}
 @keyframes blink {{ 0%,100% {{ opacity: 1; }} 50% {{ opacity: 0.2; }} }}
-.section-header {{ color: {AC}; font-family: 'JetBrains Mono', monospace; font-size: 14px; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid {M['border']}; padding-bottom: 8px; margin-bottom: 16px; }}
-.math-block {{ background: #0a0f1a; border-left: 3px solid {AC}; padding: 16px 20px; font-family: 'JetBrains Mono', monospace; font-size: 15px; color: #e2e8f0; border-radius: 0 6px 6px 0; margin: 12px 0; }}
-.kpi-highlight {{ background: linear-gradient(135deg, #001a33, #002244); border: 1px solid #003366; border-radius: 10px; padding: 24px; text-align: center; }}
+
+/* ─── Section headers & math blocks ─── */
+.section-header {{
+    color: {AC} !important;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 1px solid {M['border']};
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+}}
+.math-block {{
+    background: #0a0f1a;
+    border-left: 3px solid {AC};
+    padding: 16px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    color: #f1f5f9 !important;
+    border-radius: 0 6px 6px 0;
+    margin: 12px 0;
+    line-height: 1.8;
+}}
+.math-block strong {{ color: #ffffff !important; }}
+
+/* ─── KPI highlights ─── */
+.kpi-highlight {{
+    background: linear-gradient(135deg, #001a33, #002244);
+    border: 1px solid #003366;
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+}}
 .kpi-value {{ font-size: 42px; font-weight: 700; color: #00ff88; font-family: 'JetBrains Mono'; }}
-.kpi-label {{ font-size: 13px; color: #94a3b8; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }}
-/* Markdown & sidebar readability */
-.stMarkdown, .stMarkdown p {{ color: #e2e8f0 !important; font-size: 15px; }}
-div[data-testid="stSidebar"] * {{ color: #e2e8f0 !important; }}
+.kpi-label {{ font-size: 13px; color: #cbd5e1; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; }}
+
+/* ─── Dataframe readability ─── */
+.stDataFrame {{ color: #f1f5f9 !important; }}
+[data-testid="stDataFrame"] * {{ color: #e2e8f0 !important; font-size: 13px !important; }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -744,7 +817,7 @@ with tab1:
     fig.add_hline(y=f0 + M["penalty_f"], line_dash="dot", line_color="#ff4b4b", row=1, col=1)
     fig.add_trace(go.Scatter(x=t_axis, y=state["rocof_history"], name="df/dt", line=dict(color="#fbc02d", width=1.5), fill='tozeroy', fillcolor='rgba(251,192,45,0.08)'), row=2, col=1)
     fig.add_trace(go.Scatter(x=t_axis, y=state["inertia_injection"], name="u(t)", line=dict(color="#00ff88", width=2), fill='tozeroy', fillcolor='rgba(0,255,136,0.1)'), row=3, col=1)
-    fig.update_layout(template="plotly_dark", height=750, showlegend=False, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=80,b=40), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
+    fig.update_layout(template="plotly_dark", height=750, showlegend=False, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=80,b=40), font=dict(family="JetBrains Mono", size=14, color="#cbd5e1"))
     fig.update_xaxes(title_text="Time (s)", row=3, col=1, gridcolor="#1a2744")
     fig.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig, use_container_width=True)
@@ -769,7 +842,7 @@ with tab2:
     fig2.add_trace(go.Scatter(x=sg, y=state["u_optimal"], line=dict(color="#00ff88", width=3), fill='tozeroy', fillcolor='rgba(0,255,136,0.08)'), row=2, col=1)
     fig2.add_vline(x=f0, line_dash="dash", line_color="#fbc02d", annotation_text="f₀", row=2, col=1)
     fig2.add_trace(go.Scatter(x=sg, y=state["H_field"], line=dict(color="#fbc02d", width=2), fill='tozeroy', fillcolor='rgba(251,192,45,0.06)'), row=2, col=2)
-    fig2.update_layout(template="plotly_dark", height=750, showlegend=False, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=80,b=40), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
+    fig2.update_layout(template="plotly_dark", height=750, showlegend=False, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=80,b=40), font=dict(family="JetBrains Mono", size=14, color="#cbd5e1"))
     fig2.update_xaxes(title_text="Frequency (Hz)", gridcolor="#1a2744")
     fig2.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig2, use_container_width=True)
@@ -802,7 +875,7 @@ with tab3:
     fig3.add_trace(go.Scatter(x=h, y=state["capital_cumulative"], name="Rescued", line=dict(color=AC, width=3), fill='tozeroy', fillcolor=hex_to_rgba(AC, 0.08)), row=2, col=1)
     curr_h = now.hour + now.minute/60.0
     fig3.add_vline(x=curr_h, line_dash="dash", line_color=AC, opacity=0.7, annotation_text="LIVE")
-    fig3.update_layout(template="plotly_dark", height=700, showlegend=True, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=100,b=40), legend=dict(orientation="h", y=1.18, x=0.5, xanchor="center"), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
+    fig3.update_layout(template="plotly_dark", height=700, showlegend=True, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=100,b=40), legend=dict(orientation="h", y=1.18, x=0.5, xanchor="center"), font=dict(family="JetBrains Mono", size=14, color="#cbd5e1"))
     fig3.update_xaxes(title_text="Hour", gridcolor="#1a2744")
     fig3.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig3, use_container_width=True)
@@ -812,7 +885,7 @@ with tab3:
     fig_px.add_trace(go.Scatter(x=h, y=state["prices"], name=f"{M['price_name']} ({M['cur_code']}/MWh)", line=dict(color=AC, width=2), fill='tozeroy', fillcolor=hex_to_rgba(AC, 0.06)))
     fig_px.add_hline(y=M["price_threshold"], line_dash="dash", line_color="#ff4b4b", annotation_text=M["threshold_label"])
     fig_px.add_vline(x=curr_h, line_dash="dash", line_color=AC, opacity=0.7, annotation_text="LIVE")
-    fig_px.update_layout(template="plotly_dark", height=280, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=20,b=40), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
+    fig_px.update_layout(template="plotly_dark", height=280, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=20,b=40), font=dict(family="JetBrains Mono", size=14, color="#cbd5e1"))
     fig_px.update_xaxes(gridcolor="#1a2744")
     fig_px.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig_px, use_container_width=True)
@@ -835,7 +908,7 @@ with tab4:
         marker=dict(color=["#ff4b4b" if v > M['thd_limit']*0.6 else AC for v in hv], line=dict(color=M['border'], width=1)),
         text=[f"{v:.2f}%" for v in hv], textposition='outside', textfont=dict(family="JetBrains Mono", size=12, color="#e0e6ed")))
     fig4.add_hline(y=M['thd_limit']*0.6, line_dash="dash", line_color="#ff4b4b", annotation_text=f"{M['thd_std']} Ind. Limit")
-    fig4.update_layout(template="plotly_dark", height=350, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", yaxis_title="Magnitude (%)", margin=dict(l=60,r=20,t=20,b=40), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
+    fig4.update_layout(template="plotly_dark", height=350, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", yaxis_title="Magnitude (%)", margin=dict(l=60,r=20,t=20,b=40), font=dict(family="JetBrains Mono", size=14, color="#cbd5e1"))
     fig4.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig4, use_container_width=True)
 
@@ -850,7 +923,7 @@ with tab4:
     fig5.add_trace(go.Scatter(x=t_wave*1000, y=pa, name="Phase A", line=dict(color=AC, width=2.5)))
     fig5.add_trace(go.Scatter(x=t_wave*1000, y=pb, name="Phase B", line=dict(color="#00ff88", width=2)))
     fig5.add_trace(go.Scatter(x=t_wave*1000, y=pc, name="Phase C", line=dict(color="#fbc02d", width=2)))
-    fig5.update_layout(template="plotly_dark", height=320, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=20,b=40), xaxis_title="Time (ms)", yaxis_title="V (p.u.)", legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"), font=dict(family="JetBrains Mono", size=14, color="#94a3b8"))
+    fig5.update_layout(template="plotly_dark", height=320, paper_bgcolor="#050810", plot_bgcolor="#0a0f1a", margin=dict(l=60,r=20,t=20,b=40), xaxis_title="Time (ms)", yaxis_title="V (p.u.)", legend=dict(orientation="h", y=1.1, x=0.5, xanchor="center"), font=dict(family="JetBrains Mono", size=14, color="#cbd5e1"))
     fig5.update_xaxes(gridcolor="#1a2744")
     fig5.update_yaxes(gridcolor="#1a2744")
     st.plotly_chart(fig5, use_container_width=True)
@@ -868,7 +941,7 @@ with tab5:
     for node in state["nodes"]:
         regions.setdefault(node["region"], []).append(node)
     for rname, rnodes in regions.items():
-        st.markdown(f"<p style='font-family:JetBrains Mono;font-size:11px;color:{AC};letter-spacing:2px;margin:16px 0 8px 0;'>▸ {rname.upper()}</p>", unsafe_allow_html=True)
+        st.markdown(f"<p style='font-family:JetBrains Mono;font-size:13px;color:{AC};letter-spacing:2px;margin:20px 0 10px 0;font-weight:700;'>▸ {rname.upper()}</p>", unsafe_allow_html=True)
         for i in range(0, len(rnodes), 3):
             cols = st.columns(3)
             for j, col in enumerate(cols):
@@ -880,10 +953,10 @@ with tab5:
                         st.markdown(f"""<div style='background:linear-gradient(135deg,#0d1520,#111b2a);border:1px solid {M['border']};
                             border-left:4px solid {sc};border-radius:8px;padding:14px 16px;margin-bottom:10px;'>
                             <div style='display:flex;justify-content:space-between;align-items:center;'>
-                            <div><span style='font-family:JetBrains Mono;font-size:14px;font-weight:700;color:#e0e6ed;'>{n["id"]}</span>
-                            <span style='font-size:10px;color:{sc};margin-left:8px;font-weight:700;'>● {n["status"]}</span></div>
-                            <span style='font-family:JetBrains Mono;font-size:16px;color:{AC};'>{n["f"]:.3f} Hz</span></div>
-                            <div style='font-size:11px;color:#94a3b8;margin-top:5px;'>{n["loc"]} | {n["cap"]} MW | Load: {n["load"]}% | Δf: {fd:+.4f}</div>
+                            <div><span style='font-family:JetBrains Mono;font-size:14px;font-weight:700;color:#ffffff;'>{n["id"]}</span>
+                            <span style='font-size:11px;color:{sc};margin-left:8px;font-weight:700;'>● {n["status"]}</span></div>
+                            <span style='font-family:JetBrains Mono;font-size:16px;font-weight:700;color:{AC};'>{n["f"]:.3f} Hz</span></div>
+                            <div style='font-size:12px;color:#cbd5e1;margin-top:6px;line-height:1.5;'>{n["loc"]} | {n["cap"]} MW | Load: {n["load"]}% | Δf: {fd:+.4f}</div>
                             </div>""", unsafe_allow_html=True)
     st.markdown("")
     ns1, ns2, ns3, ns4 = st.columns(4)
