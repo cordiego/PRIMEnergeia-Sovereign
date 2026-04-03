@@ -771,7 +771,7 @@ with h2:
     st.markdown(f"<p class='{sc}' style='font-size:18px; margin-top:20px;'>{'● NOMINAL' if is_nominal else '⚠ EXCURSION'}</p>", unsafe_allow_html=True)
     st.caption(f"Protocol: {M['protocol']}")
 with h3:
-    st.markdown(f"<p style='font-family:JetBrains Mono;color:#94a3b8;margin-top:20px;font-size:14px;'>{now.strftime('%Y-%m-%d %H:%M:%S')} {M['tz']}</p>", unsafe_allow_html=True)
+    st.markdown(f"<p style='font-family:JetBrains Mono;color:#cbd5e1;margin-top:20px;font-size:14px;'>{now.strftime('%Y-%m-%d %H:%M:%S')} {M['tz']}</p>", unsafe_allow_html=True)
     st.caption(f"Latency: 0.{np.random.randint(3,9)}ms | Uptime: 99.98%")
 
 st.divider()
@@ -779,11 +779,13 @@ st.divider()
 # ============================================================
 #  KPI BAR
 # ============================================================
-k1, k2, k3, k4, k5, k6, k7 = st.columns(7)
+k1, k2, k3, k4 = st.columns(4)
 k1.metric("FREQUENCY", f"{f:.4f} Hz", f"Δ {f-f0:+.4f}")
-k2.metric("RoCoF", f"{state['rocof']:+.5f} Hz/s", "Swing Eq.")
-k3.metric("VOLTAGE Φ-A", f"{state['v_a']:.1f} kV", f"{M['v_nom']:.0f} kV Nom.")
+k2.metric("RoCoF", f"{state['rocof']:+.5f} Hz/s", "Swing Equation")
+k3.metric("VOLTAGE Φ-A", f"{state['v_a']:.1f} kV", f"{M['v_nom']:.0f} kV Nominal")
 k4.metric("THD", f"{state['thd']:.2f} %", f"{'✓ ' + M['thd_std'] if state['thd'] < M['thd_limit'] else '⚠ Exceeds'}")
+
+k5, k6, k7 = st.columns(3)
 k5.metric("COS φ", f"{state['pf']:.4f}", "Unity Target")
 k6.metric("HOUR OF DAY", now.strftime("%H:%M"), "Live")
 k7.metric("RESCUED ACC.", f"{M['currency']}{state['capital_total']:,.0f}", f"{M['cur_code']} / day")
