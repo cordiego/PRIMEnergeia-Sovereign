@@ -335,10 +335,10 @@ with eu1:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #F1C40F;'>🏛️ Eureka Sovereign</div>
-        <div class='product-desc'>100% VTIP Core Anchor with monthly gains sweep to satellites. IAU · KMLM · GEV · VGSH (25% each). Geometric return adjustment + Monte Carlo + automated daily Telegram signals.</div>
+        <div class='product-desc'>100% VTIP Core Anchor with monthly gains sweep to satellites. IAU · GEV · VGSH (~33% each). Geometric return adjustment + Monte Carlo + automated daily Telegram signals.</div>
         <div>
             <span class='product-badge'>VIX REGIME</span>
-            <span class='product-badge'>5 ASSETS</span>
+            <span class='product-badge'>4 ASSETS</span>
             <span class='product-badge'>KELLY</span>
             <span class='product-badge'>TELEGRAM</span>
         </div>

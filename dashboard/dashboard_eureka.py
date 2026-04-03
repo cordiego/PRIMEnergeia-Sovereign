@@ -139,7 +139,7 @@ div[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 # ============================================================
 
 EUREKA_CORE = ["VTIP"]
-GAINS_SATELLITES = ["IAU", "GEV", "KMLM", "VGSH"]
+GAINS_SATELLITES = ["IAU", "GEV", "VGSH"]
 EUREKA_UNIVERSE = EUREKA_CORE
 BENCHMARK = "SPY"
 VIX_TICKER = "^VIX"
@@ -153,7 +153,6 @@ ASSET_META = {
     "VTIP": {"desc": "TIPS Bond",            "lever": 1.0, "category": "Core Anchor"},
     "IAU":  {"desc": "Gold",                 "lever": 1.0, "category": "Satellite"},
     "GEV":  {"desc": "Nuclear Energy",        "lever": 1.0, "category": "Satellite"},
-    "KMLM": {"desc": "Managed Futures",       "lever": 1.0, "category": "Satellite"},
     "VGSH": {"desc": "Short-Term Treasury",   "lever": 1.0, "category": "Satellite"},
 }
 
@@ -309,7 +308,7 @@ with h2:
     vix_label = data["vix_label"]
     vix_color = {"LOW": "#00ff88", "ELEVATED": "#fbc02d", "HIGH": "#ff4b4b"}[vix_label]
     st.markdown(f"<p style='font-family: JetBrains Mono; font-size:18px; font-weight:700; color:{vix_color}; margin-top:20px;'>VIX: {vix_label}</p>", unsafe_allow_html=True)
-    st.caption(f"100% VTIP | Gains → IAU · KMLM · GEV · VGSH")
+    st.caption(f"100% VTIP | Gains → IAU · GEV · VGSH")
 with h3:
     st.markdown(f"<p style='font-family: JetBrains Mono; color: #6b7fa3; margin-top:20px; font-size:14px;'>{now.strftime('%Y-%m-%d %H:%M:%S')} CST</p>", unsafe_allow_html=True)
     st.caption(f"Data Lag: 5min | Core: VTIP | Satellites: {len(GAINS_SATELLITES)}")
@@ -353,7 +352,7 @@ with tab1:
     st.markdown("""
     <div class='math-block'>
     <strong>Portfolio Construction:</strong>&nbsp;&nbsp; R<sub>p,t</sub> = 1.0 · r<sub>VTIP</sub><br>
-    <strong>Gains Destination:</strong>&nbsp;&nbsp; IAU · KMLM · GEV · VGSH — gains redistributed equally to satellites
+    <strong>Gains Destination:</strong>&nbsp;&nbsp; IAU · GEV · VGSH — gains redistributed equally to satellites
     </div>
     """, unsafe_allow_html=True)
 
@@ -433,17 +432,17 @@ with tab2:
     st.markdown("""
     <div class='math-block'>
     <strong>Allocation:</strong>&nbsp;&nbsp; 100% VTIP (Core Anchor)<br>
-    <strong>Gains Destinations:</strong>&nbsp;&nbsp; IAU · KMLM · GEV · VGSH — gains redistributed equally
+    <strong>Gains Destinations:</strong>&nbsp;&nbsp; IAU · GEV · VGSH — gains redistributed equally
     </div>
     """, unsafe_allow_html=True)
 
     # Weight display cards — VTIP core + 4 satellites
-    wc1, wc2, wc3, wc4, wc5 = st.columns(5)
+    wc1, wc2, wc3, wc4 = st.columns(4)
     weight_data = [
         ("VTIP", 100.0, "#a78bfa"), ("IAU", 0.0, "#FFD700"), ("GEV", 0.0, "#00ff88"),
-        ("KMLM", 0.0, "#22d3ee"), ("VGSH", 0.0, "#00d1ff"),
+        ("VGSH", 0.0, "#00d1ff"),
     ]
-    for col, (tk, pct, color) in zip([wc1, wc2, wc3, wc4, wc5], weight_data):
+    for col, (tk, pct, color) in zip([wc1, wc2, wc3, wc4], weight_data):
         with col:
             label = f"{pct:.0f}% CORE" if tk == "VTIP" else "💰 GAINS"
             desc = ASSET_META.get(tk, {}).get("desc", tk)
@@ -484,7 +483,6 @@ with tab2:
         "VTIP": "rgba(167, 139, 250, 0.66)",
         "IAU":  "rgba(255, 215, 0, 0.66)",
         "GEV":  "rgba(0, 255, 136, 0.66)",
-        "KMLM": "rgba(34, 211, 238, 0.66)",
         "VGSH": "rgba(0, 209, 255, 0.66)",
     }
     for tk in EUREKA_CORE:
@@ -751,7 +749,7 @@ with tab5:
     st.markdown("<div class='section-header'>CURRENT ALLOCATION — TREEMAP</div>", unsafe_allow_html=True)
     w_labels = list(data["current_weights"].keys())
     w_values = [v * 100 for v in data["current_weights"].values()]
-    treemap_colors = {"VTIP": "#a78bfa", "IAU": "#FFD700", "GEV": "#00ff88", "KMLM": "#22d3ee", "VGSH": "#00d1ff"}
+    treemap_colors = {"VTIP": "#a78bfa", "IAU": "#FFD700", "GEV": "#00ff88", "VGSH": "#00d1ff"}
     w_colors = [treemap_colors.get(tk, "#ffffff") for tk in w_labels]
 
     fig_tree = go.Figure(go.Treemap(
@@ -817,7 +815,7 @@ with fc1:
     st.caption("Proprietary Vol-Targeting Protocol")
 with fc2:
     st.caption("Architect: Diego Córdoba Urrutia")
-    st.caption("100% VTIP Core Anchor | Gains → IAU · KMLM · GEV · VGSH")
+    st.caption("100% VTIP Core Anchor | Gains → IAU · GEV · VGSH")
 with fc3:
     st.caption("Soberanía Financiera 🇲🇽")
     st.caption(f"Build: EUREKA-VOL-v2.3-HJB | {now.strftime('%Y')}")

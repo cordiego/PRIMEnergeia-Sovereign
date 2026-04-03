@@ -34,15 +34,13 @@ warnings.filterwarnings("ignore")
 #  CONFIGURATION
 # ============================================================
 
-EUREKA_UNIVERSE = ["IAU", "GEV", "VGSH", "VTIP", "VIXM"]
+EUREKA_UNIVERSE = ["VTIP", "IAU", "GEV", "VGSH"]
+GAINS_DESTINATION = "VGSH"
 VIX_TICKER = "^VIX"
 BENCHMARK = "SPY"
 
-REGIMES = {
-    "RISK-ON":    {"vix_range": (0, 18),   "weights": {"IAU": 0.35, "GEV": 0.35, "VGSH": 0.125, "VTIP": 0.125, "VIXM": 0.05}},
-    "TRANSITION": {"vix_range": (18, 28),  "weights": {"IAU": 0.20, "GEV": 0.20, "VGSH": 0.20,  "VTIP": 0.20,  "VIXM": 0.20}},
-    "CRISIS":     {"vix_range": (28, 100), "weights": {"IAU": 0.10, "GEV": 0.10, "VGSH": 0.25,  "VTIP": 0.25,  "VIXM": 0.30}},
-}
+# Static allocation — Vol≤5% optimal
+TARGET_WEIGHTS = {"VTIP": 1.0}
 
 # Thresholds for momentum signals
 TAKE_PROFIT_THRESHOLD = 0.01   # daily return > +1% → take profit window
