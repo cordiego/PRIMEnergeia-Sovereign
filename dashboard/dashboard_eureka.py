@@ -224,7 +224,6 @@ def load_market_data():
     weight_history = {"VTIP": [1.0] * len(returns)}
     spy_cum = (1 + returns[BENCHMARK]).cumprod()
 
-
     # --- Rolling analytics ---
     rolling_vol_20 = port_returns.rolling(20).std() * np.sqrt(252)
     rolling_vol_60 = port_returns.rolling(60).std() * np.sqrt(252)
@@ -383,22 +382,35 @@ with tab1:
 
     st.markdown("")
 
-    # Cumulative chart
+    # Cumulative chart — all tickers
     fig_perf = make_subplots(
         rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.12,
-        subplot_titles=("Cumulative Returns: Eureka Sovereign vs S&P 500", "Daily Portfolio Returns Distribution"),
+        subplot_titles=("Cumulative Returns: Full Portfolio Universe", "Daily Portfolio Returns Distribution"),
         row_heights=[0.65, 0.35]
     )
 
     fig_perf.add_trace(go.Scatter(
         x=data["cum_returns"].index, y=data["cum_returns"].values,
-        name="Eureka Sovereign", line=dict(color="#F1C40F", width=3),
+        name="VTIP (Core 100%)", line=dict(color="#F1C40F", width=3),
         fill='tozeroy', fillcolor='rgba(241,196,15,0.05)'
     ), row=1, col=1)
     fig_perf.add_trace(go.Scatter(
         x=data["spy_cum"].index, y=data["spy_cum"].values,
         name="S&P 500 (SPY)", line=dict(color="rgba(255,255,255,0.35)", width=1.5, dash="dot")
     ), row=1, col=1)
+
+    # Satellite cumulative returns — IAU, GEV, VGSH
+    sat_colors = {"IAU": "#FFD700", "GEV": "#00ff88", "VGSH": "#00d1ff"}
+    for tk in GAINS_SATELLITES:
+        if tk in data["returns"].columns:
+            sat_cum = (1 + data["returns"][tk]).cumprod()
+            fig_perf.add_trace(go.Scatter(
+                x=sat_cum.index, y=sat_cum.values,
+                name=f"{tk} ({ASSET_META[tk]['desc']})",
+                line=dict(color=sat_colors.get(tk, "#aaa"), width=1.8, dash="dash"),
+                opacity=0.85,
+            ), row=1, col=1)
+
     fig_perf.add_hline(y=1.0, line_dash="dash", line_color="#333", row=1, col=1)
 
     # Daily returns bar
@@ -436,7 +448,7 @@ with tab2:
     </div>
     """, unsafe_allow_html=True)
 
-    # Weight display cards — VTIP core + 4 satellites
+    # Weight display cards — VTIP core + 3 satellites
     wc1, wc2, wc3, wc4 = st.columns(4)
     weight_data = [
         ("VTIP", 100.0, "#a78bfa"), ("IAU", 0.0, "#FFD700"), ("GEV", 0.0, "#00ff88"),
@@ -728,7 +740,8 @@ with tab5:
     # Correlation heatmap
     st.markdown("<div class='section-header'>CROSS-ASSET CORRELATION MATRIX</div>", unsafe_allow_html=True)
 
-    corr = data["corr_matrix"]
+    corr_tickers = [tk for tk in EUREKA_CORE + GAINS_SATELLITES if tk in data["returns"].columns]
+    corr = data["returns"][corr_tickers].corr()
     fig_corr = go.Figure(data=go.Heatmap(
         z=corr.values, x=corr.columns, y=corr.index,
         colorscale=[[0, "#ff4b4b"], [0.5, "#0a0f1a"], [1, "#00d1ff"]],
