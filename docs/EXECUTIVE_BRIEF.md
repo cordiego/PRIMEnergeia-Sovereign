@@ -6,7 +6,7 @@
 
 ## A la atención de: Dirección de Operaciones
 
-**Fecha:** Marzo 2026  
+**Fecha:** Abril 2026  
 **Preparado por:** Diego Córdoba Urrutia — Lead Computational Physicist  
 **Entidad:** PRIMEnergeia S.A.S.
 
@@ -28,13 +28,49 @@ Las redes eléctricas a nivel global pierden millones anualmente por tres razone
 
 Nuestra plataforma resuelve la ecuación **Hamilton-Jacobi-Bellman (HJB)** en tiempo real para calcular la acción de control óptima *antes* de que la inestabilidad se manifieste.
 
-### Mercados Activos
+### 17 Mercados Globales — 1,770 GW
 
-| Mercado | Región | Frecuencia | Nodos | Pricing | Moneda |
-|---------|--------|-----------|-------|---------|--------|
-| **SEN** | 🇲🇽 México | 60 Hz | 30 | PML / CENACE | USD |
-| **ERCOT** | 🇺🇸 Texas | 60 Hz | 22 | LMP ($5k cap) | USD |
-| **MIBEL** | 🇪🇸🇵🇹 Ibérico | 50 Hz | 20 | OMIE Pool | EUR |
+#### 🇺🇸 Estados Unidos (7 ISOs — 665 GW)
+
+| Mercado | Región | Frecuencia | Capacidad | Pricing | Moneda |
+|---------|--------|-----------|-----------|---------|--------|
+| **ERCOT** | Texas | 60 Hz | 85 GW | LMP ($5k cap) | USD |
+| **PJM** | US East (13 estados) | 60 Hz | 180 GW | LMP | USD |
+| **CAISO** | California | 60 Hz | 80 GW | LMP | USD |
+| **MISO** | US Midwest | 60 Hz | 190 GW | LMP | USD |
+| **SPP** | US Central | 60 Hz | 65 GW | LMP | USD |
+| **NYISO** | New York | 60 Hz | 35 GW | LBMP | USD |
+| **ISONE** | New England | 60 Hz | 30 GW | LMP | USD |
+
+#### 🇨🇦 Canadá (2 ISOs — 55 GW)
+
+| Mercado | Región | Frecuencia | Capacidad | Pricing | Moneda |
+|---------|--------|-----------|-----------|---------|--------|
+| **IESO** | Ontario | 60 Hz | 38 GW | HOEP | CAD |
+| **AESO** | Alberta | 60 Hz | 17 GW | Pool Price | CAD |
+
+#### 🇲🇽 México (1 ISO — 75 GW)
+
+| Mercado | Región | Frecuencia | Capacidad | Pricing | Moneda |
+|---------|--------|-----------|-----------|---------|--------|
+| **SEN** | México (9 regiones CENACE) | 60 Hz | 75 GW | PML / CENACE | USD |
+
+#### 🇪🇺 Europa (5 Mercados — 640 GW)
+
+| Mercado | Región | Frecuencia | Capacidad | Pricing | Moneda |
+|---------|--------|-----------|-----------|---------|--------|
+| **MIBEL** | 🇪🇸🇵🇹 España + Portugal | 50 Hz | 110 GW | OMIE Pool | EUR |
+| **EPEX** | 🇩🇪 Alemania | 50 Hz | 220 GW | EPEX SPOT | EUR |
+| **EPEX FR** | 🇫🇷 Francia | 50 Hz | 130 GW | EPEX SPOT | EUR |
+| **Nord Pool** | 🇳🇴🇸🇪🇫🇮🇩🇰 Nórdicos | 50 Hz | 100 GW | Nord Pool | EUR |
+| **Elexon** | 🇬🇧 Reino Unido | 50 Hz | 80 GW | BMRS | GBP |
+
+#### 🌏 Asia-Pacífico (2 Mercados — 335 GW)
+
+| Mercado | Región | Frecuencia | Capacidad | Pricing | Moneda |
+|---------|--------|-----------|-----------|---------|--------|
+| **NEM** | 🇦🇺 Australia | 50 Hz | 55 GW | AEMO Pool | AUD |
+| **JEPX** | 🇯🇵 Japón | 50/60 Hz | 280 GW | JEPX Spot | JPY |
 
 ### Capacidades Técnicas
 
@@ -43,10 +79,10 @@ Nuestra plataforma resuelve la ecuación **Hamilton-Jacobi-Bellman (HJB)** en ti
 | Predicción de excursiones de frecuencia | Modelo estocástico de dinámica de red |
 | Inyección proactiva de inercia sintética | Ley de control óptimo HJB |
 | Eliminación de penalizaciones | Resolución de Ecuación de Oscilación (50/60 Hz) |
-| Captura de arbitraje de precios | Optimización de despacho (PML / LMP / OMIE) |
+| Captura de arbitraje de precios | Optimización de despacho multi-mercado |
 | Auto-reparación post-disturbio | Red neuronal actor-crítico (Deep RL) |
 
-**Latencia:** < 0.5 ms | **Sin cambios de hardware** | **72 nodos en 3 mercados**
+**Latencia:** < 0.5 ms | **Sin cambios de hardware** | **17 mercados · 1,770 GW**
 
 ---
 
@@ -62,14 +98,26 @@ Nuestra plataforma resuelve la ecuación **Hamilton-Jacobi-Bellman (HJB)** en ti
 
 ---
 
-## 4. Proyecciones de Ingresos — Multi-Mercado
+## 4. Proyecciones de Ingresos — Multi-Mercado (17 ISOs)
 
-| Mercado | Nodos | Rescate Anual | Ingreso PRIME (25%) |
-|---------|-------|--------------|---------------------|
-| SEN 🇲🇽 | 30 | $64.7M USD | $16.2M USD |
-| ERCOT 🇺🇸 | 22 | $71.7M USD | $17.9M USD |
-| MIBEL 🇪🇸🇵🇹 | 20 | €51.6M EUR | €12.9M EUR |
-| **TOTAL** | **72** | **~$188M** | **~$48M USD** |
+### Mercados de Lanzamiento (Año 1)
+
+| Mercado | Capacidad | Rescate Anual | Ingreso PRIME (25%) |
+|---------|-----------|--------------|---------------------|
+| SEN 🇲🇽 | 75 GW | $64.7M USD | $16.2M USD |
+| ERCOT 🇺🇸 | 85 GW | $71.7M USD | $17.9M USD |
+| MIBEL 🇪🇸🇵🇹 | 110 GW | €51.6M EUR | €12.9M EUR |
+
+### Expansión Completa (Año 5 — 17 Mercados)
+
+| Región | Mercados | Capacidad | Rescate Potencial | Ingreso PRIME (25%) |
+|--------|----------|-----------|-------------------|---------------------|
+| 🇺🇸 US ISOs | ERCOT, PJM, CAISO, MISO, SPP, NYISO, ISONE | 665 GW | ~$350M USD | ~$87M USD |
+| 🇨🇦 Canadá | IESO, AESO | 55 GW | ~$25M CAD | ~$5M USD |
+| 🇲🇽 México | SEN | 75 GW | ~$65M USD | ~$16M USD |
+| 🇪🇺 Europa | MIBEL, EPEX, EPEX FR, Nord Pool, Elexon | 640 GW | ~€280M EUR | ~€70M EUR |
+| 🌏 Asia-Pac | NEM, JEPX | 335 GW | ~$50M USD | ~$12M USD |
+| **TOTAL** | **17 ISOs** | **1,770 GW** | **~$770M** | **~$190M** |
 
 ---
 
@@ -102,4 +150,4 @@ Lead Computational Physicist | PRIMEnergeia S.A.S.
 
 ---
 
-*PRIMEnergeia S.A.S. — Soberanía Energética Global* ⚡🇲🇽🇺🇸🇪🇸🇵🇹
+*PRIMEnergeia S.A.S. — Soberanía Energética Global* ⚡🇲🇽🇺🇸🇪🇺🇦🇺🇯🇵🇨🇦🇬🇧

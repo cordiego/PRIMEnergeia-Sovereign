@@ -486,8 +486,32 @@
 
     .market-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: 1.5rem;
+    }
+
+    .market-card.region-header {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, rgba(0, 209, 255, 0.06) 0%, rgba(139, 92, 246, 0.04) 100%);
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 1rem 2rem;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .market-card.region-header h3 {
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    .market-card.region-header .region-gw {
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
     }
 
     .market-card {
@@ -744,7 +768,10 @@
     @media (max-width: 768px) {
       .nav-links { display: none; }
 
-      .ps-grid,
+      .ps-grid {
+        grid-template-columns: 1fr;
+      }
+
       .market-grid {
         grid-template-columns: 1fr;
       }
@@ -798,7 +825,7 @@
       <div class="hero-content">
         <div class="hero-badge">
           <span class="pulse"></span>
-          Live across 3 international markets
+          Live across 17 international markets · 1,770 GW
         </div>
 
         <h1>
@@ -819,7 +846,7 @@
           <a href="https://primenergeia-sovereign.streamlit.app" class="btn btn-primary" target="_blank">
             🔴 Launch Live Dashboard
           </a>
-          <a href="EXECUTIVE_BRIEF.md" class="btn btn-secondary">
+          <a href="https://github.com/cordiego/PRIMEnergeia-Sovereign/blob/main/docs/EXECUTIVE_BRIEF.md" class="btn btn-secondary" target="_blank">
             📋 Executive Brief
           </a>
           <a href="https://github.com/cordiego/PRIMEnergeia-Sovereign" class="btn btn-secondary" target="_blank">
@@ -833,8 +860,8 @@
             <div class="stat-label">Capital Rescued</div>
           </div>
           <div class="stat">
-            <div class="stat-value gold">72</div>
-            <div class="stat-label">Active Nodes</div>
+            <div class="stat-value gold">1,770 GW</div>
+            <div class="stat-label">Grid Coverage</div>
           </div>
           <div class="stat">
             <div class="stat-value green">99.96%</div>
@@ -845,8 +872,8 @@
             <div class="stat-label">Control Latency</div>
           </div>
           <div class="stat">
-            <div class="stat-value">$48M</div>
-            <div class="stat-label">Projected ARR</div>
+            <div class="stat-value">17</div>
+            <div class="stat-label">Global ISOs</div>
           </div>
         </div>
       </div>
@@ -919,7 +946,7 @@
 
         <p class="proof-note">
           Proof of concept — single node, single market.<br>
-          72-node fleet projected at ~$48M USD annual recurring revenue.
+          17-market fleet projected across 1,770 GW global coverage.
         </p>
       </div>
     </div>
@@ -929,23 +956,18 @@
   <section class="markets" id="markets">
     <div class="container">
       <span class="section-label">🌍 Markets</span>
-      <h2>Three International Grids</h2>
+      <h2>17 Global Markets · 1,770 GW</h2>
       <p class="section-desc">
-        Unified control across 17 global ISOs — 1,700+ GW. Adapting to each market’s frequency standard, pricing, and regulatory regime.
+        Unified HJB optimal control across 17 global ISOs — adapting to each market's frequency standard, pricing mechanism, and regulatory regime.
       </p>
 
       <div class="market-grid">
-        <div class="market-card">
-          <div class="market-flag">🇲🇽</div>
-          <h3>SEN</h3>
-          <div class="market-region">Mexico — Sistema Eléctrico Nacional</div>
-          <ul class="market-specs">
-            <li><span>Frequency</span><span>60 Hz</span></li>
-            <li><span>Nodes</span><span>30</span></li>
-            <li><span>Pricing</span><span>PML / CENACE</span></li>
-            <li><span>THD Standard</span><span>≤5%</span></li>
-            <li><span>Annual Rescue</span><span>$64.7M</span></li>
-          </ul>
+
+        <!-- ── US ISOs ── -->
+        <div class="market-card region-header">
+          <span>🇺🇸</span>
+          <h3>United States — 7 ISOs</h3>
+          <span class="region-gw">665 GW</span>
         </div>
 
         <div class="market-card">
@@ -953,26 +975,233 @@
           <h3>ERCOT</h3>
           <div class="market-region">Texas — Electric Reliability Council</div>
           <ul class="market-specs">
+            <li><span>Capacity</span><span>85 GW</span></li>
             <li><span>Frequency</span><span>60 Hz</span></li>
-            <li><span>Nodes</span><span>22</span></li>
             <li><span>Pricing</span><span>LMP ($5k cap)</span></li>
-            <li><span>THD Standard</span><span>≤5%</span></li>
-            <li><span>Annual Rescue</span><span>$71.7M</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
           </ul>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇺🇸</div>
+          <h3>PJM</h3>
+          <div class="market-region">US East — 13 States</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>180 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇺🇸</div>
+          <h3>CAISO</h3>
+          <div class="market-region">California ISO</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>80 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇺🇸</div>
+          <h3>MISO</h3>
+          <div class="market-region">US Midwest — 15 States</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>190 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇺🇸</div>
+          <h3>SPP</h3>
+          <div class="market-region">US Central — Southwest Power Pool</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>65 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇺🇸</div>
+          <h3>NYISO</h3>
+          <div class="market-region">New York ISO</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>35 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LBMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇺🇸</div>
+          <h3>ISONE</h3>
+          <div class="market-region">New England — ISO-NE</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>30 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <!-- ── Canada ── -->
+        <div class="market-card region-header">
+          <span>🇨🇦</span>
+          <h3>Canada — 2 ISOs</h3>
+          <span class="region-gw">55 GW</span>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇨🇦</div>
+          <h3>IESO</h3>
+          <div class="market-region">Ontario — Independent Electricity SO</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>38 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>HOEP (CAD)</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇨🇦</div>
+          <h3>AESO</h3>
+          <div class="market-region">Alberta — Electric System Operator</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>17 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>Pool Price (CAD)</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <!-- ── Mexico ── -->
+        <div class="market-card region-header">
+          <span>🇲🇽</span>
+          <h3>México — CENACE</h3>
+          <span class="region-gw">75 GW</span>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇲🇽</div>
+          <h3>SEN</h3>
+          <div class="market-region">Mexico — Sistema Eléctrico Nacional</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>75 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>PML / CENACE</span></li>
+            <li><span>Source</span><span>CENACE API</span></li>
+          </ul>
+        </div>
+
+        <!-- ── Europe ── -->
+        <div class="market-card region-header">
+          <span>🇪🇺</span>
+          <h3>Europe — 5 Markets</h3>
+          <span class="region-gw">640 GW</span>
         </div>
 
         <div class="market-card">
           <div class="market-flag">🇪🇸🇵🇹</div>
           <h3>MIBEL</h3>
-          <div class="market-region">Spain/Portugal — Iberian Market</div>
+          <div class="market-region">Spain + Portugal — OMIE</div>
           <ul class="market-specs">
+            <li><span>Capacity</span><span>110 GW</span></li>
             <li><span>Frequency</span><span>50 Hz</span></li>
-            <li><span>Nodes</span><span>20</span></li>
             <li><span>Pricing</span><span>OMIE Pool (EUR)</span></li>
-            <li><span>THD Standard</span><span>≤8%</span></li>
-            <li><span>Annual Rescue</span><span>€51.6M</span></li>
+            <li><span>Source</span><span>OMIE / ENTSO-E</span></li>
           </ul>
         </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇩🇪</div>
+          <h3>EPEX</h3>
+          <div class="market-region">Germany — EPEX SPOT</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>220 GW</span></li>
+            <li><span>Frequency</span><span>50 Hz</span></li>
+            <li><span>Pricing</span><span>EPEX SPOT (EUR)</span></li>
+            <li><span>Source</span><span>ENTSO-E</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇫🇷</div>
+          <h3>EPEX FR</h3>
+          <div class="market-region">France — EPEX SPOT</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>130 GW</span></li>
+            <li><span>Frequency</span><span>50 Hz</span></li>
+            <li><span>Pricing</span><span>EPEX SPOT (EUR)</span></li>
+            <li><span>Source</span><span>ENTSO-E</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇳🇴🇸🇪🇫🇮🇩🇰</div>
+          <h3>Nord Pool</h3>
+          <div class="market-region">Nordics — NO/SE/FI/DK</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>100 GW</span></li>
+            <li><span>Frequency</span><span>50 Hz</span></li>
+            <li><span>Pricing</span><span>Nord Pool (EUR)</span></li>
+            <li><span>Source</span><span>ENTSO-E</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇬🇧</div>
+          <h3>Elexon</h3>
+          <div class="market-region">United Kingdom — BMRS</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>80 GW</span></li>
+            <li><span>Frequency</span><span>50 Hz</span></li>
+            <li><span>Pricing</span><span>BMRS (GBP)</span></li>
+            <li><span>Source</span><span>ENTSO-E</span></li>
+          </ul>
+        </div>
+
+        <!-- ── Asia-Pacific ── -->
+        <div class="market-card region-header">
+          <span>🌏</span>
+          <h3>Asia-Pacific — 2 Markets</h3>
+          <span class="region-gw">335 GW</span>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇦🇺</div>
+          <h3>NEM</h3>
+          <div class="market-region">Australia — AEMO</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>55 GW</span></li>
+            <li><span>Frequency</span><span>50 Hz</span></li>
+            <li><span>Pricing</span><span>AEMO Pool (AUD)</span></li>
+            <li><span>Source</span><span>Proxy</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card">
+          <div class="market-flag">🇯🇵</div>
+          <h3>JEPX</h3>
+          <div class="market-region">Japan — Power Exchange</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>280 GW</span></li>
+            <li><span>Frequency</span><span>50/60 Hz</span></li>
+            <li><span>Pricing</span><span>JEPX Spot (JPY)</span></li>
+            <li><span>Source</span><span>Proxy</span></li>
+          </ul>
+        </div>
+
       </div>
     </div>
   </section>
@@ -1045,22 +1274,22 @@
       </p>
 
       <div class="docs-grid">
-        <a href="EXECUTIVE_BRIEF.md" class="doc-card">
+        <a href="https://github.com/cordiego/PRIMEnergeia-Sovereign/blob/main/docs/EXECUTIVE_BRIEF.md" class="doc-card" target="_blank">
           <div class="doc-icon">📋</div>
           <h3>Executive Brief</h3>
-          <p>Value proposition for C-level decision makers. Problem, solution, certified results, revenue projections, and commercial model.</p>
+          <p>Value proposition for C-level decision makers. 17 global markets, certified results, revenue projections, and commercial model.</p>
         </a>
-        <a href="PRODUCT_CATALOG.md" class="doc-card">
+        <a href="https://github.com/cordiego/PRIMEnergeia-Sovereign/blob/main/docs/PRODUCT_CATALOG.md" class="doc-card" target="_blank">
           <div class="doc-icon">💰</div>
           <h3>Product Catalog</h3>
-          <p>Complete portfolio overview: 3 divisions, $5B+ total addressable market, pricing models, and technical specifications.</p>
+          <p>Complete portfolio overview: 5 divisions, $5B+ total addressable market, pricing models, and technical specifications.</p>
         </a>
-        <a href="ROI_ANALYSIS.md" class="doc-card">
+        <a href="https://github.com/cordiego/PRIMEnergeia-Sovereign/blob/main/docs/ROI_ANALYSIS.md" class="doc-card" target="_blank">
           <div class="doc-icon">📊</div>
           <h3>ROI Analysis</h3>
-          <p>Multi-market revenue projections: ~$48M ARR across 72 nodes. Per-market breakdown with rescue estimates.</p>
+          <p>Multi-market revenue projections across 17 ISOs. Per-market breakdown with rescue estimates and 5-year rollout plan.</p>
         </a>
-        <a href="architecture.md" class="doc-card">
+        <a href="https://github.com/cordiego/PRIMEnergeia-Sovereign/blob/main/docs/architecture.md" class="doc-card" target="_blank">
           <div class="doc-icon">🏗️</div>
           <h3>System Architecture</h3>
           <p>Six-layer architecture from physics engine to dashboard. Control flow, data pipelines, and integration points.</p>
@@ -1074,7 +1303,7 @@
     <div class="container">
       <h2>Ready to Recover Lost Capital?</h2>
       <p>
-        See the live optimization running across 72 nodes and 3 international markets.
+        See the live optimization running across 17 global ISOs covering 1,770 GW.
         Book a 15-minute demo to explore results for your portfolio.
       </p>
       <div class="hero-actions">
@@ -1096,11 +1325,11 @@
         <li><a href="https://primenergeia-sovereign.streamlit.app" target="_blank">Dashboard</a></li>
         <li><a href="https://github.com/cordiego/PRIMEnergeia-Sovereign" target="_blank">GitHub</a></li>
         <li><a href="https://github.com/cordiego" target="_blank">Profile</a></li>
-        <li><a href="EXECUTIVE_BRIEF.md">Brief</a></li>
-        <li><a href="PRODUCT_CATALOG.md">Catalog</a></li>
+        <li><a href="https://github.com/cordiego/PRIMEnergeia-Sovereign/blob/main/docs/EXECUTIVE_BRIEF.md" target="_blank">Brief</a></li>
+        <li><a href="https://github.com/cordiego/PRIMEnergeia-Sovereign/blob/main/docs/PRODUCT_CATALOG.md" target="_blank">Catalog</a></li>
       </ul>
       <div class="footer-copy">
-        © 2026 PRIMEnergeia S.A.S. — Soberanía Energética Global ⚡🇲🇽🇺🇸🇪🇸🇵🇹
+        © 2026 PRIMEnergeia S.A.S. — Soberanía Energética Global ⚡🇲🇽🇺🇸🇪🇺🇦🇺🇯🇵🇨🇦🇬🇧
       </div>
     </div>
   </footer>
