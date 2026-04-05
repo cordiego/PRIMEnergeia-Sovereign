@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRIMEnergeia — Executive Brief</title>
+  <meta name="description" content="PRIMEnergeia S.A.S. — Propuesta Ejecutiva de Valor. Sistema de Control Inteligente Multi-Mercado para 17 ISOs globales, 1,770 GW.">
+  <meta property="og:title" content="PRIMEnergeia — Executive Brief">
+  <meta property="og:description" content="HJB optimal control across 17 global electricity markets. $231K rescued at VZA-400.">
+  <meta property="og:url" content="https://cordiego.github.io/PRIMEnergeia-Sovereign/executive-brief.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #050810;
+      --bg-card: #0a1018;
+      --bg-card-alt: #0d1520;
+      --cyan: #00d1ff;
+      --gold: #fbc02d;
+      --green: #00ff88;
+      --purple: #8b5cf6;
+      --red: #ef4444;
+      --text: #e0e6ed;
+      --text-muted: #64748b;
+      --border: #1a2744;
+      --border-glow: rgba(0, 209, 255, 0.15);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5, 8, 16, 0.92);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 18px;
+      color: white;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--cyan); }
+    .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: white; }
+    .nav-cta {
+      background: var(--cyan) !important;
+      color: #050810 !important;
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 700 !important;
+      font-size: 13px !important;
+    }
+
+    /* ── CONTAINER ── */
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* ── HEADER ── */
+    .brief-header {
+      padding: 80px 0 48px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .brief-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(0, 209, 255, 0.08);
+      border: 1px solid rgba(0, 209, 255, 0.2);
+      border-radius: 100px;
+      padding: 8px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--cyan);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .brief-header h1 {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .brief-header h1 span { color: var(--cyan); }
+    .brief-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin: 0 auto 28px;
+    }
+    .brief-meta {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .brief-meta strong { color: var(--text); }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 56px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    section:last-of-type {
+      border-bottom: none;
+    }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--cyan);
+      margin-bottom: 12px;
+      display: block;
+    }
+    h2 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin: 32px 0 12px;
+      color: white;
+    }
+    p, li {
+      color: #b0bec5;
+      font-size: 15px;
+    }
+    ol, ul {
+      padding-left: 1.5rem;
+      margin: 12px 0;
+    }
+    li { margin-bottom: 6px; }
+
+    /* ── PROBLEM CARDS ── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 20px;
+    }
+    .problem-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .problem-card .num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--red);
+      opacity: 0.6;
+      margin-bottom: 8px;
+    }
+    .problem-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: white;
+    }
+    .problem-card p {
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .problem-estimate {
+      margin-top: 20px;
+      padding: 16px 24px;
+      background: rgba(239, 68, 68, 0.06);
+      border: 1px solid rgba(239, 68, 68, 0.15);
+      border-radius: 10px;
+      font-size: 14px;
+      color: #fca5a5;
+    }
+
+    /* ── TABLES ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    thead th {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody td {
+      padding: 10px 16px;
+      border-bottom: 1px solid rgba(26, 39, 68, 0.5);
+      color: #b0bec5;
+    }
+    tbody tr:hover { background: rgba(0, 209, 255, 0.03); }
+    td strong { color: white; }
+    .table-total td {
+      font-weight: 700;
+      color: var(--cyan);
+      border-top: 2px solid var(--border);
+      padding-top: 14px;
+    }
+
+    /* ── REGION HEADER ── */
+    .region-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 28px 0 8px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, rgba(0, 209, 255, 0.05) 0%, rgba(139, 92, 246, 0.03) 100%);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .region-label .flag { font-size: 24px; }
+    .region-label h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      margin: 0;
+    }
+    .region-label .gw {
+      margin-left: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--cyan);
+    }
+
+    /* ── CAPABILITIES ── */
+    .cap-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .cap-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    .cap-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .cap-item h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 2px;
+    }
+    .cap-item p {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    /* ── PROOF CARD ── */
+    .proof-card {
+      background: linear-gradient(135deg, #0d1520 0%, #111b2a 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+      margin: 20px 0;
+    }
+    .proof-node {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+    }
+    .proof-amount {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 3rem;
+      font-weight: 700;
+      color: var(--cyan);
+      text-shadow: 0 0 30px rgba(0, 209, 255, 0.3);
+      margin-bottom: 8px;
+    }
+    .proof-caption {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 24px;
+    }
+    .proof-metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+    .proof-metric {
+      padding: 16px;
+      background: rgba(0, 209, 255, 0.04);
+      border: 1px solid rgba(0, 209, 255, 0.1);
+      border-radius: 10px;
+    }
+    .proof-metric-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+    }
+    .proof-metric-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── LATENCY BAR ── */
+    .latency-bar {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      margin-top: 24px;
+      padding: 16px 0;
+    }
+    .latency-item {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .latency-item strong {
+      color: var(--green);
+    }
+
+    /* ── COMMERCIAL ── */
+    .commercial-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 16px;
+    }
+    .commercial-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      text-align: center;
+    }
+    .commercial-card .value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 4px;
+    }
+    .commercial-card .label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .incentive-note {
+      margin-top: 16px;
+      padding: 16px 24px;
+      background: rgba(251, 192, 45, 0.06);
+      border: 1px solid rgba(251, 192, 45, 0.15);
+      border-radius: 10px;
+      font-size: 14px;
+      color: #fde68a;
+      text-align: center;
+    }
+
+    /* ── NEXT STEPS ── */
+    .steps-list {
+      list-style: none;
+      padding: 0;
+      counter-reset: steps;
+    }
+    .steps-list li {
+      counter-increment: steps;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(26, 39, 68, 0.4);
+      font-size: 15px;
+    }
+    .steps-list li::before {
+      content: counter(steps);
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 209, 255, 0.08);
+      border: 1px solid rgba(0, 209, 255, 0.2);
+      border-radius: 50%;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--cyan);
+    }
+    .step-icon { margin-right: 4px; }
+
+    /* ── CTA FOOTER ── */
+    .cta-section {
+      padding: 64px 0;
+      text-align: center;
+    }
+    .cta-section h2 { margin-bottom: 12px; }
+    .cta-section p {
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+    .cta-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: var(--cyan);
+      color: #050810;
+    }
+    .btn-primary:hover { box-shadow: 0 0 30px rgba(0, 209, 255, 0.3); }
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      color: white;
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--cyan); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 32px 0;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+    footer a {
+      color: var(--cyan);
+      text-decoration: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .brief-header h1 { font-size: 2rem; }
+      .proof-amount { font-size: 2rem; }
+      .proof-metrics { grid-template-columns: repeat(2, 1fr); }
+      .problem-grid, .cap-grid, .commercial-grid { grid-template-columns: 1fr; }
+      .brief-meta { flex-direction: column; gap: 0.5rem; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav>
+    <a href="./" class="nav-logo">⚡ <span>PRIME</span> nergeia</a>
+    <div class="nav-links">
+      <a href="./#results">Results</a>
+      <a href="./#markets">Markets</a>
+      <a href="./#docs">Documentation</a>
+      <a href="https://primenergeia-sovereign.streamlit.app" class="nav-cta" target="_blank">🔴 Live Dashboard</a>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- ── HEADER ── -->
+    <header class="brief-header">
+      <div class="brief-badge">📋 Propuesta Ejecutiva</div>
+      <h1>Sistema de Control<br><span>Multi-Mercado Global</span></h1>
+      <p class="brief-subtitle">
+        Propuesta de valor para directivos — Hamilton-Jacobi-Bellman optimal control across 17 electricity markets.
+      </p>
+      <div class="brief-meta">
+        <span><strong>Fecha:</strong> Abril 2026</span>
+        <span><strong>Autor:</strong> Diego Córdoba Urrutia</span>
+        <span><strong>Entidad:</strong> PRIMEnergeia S.A.S.</span>
+      </div>
+    </header>
+
+    <!-- ── 1. EL PROBLEMA ── -->
+    <section>
+      <span class="section-label">01 — El Problema</span>
+      <h2>Capital Evaporado en Redes Eléctricas</h2>
+      <p>Las redes eléctricas a nivel global pierden millones anualmente por tres razones:</p>
+
+      <div class="problem-grid">
+        <div class="problem-card">
+          <div class="num">01</div>
+          <h4>Penalizaciones</h4>
+          <p>Desviaciones de frecuencia generan multas automáticas de los operadores (CENACE, NERC, ENTSO-E).</p>
+        </div>
+        <div class="problem-card">
+          <div class="num">02</div>
+          <h4>Inyección Subóptima</h4>
+          <p>Los sistemas de control actuales reaccionan <em>después</em> de la inestabilidad — no antes.</p>
+        </div>
+        <div class="problem-card">
+          <div class="num">03</div>
+          <h4>Disipación de Exergía</h4>
+          <p>La diferencia entre potencia óptima y potencia real es capital que se disipa como calor.</p>
+        </div>
+      </div>
+
+      <div class="problem-estimate">
+        <strong>Estimación conservadora:</strong> Un nodo de 100 MW pierde entre <strong>$150,000 – $400,000 USD mensuales</strong>.
+      </div>
+    </section>
+
+    <!-- ── 2. LA SOLUCIÓN ── -->
+    <section>
+      <span class="section-label">02 — La Solución</span>
+      <h2>Control Óptimo HJB en Tiempo Real</h2>
+      <p>Nuestra plataforma resuelve la ecuación <strong>Hamilton-Jacobi-Bellman (HJB)</strong> en tiempo real para calcular la acción de control óptima <em>antes</em> de que la inestabilidad se manifieste.</p>
+
+      <div class="cap-grid">
+        <div class="cap-item">
+          <div class="cap-icon">📡</div>
+          <div>
+            <h4>Predicción de Frecuencia</h4>
+            <p>Modelo estocástico de dinámica de red con predicción de excursiones.</p>
+          </div>
+        </div>
+        <div class="cap-item">
+          <div class="cap-icon">⚡</div>
+          <div>
+            <h4>Inercia Sintética</h4>
+            <p>Inyección proactiva mediante ley de control óptimo HJB.</p>
+          </div>
+        </div>
+        <div class="cap-item">
+          <div class="cap-icon">🛡️</div>
+          <div>
+            <h4>Eliminación de Penalizaciones</h4>
+            <p>Resolución de Ecuación de Oscilación en frecuencias de 50/60 Hz.</p>
+          </div>
+        </div>
+        <div class="cap-item">
+          <div class="cap-icon">💰</div>
+          <div>
+            <h4>Arbitraje de Precios</h4>
+            <p>Optimización de despacho multi-mercado en PML / LMP / OMIE.</p>
+          </div>
+        </div>
+        <div class="cap-item">
+          <div class="cap-icon">🧠</div>
+          <div>
+            <h4>Auto-Reparación (Deep RL)</h4>
+            <p>Red neuronal actor-crítico para auto-curación post-disturbio.</p>
+          </div>
+        </div>
+        <div class="cap-item">
+          <div class="cap-icon">🔧</div>
+          <div>
+            <h4>Sin Hardware Nuevo</h4>
+            <p>Software puro — se integra sobre infraestructura existente.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="latency-bar">
+        <div class="latency-item"><strong>&lt; 0.5 ms</strong> latencia</div>
+        <div class="latency-item"><strong>17</strong> mercados</div>
+        <div class="latency-item"><strong>1,770 GW</strong> cobertura</div>
+        <div class="latency-item"><strong>0</strong> cambios de hardware</div>
+      </div>
+    </section>
+
+    <!-- ── 3. MERCADOS ── -->
+    <section>
+      <span class="section-label">03 — Mercados Globales</span>
+      <h2>17 ISOs · 1,770 GW</h2>
+
+      <!-- US -->
+      <div class="region-label">
+        <span class="flag">🇺🇸</span>
+        <h4>Estados Unidos — 7 ISOs</h4>
+        <span class="gw">665 GW</span>
+      </div>
+      <table>
+        <thead><tr><th>Mercado</th><th>Región</th><th>Frecuencia</th><th>Capacidad</th><th>Pricing</th><th>Moneda</th></tr></thead>
+        <tbody>
+          <tr><td><strong>ERCOT</strong></td><td>Texas</td><td>60 Hz</td><td>85 GW</td><td>LMP ($5k cap)</td><td>USD</td></tr>
+          <tr><td><strong>PJM</strong></td><td>US East (13 estados)</td><td>60 Hz</td><td>180 GW</td><td>LMP</td><td>USD</td></tr>
+          <tr><td><strong>CAISO</strong></td><td>California</td><td>60 Hz</td><td>80 GW</td><td>LMP</td><td>USD</td></tr>
+          <tr><td><strong>MISO</strong></td><td>US Midwest</td><td>60 Hz</td><td>190 GW</td><td>LMP</td><td>USD</td></tr>
+          <tr><td><strong>SPP</strong></td><td>US Central</td><td>60 Hz</td><td>65 GW</td><td>LMP</td><td>USD</td></tr>
+          <tr><td><strong>NYISO</strong></td><td>New York</td><td>60 Hz</td><td>35 GW</td><td>LBMP</td><td>USD</td></tr>
+          <tr><td><strong>ISONE</strong></td><td>New England</td><td>60 Hz</td><td>30 GW</td><td>LMP</td><td>USD</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Canada -->
+      <div class="region-label">
+        <span class="flag">🇨🇦</span>
+        <h4>Canadá — 2 ISOs</h4>
+        <span class="gw">55 GW</span>
+      </div>
+      <table>
+        <thead><tr><th>Mercado</th><th>Región</th><th>Frecuencia</th><th>Capacidad</th><th>Pricing</th><th>Moneda</th></tr></thead>
+        <tbody>
+          <tr><td><strong>IESO</strong></td><td>Ontario</td><td>60 Hz</td><td>38 GW</td><td>HOEP</td><td>CAD</td></tr>
+          <tr><td><strong>AESO</strong></td><td>Alberta</td><td>60 Hz</td><td>17 GW</td><td>Pool Price</td><td>CAD</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Mexico -->
+      <div class="region-label">
+        <span class="flag">🇲🇽</span>
+        <h4>México — CENACE</h4>
+        <span class="gw">75 GW</span>
+      </div>
+      <table>
+        <thead><tr><th>Mercado</th><th>Región</th><th>Frecuencia</th><th>Capacidad</th><th>Pricing</th><th>Moneda</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SEN</strong></td><td>México (9 regiones)</td><td>60 Hz</td><td>75 GW</td><td>PML / CENACE</td><td>USD</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Europe -->
+      <div class="region-label">
+        <span class="flag">🇪🇺</span>
+        <h4>Europa — 5 Mercados</h4>
+        <span class="gw">640 GW</span>
+      </div>
+      <table>
+        <thead><tr><th>Mercado</th><th>Región</th><th>Frecuencia</th><th>Capacidad</th><th>Pricing</th><th>Moneda</th></tr></thead>
+        <tbody>
+          <tr><td><strong>MIBEL</strong></td><td>🇪🇸🇵🇹 España + Portugal</td><td>50 Hz</td><td>110 GW</td><td>OMIE Pool</td><td>EUR</td></tr>
+          <tr><td><strong>EPEX</strong></td><td>🇩🇪 Alemania</td><td>50 Hz</td><td>220 GW</td><td>EPEX SPOT</td><td>EUR</td></tr>
+          <tr><td><strong>EPEX FR</strong></td><td>🇫🇷 Francia</td><td>50 Hz</td><td>130 GW</td><td>EPEX SPOT</td><td>EUR</td></tr>
+          <tr><td><strong>Nord Pool</strong></td><td>🇳🇴🇸🇪🇫🇮🇩🇰 Nórdicos</td><td>50 Hz</td><td>100 GW</td><td>Nord Pool</td><td>EUR</td></tr>
+          <tr><td><strong>Elexon</strong></td><td>🇬🇧 Reino Unido</td><td>50 Hz</td><td>80 GW</td><td>BMRS</td><td>GBP</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Asia-Pacific -->
+      <div class="region-label">
+        <span class="flag">🌏</span>
+        <h4>Asia-Pacífico — 2 Mercados</h4>
+        <span class="gw">335 GW</span>
+      </div>
+      <table>
+        <thead><tr><th>Mercado</th><th>Región</th><th>Frecuencia</th><th>Capacidad</th><th>Pricing</th><th>Moneda</th></tr></thead>
+        <tbody>
+          <tr><td><strong>NEM</strong></td><td>🇦🇺 Australia</td><td>50 Hz</td><td>55 GW</td><td>AEMO Pool</td><td>AUD</td></tr>
+          <tr><td><strong>JEPX</strong></td><td>🇯🇵 Japón</td><td>50/60 Hz</td><td>280 GW</td><td>JEPX Spot</td><td>JPY</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── 4. RESULTADOS ── -->
+    <section>
+      <span class="section-label">04 — Resultados Certificados</span>
+      <h2>Nodo VZA-400 — SEN, Valle de México</h2>
+
+      <div class="proof-card">
+        <div class="proof-node">NODE VZA-400 · SEN · 🇲🇽 MEXICO</div>
+        <div class="proof-amount">$231,243 USD</div>
+        <div class="proof-caption">Capital total rescatado de inyección subóptima de potencia</div>
+        <div class="proof-metrics">
+          <div class="proof-metric">
+            <div class="proof-metric-value">$173,432</div>
+            <div class="proof-metric-label">Ahorro Cliente (75%)</div>
+          </div>
+          <div class="proof-metric">
+            <div class="proof-metric-value">$57,811</div>
+            <div class="proof-metric-label">Fee PRIME (25%)</div>
+          </div>
+          <div class="proof-metric">
+            <div class="proof-metric-value">99.96%</div>
+            <div class="proof-metric-label">Estabilidad Freq.</div>
+          </div>
+          <div class="proof-metric">
+            <div class="proof-metric-value">6</div>
+            <div class="proof-metric-label">Eventos Mitigados</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 5. PROYECCIONES ── -->
+    <section>
+      <span class="section-label">05 — Proyecciones</span>
+      <h2>Ingresos Multi-Mercado</h2>
+
+      <h3>Mercados de Lanzamiento — Año 1</h3>
+      <table>
+        <thead><tr><th>Mercado</th><th>Capacidad</th><th>Rescate Anual</th><th>Ingreso PRIME (25%)</th></tr></thead>
+        <tbody>
+          <tr><td><strong>SEN</strong> 🇲🇽</td><td>75 GW</td><td>$64.7M USD</td><td>$16.2M USD</td></tr>
+          <tr><td><strong>ERCOT</strong> 🇺🇸</td><td>85 GW</td><td>$71.7M USD</td><td>$17.9M USD</td></tr>
+          <tr><td><strong>MIBEL</strong> 🇪🇸🇵🇹</td><td>110 GW</td><td>€51.6M EUR</td><td>€12.9M EUR</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Expansión Completa — Año 5 (17 ISOs)</h3>
+      <table>
+        <thead><tr><th>Región</th><th>Mercados</th><th>Capacidad</th><th>Rescate Potencial</th><th>Ingreso PRIME (25%)</th></tr></thead>
+        <tbody>
+          <tr><td>🇺🇸 US ISOs</td><td>ERCOT, PJM, CAISO, MISO, SPP, NYISO, ISONE</td><td>665 GW</td><td>~$350M USD</td><td>~$87M USD</td></tr>
+          <tr><td>🇨🇦 Canadá</td><td>IESO, AESO</td><td>55 GW</td><td>~$25M CAD</td><td>~$5M USD</td></tr>
+          <tr><td>🇲🇽 México</td><td>SEN</td><td>75 GW</td><td>~$65M USD</td><td>~$16M USD</td></tr>
+          <tr><td>🇪🇺 Europa</td><td>MIBEL, EPEX, EPEX FR, Nord Pool, Elexon</td><td>640 GW</td><td>~€280M EUR</td><td>~€70M EUR</td></tr>
+          <tr><td>🌏 Asia-Pac</td><td>NEM, JEPX</td><td>335 GW</td><td>~$50M USD</td><td>~$12M USD</td></tr>
+          <tr class="table-total"><td><strong>TOTAL</strong></td><td><strong>17 ISOs</strong></td><td><strong>1,770 GW</strong></td><td><strong>~$770M</strong></td><td><strong>~$190M</strong></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ── 6. MODELO COMERCIAL ── -->
+    <section>
+      <span class="section-label">06 — Modelo Comercial</span>
+      <h2>Alineación Total de Incentivos</h2>
+
+      <div class="commercial-grid">
+        <div class="commercial-card">
+          <div class="value">$50K</div>
+          <div class="label">Fee de Implementación<br>(por nodo)</div>
+        </div>
+        <div class="commercial-card">
+          <div class="value">25%</div>
+          <div class="label">Royalty Operativo<br>(del capital rescatado)</div>
+        </div>
+        <div class="commercial-card">
+          <div class="value">12 mo</div>
+          <div class="label">Plazo de Contrato<br>(renovable)</div>
+        </div>
+      </div>
+
+      <div class="incentive-note">
+        💡 PRIMEnergeia solo cobra sobre el valor <strong>que realmente genera</strong>.
+      </div>
+    </section>
+
+    <!-- ── 7. SIGUIENTES PASOS ── -->
+    <section>
+      <span class="section-label">07 — Siguientes Pasos</span>
+      <h2>Ruta de Implementación</h2>
+
+      <ol class="steps-list">
+        <li><span class="step-icon">✅</span> Revisión de esta propuesta con dirección técnica</li>
+        <li><span class="step-icon">📊</span> Entrega de datos de telemetría del nodo objetivo</li>
+        <li><span class="step-icon">🔧</span> Integración PRIMEnergeia (2–4 semanas desde recepción de datos)</li>
+        <li><span class="step-icon">📈</span> Periodo de prueba con métricas verificables (30 días)</li>
+        <li><span class="step-icon">📝</span> Firma de contrato de royalty basado en resultados demostrados</li>
+      </ol>
+    </section>
+
+    <!-- ── CTA ── -->
+    <div class="cta-section">
+      <h2>¿Listo para Recuperar Capital Perdido?</h2>
+      <p>Agende una demostración de 15 minutos para explorar resultados en su portafolio.</p>
+      <div class="cta-buttons">
+        <a href="https://primenergeia-sovereign.streamlit.app" class="btn btn-primary" target="_blank">🔴 Ver Dashboard en Vivo</a>
+        <a href="./" class="btn btn-secondary">← Volver al Landing</a>
+        <a href="https://github.com/cordiego" class="btn btn-secondary" target="_blank">👤 Contactar</a>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <div class="container">
+      <strong>Diego Córdoba Urrutia</strong> — Lead Computational Physicist<br>
+      <a href="https://github.com/cordiego">PRIMEnergeia S.A.S.</a> · Soberanía Energética Global ⚡🇲🇽🇺🇸🇪🇺🇦🇺🇯🇵🇨🇦🇬🇧
+    </div>
+  </footer>
+
+</body>
+</html>
