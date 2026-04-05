@@ -8,6 +8,12 @@ from datetime import datetime, timedelta
 import time
 import warnings
 
+try:
+    from scipy.optimize import minimize as scipy_minimize
+    HAS_SCIPY = True
+except ImportError:
+    HAS_SCIPY = False
+
 warnings.filterwarnings("ignore")
 
 # ============================================================
@@ -141,6 +147,7 @@ div[data-testid="stSidebar"] * { color: #e2e8f0 !important; }
 EUREKA_CORE = ["VTIP"]
 GAINS_SATELLITES = ["IAU", "GEV", "VGSH"]
 EUREKA_UNIVERSE = EUREKA_CORE
+FULL_UNIVERSE = EUREKA_CORE + GAINS_SATELLITES  # all tickers for blended view
 BENCHMARK = "SPY"
 VIX_TICKER = "^VIX"
 ALL_TICKERS = EUREKA_CORE + GAINS_SATELLITES + [BENCHMARK, VIX_TICKER]
@@ -217,19 +224,155 @@ def load_market_data():
 
     returns = prices.pct_change().dropna()
 
-    # --- Compute portfolio returns — 100% VTIP ---
+    # --- Compute portfolio returns — 100% VTIP (CORE) ---
     vix_series = prices[VIX_TICKER]
     port_returns = returns["VTIP"].copy()
     cum_returns = (1 + port_returns).cumprod()
     weight_history = {"VTIP": [1.0] * len(returns)}
     spy_cum = (1 + returns[BENCHMARK]).cumprod()
 
-    # --- Rolling analytics ---
+    # ================================================================
+    #  SATELLITE OPTIMIZATION — Max Sharpe on IAU, GEV, VGSH only
+    #  These are the gains destinations — VTIP profits flow here
+    # ================================================================
+    sat_tickers = [tk for tk in GAINS_SATELLITES if tk in returns.columns]
+    n_sat = len(sat_tickers)
+    # Equal-weight baseline for satellites
+    ew_sat_weights = {tk: 1.0 / n_sat for tk in sat_tickers} if n_sat > 0 else {}
+
+    if n_sat >= 2:
+        ret_matrix = returns[sat_tickers]
+        mu = ret_matrix.mean().values * 252
+        cov = ret_matrix.cov().values * 252
+        rf = 0.045
+
+        def neg_sharpe(w):
+            port_ret = np.dot(w, mu)
+            port_vol = np.sqrt(np.dot(w, np.dot(cov, w)))
+            return -(port_ret - rf) / port_vol if port_vol > 1e-10 else 1e6
+
+        x0 = np.array([1.0 / n_sat] * n_sat)
+
+        if HAS_SCIPY:
+            constraints = ({'type': 'eq', 'fun': lambda w: np.sum(w) - 1.0})
+            bounds = tuple((0.0, 1.0) for _ in range(n_sat))
+            try:
+                result = scipy_minimize(neg_sharpe, x0, method='SLSQP',
+                                        bounds=bounds, constraints=constraints,
+                                        options={'maxiter': 1000, 'ftol': 1e-12})
+                opt_w = result.x if result.success else x0
+            except Exception:
+                opt_w = x0
+        else:
+            np.random.seed(42)
+            best_sharpe = 1e6
+            opt_w = x0.copy()
+            for _ in range(20000):
+                w = np.random.dirichlet(np.ones(n_sat))
+                s = neg_sharpe(w)
+                if s < best_sharpe:
+                    best_sharpe = s
+                    opt_w = w.copy()
+
+        sat_opt_weights = {tk: float(w) for tk, w in zip(sat_tickers, opt_w)}
+    elif n_sat == 1:
+        sat_opt_weights = {sat_tickers[0]: 1.0}
+    else:
+        sat_opt_weights = {}
+
+    # Include VTIP in the full opt_weights dict (100% core, satellites show gains allocation)
+    opt_weights = {"VTIP": 1.0}  # core is always 100%
+    opt_weights.update(sat_opt_weights)
+
+    # ================================================================
+    #  GAINS SWEEP SIMULATION
+    #  Start with $1 in VTIP. Each month-end, sweep VTIP gains into
+    #  satellites at optimized weights. Track composite value.
+    # ================================================================
+    vtip_base = 1.0         # capital in VTIP
+    sat_values = {tk: 0.0 for tk in sat_tickers}  # accumulated satellite positions
+    composite_values = [1.0]
+    vtip_values = [1.0]
+    sat_total_values = [0.0]
+    prev_month = returns.index[0].month if len(returns) > 0 else 0
+    monthly_vtip_start = vtip_base
+
+    for i in range(len(returns)):
+        date = returns.index[i]
+        # Grow VTIP by today's return
+        vtip_daily_ret = returns["VTIP"].iloc[i]
+        vtip_base *= (1 + vtip_daily_ret)
+
+        # Grow each satellite position by its daily return
+        for tk in sat_tickers:
+            if sat_values[tk] > 0:
+                sat_values[tk] *= (1 + returns[tk].iloc[i])
+
+        # Month-end sweep: if month changes, check VTIP gains and sweep
+        curr_month = date.month
+        if curr_month != prev_month and i > 0:
+            vtip_monthly_gain = vtip_base - monthly_vtip_start
+            if vtip_monthly_gain > 0:
+                # Sweep gains into satellites at optimized weights
+                for tk in sat_tickers:
+                    w = sat_opt_weights.get(tk, 0)
+                    sat_values[tk] += vtip_monthly_gain * w
+                vtip_base -= vtip_monthly_gain  # gains moved out
+            monthly_vtip_start = vtip_base
+            prev_month = curr_month
+
+        total_sat = sum(sat_values.values())
+        vtip_values.append(vtip_base)
+        sat_total_values.append(total_sat)
+        composite_values.append(vtip_base + total_sat)
+
+    # Build series (offset by 1 because we prepended initial value)
+    composite_idx = [returns.index[0] - pd.Timedelta(days=1)] + list(returns.index)
+    composite_series = pd.Series(composite_values, index=composite_idx, name="Composite")
+    vtip_sim_series = pd.Series(vtip_values, index=composite_idx, name="VTIP Base")
+    sat_sim_series = pd.Series(sat_total_values, index=composite_idx, name="Satellite Gains")
+
+    # Composite daily returns (for risk metrics)
+    full_port_returns = composite_series.pct_change().dropna()
+    full_cum_returns = composite_series / composite_series.iloc[0]
+
+    # Equal-weight satellite simulation for comparison
+    ew_sat_values_sim = {tk: 0.0 for tk in sat_tickers}
+    ew_vtip = 1.0
+    ew_composite_vals = [1.0]
+    ew_prev_month = returns.index[0].month if len(returns) > 0 else 0
+    ew_monthly_start = ew_vtip
+    for i in range(len(returns)):
+        date = returns.index[i]
+        ew_vtip *= (1 + returns["VTIP"].iloc[i])
+        for tk in sat_tickers:
+            if ew_sat_values_sim[tk] > 0:
+                ew_sat_values_sim[tk] *= (1 + returns[tk].iloc[i])
+        curr_month = date.month
+        if curr_month != ew_prev_month and i > 0:
+            ew_gain = ew_vtip - ew_monthly_start
+            if ew_gain > 0:
+                for tk in sat_tickers:
+                    ew_sat_values_sim[tk] += ew_gain * (1.0/n_sat) if n_sat > 0 else 0
+                ew_vtip -= ew_gain
+            ew_monthly_start = ew_vtip
+            ew_prev_month = curr_month
+        ew_composite_vals.append(ew_vtip + sum(ew_sat_values_sim.values()))
+    ew_composite_series = pd.Series(ew_composite_vals, index=composite_idx, name="EW Composite")
+    ew_cum_returns = ew_composite_series / ew_composite_series.iloc[0]
+    ew_port_returns = ew_composite_series.pct_change().dropna()
+
+    # --- Rolling analytics (VTIP only) ---
     rolling_vol_20 = port_returns.rolling(20).std() * np.sqrt(252)
     rolling_vol_60 = port_returns.rolling(60).std() * np.sqrt(252)
     rolling_sharpe = (port_returns.rolling(60).mean() * 252) / (port_returns.rolling(60).std() * np.sqrt(252))
 
-    # --- Key metrics ---
+    # --- Rolling analytics (COMPOSITE PORTFOLIO) ---
+    full_rolling_vol_20 = full_port_returns.rolling(20).std() * np.sqrt(252)
+    full_rolling_vol_60 = full_port_returns.rolling(60).std() * np.sqrt(252)
+    full_rolling_sharpe = (full_port_returns.rolling(60).mean() * 252) / (full_port_returns.rolling(60).std() * np.sqrt(252))
+
+    # --- Key metrics (VTIP core) ---
     total_return = (cum_returns.iloc[-1] - 1) * 100
     spy_return = (spy_cum.iloc[-1] - 1) * 100
     max_dd = (cum_returns / cum_returns.cummax() - 1).min() * 100
@@ -238,12 +381,29 @@ def load_market_data():
     sharpe = ann_return / (port_returns.std() * np.sqrt(252)) if port_returns.std() > 0 else 0
     alpha = total_return - spy_return
 
+    # --- Key metrics (COMPOSITE — VTIP + swept gains) ---
+    full_total_return = (full_cum_returns.iloc[-1] - 1) * 100
+    full_max_dd = (full_cum_returns / full_cum_returns.cummax() - 1).min() * 100
+    full_ann_vol = full_port_returns.std() * np.sqrt(252) * 100
+    full_ann_return = full_port_returns.mean() * 252
+    full_sharpe = full_ann_return / (full_port_returns.std() * np.sqrt(252)) if full_port_returns.std() > 0 else 0
+    full_alpha = full_total_return - spy_return
+
     # Drawdown series
     drawdown_series = (cum_returns / cum_returns.cummax() - 1) * 100
+    full_drawdown_series = (full_cum_returns / full_cum_returns.cummax() - 1) * 100
 
-    # VaR / CVaR (95%)
+    # VaR / CVaR (95%) — VTIP
     var_95 = np.percentile(port_returns, 5) * 100
     cvar_95 = port_returns[port_returns <= np.percentile(port_returns, 5)].mean() * 100 if len(port_returns[port_returns <= np.percentile(port_returns, 5)]) > 0 else var_95
+
+    # VaR / CVaR (95%) — COMPOSITE
+    full_var_95 = np.percentile(full_port_returns, 5) * 100
+    full_cvar_95 = full_port_returns[full_port_returns <= np.percentile(full_port_returns, 5)].mean() * 100 if len(full_port_returns[full_port_returns <= np.percentile(full_port_returns, 5)]) > 0 else full_var_95
+
+    # Satellite accumulated value breakdown
+    sat_breakdown = {tk: float(sat_values.get(tk, 0)) for tk in sat_tickers}
+    total_sat_value = sum(sat_breakdown.values())
 
     # Current state
     current_vix = vix_series.iloc[-1]
@@ -271,6 +431,7 @@ def load_market_data():
 
     return {
         "prices": prices, "returns": returns,
+        # VTIP-only (core)
         "port_returns": port_returns, "cum_returns": cum_returns, "spy_cum": spy_cum,
         "rolling_vol_20": rolling_vol_20, "rolling_vol_60": rolling_vol_60,
         "rolling_sharpe": rolling_sharpe,
@@ -278,6 +439,26 @@ def load_market_data():
         "total_return": total_return, "spy_return": spy_return,
         "max_dd": max_dd, "ann_vol": ann_vol, "sharpe": sharpe, "alpha": alpha,
         "var_95": var_95, "cvar_95": cvar_95,
+        # Composite portfolio (VTIP + swept gains into satellites)
+        "full_port_returns": full_port_returns, "full_cum_returns": full_cum_returns,
+        "full_rolling_vol_20": full_rolling_vol_20, "full_rolling_vol_60": full_rolling_vol_60,
+        "full_rolling_sharpe": full_rolling_sharpe,
+        "full_drawdown_series": full_drawdown_series,
+        "full_total_return": full_total_return,
+        "full_max_dd": full_max_dd, "full_ann_vol": full_ann_vol, "full_sharpe": full_sharpe, "full_alpha": full_alpha,
+        "full_var_95": full_var_95, "full_cvar_95": full_cvar_95,
+        "full_tickers": EUREKA_CORE + sat_tickers, "full_n": 1 + n_sat,
+        "opt_weights": opt_weights, "sat_opt_weights": sat_opt_weights,
+        "ew_sat_weights": ew_sat_weights,
+        "ew_cum_returns": ew_cum_returns, "ew_port_returns": ew_port_returns,
+        # Simulation breakdown
+        "composite_series": composite_series,
+        "vtip_sim_series": vtip_sim_series,
+        "sat_sim_series": sat_sim_series,
+        "sat_breakdown": sat_breakdown,
+        "total_sat_value": total_sat_value,
+        "vtip_base_value": vtip_base,
+        # Common
         "vix_series": vix_series, "current_vix": current_vix,
         "vix_label": vix_label, "current_weights": current_weights,
         "weight_df": weight_df,
@@ -315,17 +496,65 @@ with h3:
 st.divider()
 
 # ============================================================
-#  PRIMARY KPI BAR
+#  PRIMARY KPI BAR — VTIP CORE
 # ============================================================
+st.markdown("<div class='section-header'>VTIP CORE (100% ALLOCATION)</div>", unsafe_allow_html=True)
 k1, k2, k3, k4, k5, k6, k7 = st.columns(7)
 k1.metric("VIX LEVEL", f"{data['current_vix']:.2f}", f"{data['vix_label']}")
 k2.metric("ALLOCATION", "100% VTIP", "Core Anchor")
-k3.metric("PORTFOLIO", f"{data['total_return']:+.2f}%", f"vs SPY {data['spy_return']:+.1f}%")
+k3.metric("VTIP RETURN", f"{data['total_return']:+.2f}%", f"vs SPY {data['spy_return']:+.1f}%")
 k4.metric("MAX DRAWDOWN", f"{data['max_dd']:.2f}%", "Peak-to-Trough")
 k5.metric("SHARPE RATIO", f"{data['sharpe']:.3f}", "Annualized")
 rv20_last = data['rolling_vol_20'].iloc[-1]
 k6.metric("ROLLING VOL", f"{float(rv20_last)*100:.1f}%" if pd.notna(rv20_last) else "N/A", "20d Ann.")
 k7.metric("α vs SPY", f"{data['alpha']:+.2f}%", "Excess Return")
+
+# ============================================================
+#  COMPOSITE PORTFOLIO — VTIP Capital + Gains → Satellites
+# ============================================================
+st.markdown("")
+sat_w = data["sat_opt_weights"]
+st.markdown("<div class='section-header'>GAINS ALLOCATION — VTIP PROFITS → SATELLITES (MAX SHARPE OPTIMIZED)</div>", unsafe_allow_html=True)
+
+# Show satellite optimal weight cards (where gains flow)
+sat_display = list(sat_w.items())
+ow_cols = st.columns(len(sat_display) + 1)  # +1 for VTIP
+opt_colors = {"VTIP": "#a78bfa", "IAU": "#FFD700", "GEV": "#00ff88", "VGSH": "#00d1ff"}
+
+# VTIP card — shows it's the capital base
+with ow_cols[0]:
+    st.markdown(f"""
+    <div style='background: linear-gradient(135deg, #0d1520, #111b2a); border: 1px solid #a78bfa;
+                border-radius: 8px; padding: 12px 16px; text-align: center;'>
+        <div style='font-family:JetBrains Mono; font-size:14px; font-weight:700; color:#a78bfa;'>VTIP</div>
+        <div style='font-family:JetBrains Mono; font-size:28px; font-weight:700; color:#e0e6ed; margin: 4px 0;'>100%</div>
+        <div style='font-size:11px; color:#94a3b8;'>CAPITAL BASE</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# Satellite cards — show where gains go
+for i, (tk, w) in enumerate(sat_display):
+    color = opt_colors.get(tk, "#ffffff")
+    with ow_cols[i + 1]:
+        st.markdown(f"""
+        <div style='background: linear-gradient(135deg, #0d1520, #111b2a); border: 1px solid {color}44;
+                    border-radius: 8px; padding: 12px 16px; text-align: center;'>
+            <div style='font-family:JetBrains Mono; font-size:14px; font-weight:700; color:{color};'>{tk}</div>
+            <div style='font-family:JetBrains Mono; font-size:28px; font-weight:700; color:#e0e6ed; margin: 4px 0;'>{w*100:.1f}%</div>
+            <div style='font-size:11px; color:#94a3b8;'>OF GAINS</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+st.markdown("")
+fk1, fk2, fk3, fk4, fk5, fk6, fk7 = st.columns(7)
+fk1.metric("STRATEGY", "Sweep", "Monthly Gains")
+fk2.metric("SAT VALUE", f"${data['total_sat_value']:.4f}", "Per $1 Invested")
+fk3.metric("COMPOSITE", f"{data['full_total_return']:+.2f}%", f"vs SPY {data['spy_return']:+.1f}%")
+fk4.metric("MAX DRAWDOWN", f"{data['full_max_dd']:.2f}%", "Peak-to-Trough")
+fk5.metric("SHARPE RATIO", f"{data['full_sharpe']:.3f}", "Annualized")
+full_rv20 = data['full_rolling_vol_20'].iloc[-1]
+fk6.metric("ROLLING VOL", f"{float(full_rv20)*100:.1f}%" if pd.notna(full_rv20) else "N/A", "20d Ann.")
+fk7.metric("α vs SPY", f"{data['full_alpha']:+.2f}%", "Excess Return")
 
 st.markdown("")
 
@@ -346,60 +575,130 @@ tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
 #  TAB 1: PORTFOLIO PERFORMANCE
 # ═══════════════════════════════════════════════
 with tab1:
-    st.markdown("<div class='section-header'>CUMULATIVE PERFORMANCE — EUREKA vs BENCHMARK</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-header'>CUMULATIVE PERFORMANCE — FULL UNIVERSE vs CORE vs BENCHMARK</div>", unsafe_allow_html=True)
 
-    st.markdown("""
+    sat_w = data["sat_opt_weights"]
+    sat_formula = " + ".join([f"{w:.2f}·r<sub>{tk}</sub>" for tk, w in sat_w.items() if w > 0.005])
+    st.markdown(f"""
     <div class='math-block'>
-    <strong>Portfolio Construction:</strong>&nbsp;&nbsp; R<sub>p,t</sub> = 1.0 · r<sub>VTIP</sub><br>
-    <strong>Gains Destination:</strong>&nbsp;&nbsp; IAU · GEV · VGSH — gains redistributed equally to satellites
+    <strong>Capital:</strong>&nbsp;&nbsp; 100% VTIP — all capital anchored in TIPS bonds<br>
+    <strong>Gains Sweep:</strong>&nbsp;&nbsp; Monthly VTIP profits → {sat_formula}<br>
+    <strong>Optimization:</strong>&nbsp;&nbsp; Max-Sharpe on satellites (IAU · GEV · VGSH) — maximize return per unit of risk
     </div>
     """, unsafe_allow_html=True)
 
-    # Big KPIs
-    pc1, pc2, pc3, pc4 = st.columns(4)
+    # Big KPIs — VTIP Core vs Full Portfolio side-by-side
+    pc1, pc2, pc3, pc4, pc5, pc6 = st.columns(6)
     with pc1:
         st.markdown(f"""<div class='kpi-highlight'>
             <div class='kpi-value'>{data['total_return']:+.2f}%</div>
-            <div class='kpi-label'>Eureka Total Return</div>
+            <div class='kpi-label'>VTIP Core Return</div>
         </div>""", unsafe_allow_html=True)
     with pc2:
+        full_color = "#00ff88" if data["full_total_return"] > 0 else "#ff4b4b"
+        st.markdown(f"""<div class='kpi-highlight'>
+            <div class='kpi-value' style='color:{full_color};'>{data['full_total_return']:+.2f}%</div>
+            <div class='kpi-label'>Composite Return (VTIP + Gains)</div>
+        </div>""", unsafe_allow_html=True)
+    with pc3:
         spy_color = "#00ff88" if data["spy_return"] > 0 else "#ff4b4b"
         st.markdown(f"""<div class='kpi-highlight'>
             <div class='kpi-value' style='color:{spy_color};'>{data['spy_return']:+.2f}%</div>
             <div class='kpi-label'>S&P 500 (SPY) Return</div>
         </div>""", unsafe_allow_html=True)
-    with pc3:
+    with pc4:
         alpha_color = "#00ff88" if data["alpha"] > 0 else "#ff4b4b"
         st.markdown(f"""<div class='kpi-highlight'>
             <div class='kpi-value' style='color:{alpha_color};'>{data['alpha']:+.2f}%</div>
-            <div class='kpi-label'>Alpha (Excess Return)</div>
+            <div class='kpi-label'>VTIP α vs SPY</div>
         </div>""", unsafe_allow_html=True)
-    with pc4:
+    with pc5:
+        full_alpha_color = "#00ff88" if data["full_alpha"] > 0 else "#ff4b4b"
+        st.markdown(f"""<div class='kpi-highlight'>
+            <div class='kpi-value' style='color:{full_alpha_color};'>{data['full_alpha']:+.2f}%</div>
+            <div class='kpi-label'>Composite α vs SPY</div>
+        </div>""", unsafe_allow_html=True)
+    with pc6:
         st.markdown(f"""<div class='kpi-highlight'>
             <div class='kpi-value' style='color:#00d1ff;'>{data['n_days']}</div>
-            <div class='kpi-label'>Trading Days Analyzed</div>
+            <div class='kpi-label'>Trading Days</div>
         </div>""", unsafe_allow_html=True)
 
     st.markdown("")
 
-    # Cumulative chart — all tickers
+    # ── Per-Ticker Performance Summary Table ──
+    st.markdown("<div class='section-header'>PER-TICKER PERFORMANCE SUMMARY</div>", unsafe_allow_html=True)
+    ticker_rows = []
+    for tk in EUREKA_CORE + GAINS_SATELLITES:
+        stats = data["asset_stats"].get(tk, {})
+        if stats:
+            ticker_rows.append({
+                "Ticker": tk,
+                "Description": ASSET_META[tk]["desc"],
+                "Role": ASSET_META[tk]["category"],
+                "Price": f"${stats['last_price']:.2f}",
+                "Return": f"{stats['return']:+.2f}%",
+                "Ann. Vol": f"{stats['vol']:.1f}%",
+                "Sharpe": f"{stats['sharpe']:.2f}",
+                "Gains Alloc": f"{data['sat_opt_weights'].get(tk, 0)*100:.1f}%" if tk != 'VTIP' else "CAPITAL",
+                "Max DD": f"{stats['max_dd']:.1f}%",
+            })
+    if ticker_rows:
+        df_tickers = pd.DataFrame(ticker_rows)
+        def style_return(val):
+            try:
+                v = float(str(val).replace("%", "").replace("+", ""))
+                return f"color: {'#00ff88' if v > 0 else '#ff4b4b'}; font-weight: 700"
+            except:
+                return ""
+        st.dataframe(
+            df_tickers.style.map(style_return, subset=["Return", "Max DD"]),
+            use_container_width=True, hide_index=True, height=220
+        )
+
+    st.markdown("")
+
+    # Cumulative chart — composite simulation + individual tickers
     fig_perf = make_subplots(
         rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.12,
-        subplot_titles=("Cumulative Returns: Full Portfolio Universe", "Daily Portfolio Returns Distribution"),
+        subplot_titles=("VTIP Capital + Swept Gains → Satellite Growth", "Daily Returns: VTIP Core vs Composite"),
         row_heights=[0.65, 0.35]
     )
 
+    # Composite portfolio (VTIP base + swept gains into satellites)
+    fig_perf.add_trace(go.Scatter(
+        x=data["full_cum_returns"].index, y=data["full_cum_returns"].values,
+        name="⚡ Composite (VTIP + Gains Swept)", line=dict(color="#a78bfa", width=3.5),
+        fill='tozeroy', fillcolor='rgba(167,139,250,0.06)'
+    ), row=1, col=1)
+
+    # Satellite accumulated value area
+    fig_perf.add_trace(go.Scatter(
+        x=data["sat_sim_series"].index, y=data["sat_sim_series"].values,
+        name="💰 Satellite Gains Value", line=dict(color="#00ff88", width=1.5),
+        fill='tozeroy', fillcolor='rgba(0,255,136,0.08)'
+    ), row=1, col=1)
+
+    # Equal-weight sweep comparison
+    fig_perf.add_trace(go.Scatter(
+        x=data["ew_cum_returns"].index, y=data["ew_cum_returns"].values,
+        name="EW Sweep (33% each sat)", line=dict(color="#6b7fa3", width=2, dash="dashdot"),
+        opacity=0.7
+    ), row=1, col=1)
+
+    # VTIP core line
     fig_perf.add_trace(go.Scatter(
         x=data["cum_returns"].index, y=data["cum_returns"].values,
-        name="VTIP (Core 100%)", line=dict(color="#F1C40F", width=3),
-        fill='tozeroy', fillcolor='rgba(241,196,15,0.05)'
+        name="VTIP (Core 100%)", line=dict(color="#F1C40F", width=2.5)
     ), row=1, col=1)
+
+    # SPY benchmark
     fig_perf.add_trace(go.Scatter(
         x=data["spy_cum"].index, y=data["spy_cum"].values,
         name="S&P 500 (SPY)", line=dict(color="rgba(255,255,255,0.35)", width=1.5, dash="dot")
     ), row=1, col=1)
 
-    # Satellite cumulative returns — IAU, GEV, VGSH
+    # Satellite individual cumulative returns — IAU, GEV, VGSH
     sat_colors = {"IAU": "#FFD700", "GEV": "#00ff88", "VGSH": "#00d1ff"}
     for tk in GAINS_SATELLITES:
         if tk in data["returns"].columns:
@@ -413,15 +712,21 @@ with tab1:
 
     fig_perf.add_hline(y=1.0, line_dash="dash", line_color="#333", row=1, col=1)
 
-    # Daily returns bar
-    colors = ["#00ff88" if r > 0 else "#ff4b4b" for r in data["port_returns"].values]
+    # Daily returns — show both VTIP and Full Portfolio
+    vtip_colors = ["rgba(241,196,15,0.33)" if r > 0 else "rgba(255,75,75,0.33)" for r in data["port_returns"].values]
     fig_perf.add_trace(go.Bar(
         x=data["port_returns"].index, y=data["port_returns"].values * 100,
-        name="Daily Return (%)", marker_color=colors, opacity=0.6
+        name="VTIP Daily (%)", marker_color=vtip_colors, opacity=0.4
+    ), row=2, col=1)
+    full_colors = ["#a78bfa" if r > 0 else "#ff4b4b" for r in data["full_port_returns"].values]
+    fig_perf.add_trace(go.Scatter(
+        x=data["full_port_returns"].index, y=data["full_port_returns"].values * 100,
+        name="Composite Daily (%)", line=dict(color="#a78bfa", width=1.5),
+        mode='lines'
     ), row=2, col=1)
 
     fig_perf.update_layout(
-        template="plotly_dark", height=750, showlegend=True,
+        template="plotly_dark", height=850, showlegend=True,
         paper_bgcolor="#050810", plot_bgcolor="#0a0f1a",
         margin=dict(l=60, r=20, t=80, b=40),
         legend=dict(orientation="h", y=1.12, x=0.5, xanchor="center", font=dict(size=11)),
@@ -532,67 +837,101 @@ with tab3:
     <div class='math-block'>
     <strong>VaR (95%):</strong>&nbsp;&nbsp; F<sup>-1</sup>(0.05) of daily return distribution<br>
     <strong>CVaR (95%):</strong>&nbsp;&nbsp; E[R | R ≤ VaR<sub>95</sub>] — Expected Shortfall<br>
-    <strong>Leverage Decay:</strong>&nbsp;&nbsp; D = −½ · L² · σ² / 252 (daily erosion from leveraged ETFs)
+    <strong>View:</strong>&nbsp;&nbsp; VTIP Core vs Composite (VTIP capital + swept gains into satellites)
     </div>
     """, unsafe_allow_html=True)
 
-    # Risk KPIs
+    # Risk KPIs — VTIP row
+    st.markdown("<div class='section-header'>VTIP CORE RISK</div>", unsafe_allow_html=True)
     rk1, rk2, rk3, rk4 = st.columns(4)
-    rk1.metric("ANN. VOLATILITY", f"{data['ann_vol']:.2f}%", "Portfolio σ")
+    rk1.metric("ANN. VOLATILITY", f"{data['ann_vol']:.2f}%", "VTIP σ")
     rk2.metric("VaR (95%)", f"{data['var_95']:.3f}%", "Daily Loss Limit")
     rk3.metric("CVaR (95%)", f"{data['cvar_95']:.3f}%", "Expected Shortfall")
     rk4.metric("MAX DRAWDOWN", f"{data['max_dd']:.2f}%", "Peak-to-Trough")
+
+    # Risk KPIs — Full Portfolio row
+    st.markdown("")
+    st.markdown("<div class='section-header'>COMPOSITE PORTFOLIO RISK (VTIP + GAINS)</div>", unsafe_allow_html=True)
+    frk1, frk2, frk3, frk4 = st.columns(4)
+    frk1.metric("ANN. VOLATILITY", f"{data['full_ann_vol']:.2f}%", "Composite σ")
+    frk2.metric("VaR (95%)", f"{data['full_var_95']:.3f}%", "Daily Loss Limit")
+    frk3.metric("CVaR (95%)", f"{data['full_cvar_95']:.3f}%", "Expected Shortfall")
+    frk4.metric("MAX DRAWDOWN", f"{data['full_max_dd']:.2f}%", "Peak-to-Trough")
 
     st.markdown("")
 
     fig_risk = make_subplots(
         rows=2, cols=2, vertical_spacing=0.18, horizontal_spacing=0.08,
         subplot_titles=(
-            "Rolling 60d Annualized Volatility",
-            "Rolling 60d Sharpe Ratio",
-            "Underwater Chart (Drawdown %)",
+            "Rolling 60d Ann. Volatility (VTIP vs Composite)",
+            "Rolling 60d Sharpe Ratio (VTIP vs Composite)",
+            "Underwater Drawdown (VTIP vs Composite)",
             "Return Distribution — VaR/CVaR"
         )
     )
 
-    # Rolling vol
+    # Rolling vol — VTIP
     rv = data["rolling_vol_60"].dropna()
     fig_risk.add_trace(go.Scatter(
-        x=rv.index, y=rv.values * 100, name="60d Vol",
+        x=rv.index, y=rv.values * 100, name="VTIP 60d Vol",
         line=dict(color="#fbc02d", width=2.5), fill='tozeroy', fillcolor='rgba(251,192,45,0.06)'
     ), row=1, col=1)
+    # Rolling vol — Full Portfolio
+    frv = data["full_rolling_vol_60"].dropna()
+    fig_risk.add_trace(go.Scatter(
+        x=frv.index, y=frv.values * 100, name="Full Port 60d Vol",
+        line=dict(color="#a78bfa", width=2.5, dash="dash")
+    ), row=1, col=1)
 
-    # Rolling Sharpe
+    # Rolling Sharpe — VTIP
     rs = data["rolling_sharpe"].dropna()
     rs_clipped = rs.clip(-3, 5)
     fig_risk.add_trace(go.Scatter(
-        x=rs_clipped.index, y=rs_clipped.values, name="60d Sharpe",
+        x=rs_clipped.index, y=rs_clipped.values, name="VTIP 60d Sharpe",
         line=dict(color="#00d1ff", width=2.5)
+    ), row=1, col=2)
+    # Rolling Sharpe — Full Portfolio
+    frs = data["full_rolling_sharpe"].dropna()
+    frs_clipped = frs.clip(-3, 5)
+    fig_risk.add_trace(go.Scatter(
+        x=frs_clipped.index, y=frs_clipped.values, name="Full Port 60d Sharpe",
+        line=dict(color="#a78bfa", width=2.5, dash="dash")
     ), row=1, col=2)
     fig_risk.add_hline(y=0, line_dash="dash", line_color="#ff4b4b", row=1, col=2)
     fig_risk.add_hline(y=1, line_dash="dot", line_color="#00ff88", annotation_text="Sharpe=1", row=1, col=2)
 
-    # Drawdown
+    # Drawdown — VTIP
     dd = data["drawdown_series"]
     fig_risk.add_trace(go.Scatter(
-        x=dd.index, y=dd.values, name="Drawdown",
+        x=dd.index, y=dd.values, name="VTIP Drawdown",
         line=dict(color="#ff4b4b", width=2), fill='tozeroy', fillcolor='rgba(255,75,75,0.12)'
     ), row=2, col=1)
+    # Drawdown — Full Portfolio
+    fdd = data["full_drawdown_series"]
+    fig_risk.add_trace(go.Scatter(
+        x=fdd.index, y=fdd.values, name="Full Port Drawdown",
+        line=dict(color="#a78bfa", width=2, dash="dash")
+    ), row=2, col=1)
 
-    # Return histogram with VaR/CVaR lines
+    # Return histogram — overlay both distributions
     fig_risk.add_trace(go.Histogram(
-        x=data["port_returns"].values * 100, nbinsx=60, name="Daily Returns",
-        marker_color="#00d1ff", opacity=0.6
+        x=data["port_returns"].values * 100, nbinsx=60, name="VTIP Daily Returns",
+        marker_color="#00d1ff", opacity=0.5
+    ), row=2, col=2)
+    fig_risk.add_trace(go.Histogram(
+        x=data["full_port_returns"].values * 100, nbinsx=60, name="Full Port Daily Returns",
+        marker_color="#a78bfa", opacity=0.4
     ), row=2, col=2)
     fig_risk.add_vline(x=data["var_95"], line_dash="dash", line_color="#fbc02d",
-                       annotation_text=f"VaR₉₅: {data['var_95']:.2f}%", row=2, col=2)
-    fig_risk.add_vline(x=data["cvar_95"], line_dash="dash", line_color="#ff4b4b",
-                       annotation_text=f"CVaR₉₅: {data['cvar_95']:.2f}%", row=2, col=2)
+                       annotation_text=f"VTIP VaR₉₅: {data['var_95']:.2f}%", row=2, col=2)
+    fig_risk.add_vline(x=data["full_var_95"], line_dash="dash", line_color="#a78bfa",
+                       annotation_text=f"Full VaR₉₅: {data['full_var_95']:.2f}%", row=2, col=2)
 
     fig_risk.update_layout(
-        template="plotly_dark", height=750, showlegend=False,
+        template="plotly_dark", height=850, showlegend=True, barmode='overlay',
         paper_bgcolor="#050810", plot_bgcolor="#0a0f1a",
         margin=dict(l=60, r=20, t=80, b=40),
+        legend=dict(orientation="h", y=-0.05, x=0.5, xanchor="center", font=dict(size=10)),
         font=dict(family="JetBrains Mono", size=11, color="#6b7fa3")
     )
     fig_risk.update_xaxes(gridcolor="#1a2744")
