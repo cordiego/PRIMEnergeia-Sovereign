@@ -16,6 +16,7 @@ Sub-products aggregated:
   - Granas Optics  → Mie scattering, CFRP optical recycling
   - Granas SDL     → Fabrication process optimization
   - Granas SIBO    → Bayesian optimization convergence
+  - Granas H2      → PEM electrolysis green hydrogen
 
 Author: Diego Córdoba Urrutia — PRIMEnergeia S.A.S.
 """
@@ -486,6 +487,55 @@ class GHBMetrics:
 
 
 # ═══════════════════════════════════════════════════════════
+# H2 Model (PEM Electrolysis — Solar to Green Hydrogen)
+# ═══════════════════════════════════════════════════════════
+@dataclass
+class H2Metrics:
+    """PEM electrolysis: Granas solar electricity → green H₂."""
+    electrolyzer_efficiency_pct: float = 70.0
+    h2_energy_kwh_per_kg: float = 55.0          # System-level
+    h2_production_kg_per_mwh: float = 18.2      # At 70% eff
+    water_consumption_kg_per_kg_h2: float = 9.0
+    solar_fraction_pct: float = 15.0
+    stack_voltage_V: float = 2.015
+    current_density_A_cm2: float = 2.0
+    cell_efficiency_pct: float = 73.4
+    system_efficiency_pct: float = 67.5
+    stack_degradation_uV_per_h: float = 4.0
+    stack_lifetime_kh: float = 80.0
+    h2_price_usd_kg: float = 4.50
+    lcoh_usd_kg: float = 3.83
+    h2_annual_tonnes: float = 0.0
+    revenue_annual_M_usd: float = 0.0
+    co2_per_kg_h2: float = 0.0                   # Zero — green
+
+    @staticmethod
+    def from_solar_input(pce_pct: float, capacity_mw: float = 50.0,
+                         solar_fraction: float = 0.15,
+                         capacity_factor: float = 0.22) -> "H2Metrics":
+        """Scale H2 metrics by available Granas solar capacity."""
+        h2_power_mw = capacity_mw * solar_fraction
+        annual_mwh = h2_power_mw * capacity_factor * 8760
+        annual_kwh = annual_mwh * 1000
+
+        # System-level: HHV / eff
+        eff = 0.70
+        kwh_per_kg = 39.4 / eff  # HHV basis
+        h2_annual_kg = annual_kwh / kwh_per_kg
+        revenue = h2_annual_kg * 4.50 / 1e6
+
+        # PCE scaling: better panels → more electricity → more H₂
+        pce_factor = min(pce_pct / 25.0, 1.5)
+
+        return H2Metrics(
+            h2_production_kg_per_mwh=1000 / kwh_per_kg,
+            h2_annual_tonnes=h2_annual_kg * pce_factor / 1000,
+            revenue_annual_M_usd=revenue * pce_factor,
+            lcoh_usd_kg=3.83,
+        )
+
+
+# ═══════════════════════════════════════════════════════════
 # ETFE Model (Front Encapsulation)
 # ═══════════════════════════════════════════════════════════
 @dataclass
@@ -579,6 +629,7 @@ class HolisticGranas:
 
     # New engine metrics
     albedo: AlbedoMetrics = field(default_factory=AlbedoMetrics)
+    h2: H2Metrics = field(default_factory=H2Metrics)
     ghb: GHBMetrics = field(default_factory=GHBMetrics)
     etfe: ETFEMetrics = field(default_factory=ETFEMetrics)
     topcon: TOPConMetrics = field(default_factory=TOPConMetrics)
@@ -627,6 +678,7 @@ class HolisticGranas:
 
         # Populate new engine metrics
         self.albedo = AlbedoMetrics.from_thermal(self.thermal, self.sdl.pce_pct)
+        self.h2 = H2Metrics.from_solar_input(self.sdl.pce_pct)
         self.ghb = GHBMetrics.from_solar_input(self.sdl.pce_pct, self.optics.jsc_mA_cm2)
         self.etfe = ETFEMetrics()
         self.topcon = TOPConMetrics.from_optics(self.optics.jsc_mA_cm2)

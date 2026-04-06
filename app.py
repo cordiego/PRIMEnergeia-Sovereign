@@ -162,14 +162,14 @@ st.divider()
 # ─── Sidebar Quick-Launch ──────────────────────────────────
 st.sidebar.markdown("### 🚀 Quick Launch")
 _quick = {
-    "⚡ Co-Optimization": "pages/24_⚡_Co_Optimization.py",
+    "⚡ Co-Optimization": "pages/25_⚡_Co_Optimization.py",
     "⚡ Grid Control":    "pages/1_⚡_Grid_Control.py",
-    "🔌 Grid Outputs":    "pages/26_🔌_Grid_Outputs.py",
+    "🔌 Grid Outputs":    "pages/27_🔌_Grid_Outputs.py",
     "🧪 Granas Optimizer":"pages/3_🧪_Granas_Optimizer.py",
-    "🧠 HJB Control":     "pages/19_🧠_HJB_Control.py",
-    "🏭 PRIMStack":       "pages/21_🏭_PRIMStack.py",
-    "🔬 Engine Research":  "pages/20_🔬_Engine_Research.py",
-    "📂 Data Upload":     "pages/25_📂_Data_Upload.py",
+    "🧠 HJB Control":     "pages/20_🧠_HJB_Control.py",
+    "🏭 PRIMStack":       "pages/22_🏭_PRIMStack.py",
+    "🔬 Engine Research":  "pages/21_🔬_Engine_Research.py",
+    "📂 Data Upload":     "pages/26_📂_Data_Upload.py",
 }
 for _label, _page in _quick.items():
     st.sidebar.page_link(_page, label=_label)
@@ -221,7 +221,7 @@ with c2:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/15_PRIMEnergeia_Battery.py", label="Open →", icon="🔋")
+    st.page_link("pages/16_PRIMEnergeia_Battery.py", label="Open →", icon="🔋")
 
 with c3:
     st.markdown("""
@@ -234,7 +234,7 @@ with c3:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/17_PRIM_Wind.py", label="Open →", icon="🌊")
+    st.page_link("pages/18_PRIM_Wind.py", label="Open →", icon="🌊")
 
 c4, c5, c6 = st.columns(3)
 
@@ -249,7 +249,7 @@ with c4:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/19_🧠_HJB_Control.py", label="Open →", icon="🧠")
+    st.page_link("pages/20_🧠_HJB_Control.py", label="Open →", icon="🧠")
 
 with c5:
     st.markdown("""
@@ -262,7 +262,7 @@ with c5:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/21_🏭_PRIMStack.py", label="Open →", icon="🏭")
+    st.page_link("pages/22_🏭_PRIMStack.py", label="Open →", icon="🏭")
 
 with c6:
     st.markdown("""
@@ -275,7 +275,7 @@ with c6:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/25_📂_Data_Upload.py", label="Open →", icon="📂")
+    st.page_link("pages/26_📂_Data_Upload.py", label="Open →", icon="📂")
 
 c7_go, _, _ = st.columns(3)
 
@@ -291,7 +291,7 @@ with c7_go:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/26_🔌_Grid_Outputs.py", label="Open →", icon="🔌")
+    st.page_link("pages/27_🔌_Grid_Outputs.py", label="Open →", icon="🔌")
 
 # ── Flagship CTA — Co-Optimization ──
 st.markdown("")
@@ -310,7 +310,7 @@ st.markdown("""
     <span class='product-badge'>BACKTEST-VALIDATED</span>
 </div>
 """, unsafe_allow_html=True)
-st.page_link("pages/24_⚡_Co_Optimization.py", label="🚀 Launch Co-Optimizer →", icon="⚡")
+st.page_link("pages/25_⚡_Co_Optimization.py", label="🚀 Launch Co-Optimizer →", icon="⚡")
 
 # ────────────────────────────────────────────────────────────
 #  🏛️ DIVISION 2: EUREKA TRADING
@@ -451,6 +451,22 @@ with g5:
 with g6:
     st.markdown("""
     <div class='product-card'>
+        <div class='product-title' style='color: #00d1ff;'>💧 Granas H2</div>
+        <div class='product-desc'>PEM electrolysis. Nafion stack + solar load-following. $3.83/kg LCOH.</div>
+        <div>
+            <span class='product-badge'>PEM</span>
+            <span class='product-badge'>GREEN H₂</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/8_💧_Granas_H2.py", label="Open →", icon="💧")
+
+# Granas Row 3
+g7, g8, g9 = st.columns(3)
+
+with g7:
+    st.markdown("""
+    <div class='product-card'>
         <div class='product-title' style='color: #7B68EE;'>⚗️ Granas GHB</div>
         <div class='product-desc'>Green Haber-Bosch NRR. Mo-N₄ catalyst + decentralized NH₃.</div>
         <div>
@@ -459,12 +475,11 @@ with g6:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/8_⚗️_Granas_GHB.py", label="Open →", icon="⚗️")
+    st.page_link("pages/9_⚗️_Granas_GHB.py", label="Open →", icon="⚗️")
 
-# Granas Row 3
-g7, g8, g9 = st.columns(3)
+g8, g9, _ = st.columns(3)
 
-with g7:
+with g8:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #2ecc71;'>🌿 Granas Albedo</div>
@@ -475,9 +490,9 @@ with g7:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/9_🌿_Granas_Albedo.py", label="Open →", icon="🌿")
+    st.page_link("pages/10_🌿_Granas_Albedo.py", label="Open →", icon="🌿")
 
-with g8:
+with g9:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #00BFFF;'>🛡️ Granas ETFE</div>
@@ -488,9 +503,12 @@ with g8:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/10_🛡️_Granas_ETFE.py", label="Open →", icon="🛡️")
+    st.page_link("pages/11_🛡️_Granas_ETFE.py", label="Open →", icon="🛡️")
 
-with g9:
+# Granas Row 4 + Engines
+g10, g11, g12 = st.columns(3)
+
+with g10:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #FF6347;'>🔬 Granas TOPCon</div>
@@ -501,12 +519,9 @@ with g9:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/11_🔬_Granas_TOPCon.py", label="Open →", icon="🔬")
+    st.page_link("pages/12_🔬_Granas_TOPCon.py", label="Open →", icon="🔬")
 
-# Granas Row 4 + Engines
-g10, g11, g12 = st.columns(3)
-
-with g10:
+with g11:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #00c878;'>📐 Granas Blueprint</div>
@@ -517,9 +532,9 @@ with g10:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/12_📐_Granas_Blueprint.py", label="Open →", icon="📐")
+    st.page_link("pages/13_📐_Granas_Blueprint.py", label="Open →", icon="📐")
 
-with g11:
+with g12:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #FF8C00;'>🏭 Granas Scale</div>
@@ -530,9 +545,12 @@ with g11:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/13_🏭_Granas_Scale.py", label="Open →", icon="🏭")
+    st.page_link("pages/14_🏭_Granas_Scale.py", label="Open →", icon="🏭")
 
-with g12:
+# Engines + SIBO + Cycle
+g13, g14, g15 = st.columns(3)
+
+with g13:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #E040FB;'>🧠 SIBO API</div>
@@ -543,12 +561,9 @@ with g12:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/14_🧠_SIBO_API.py", label="Open →", icon="🧠")
+    st.page_link("pages/15_🧠_SIBO_API.py", label="Open →", icon="🧠")
 
-# Engines + Circular + Platform
-g13, g14, g15 = st.columns(3)
-
-with g13:
+with g14:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #EF5350;'>🚀 PRIMEngines</div>
@@ -559,9 +574,9 @@ with g13:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/18_PRIMEngines.py", label="Open →", icon="🚀")
+    st.page_link("pages/19_PRIMEngines.py", label="Open →", icon="🚀")
 
-with g14:
+with g15:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #FFA726;'>🔬 Engine Research</div>
@@ -572,9 +587,12 @@ with g14:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/20_🔬_Engine_Research.py", label="Open →", icon="🔬")
+    st.page_link("pages/21_🔬_Engine_Research.py", label="Open →", icon="🔬")
 
-with g15:
+# Platform Core + Circular
+g16, g17, g18 = st.columns(3)
+
+with g16:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #66BB6A;'>♻️ PRIMEcycle</div>
@@ -585,12 +603,9 @@ with g15:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/16_PRIMEcycle.py", label="Open →", icon="♻️")
+    st.page_link("pages/17_PRIMEcycle.py", label="Open →", icon="♻️")
 
-# Platform Core
-g16, g17 = st.columns([1, 1])
-
-with g16:
+with g17:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #00ffcc;'>🧠 PRIME Kernel</div>
@@ -601,9 +616,9 @@ with g16:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/22_🧠_PRIME_Kernel.py", label="Open →", icon="🧠")
+    st.page_link("pages/23_🧠_PRIME_Kernel.py", label="Open →", icon="🧠")
 
-with g17:
+with g18:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #F1C40F;'>📊 CEO Dashboard</div>
@@ -614,7 +629,7 @@ with g17:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/23_📊_CEO_Dashboard.py", label="Open →", icon="📊")
+    st.page_link("pages/24_📊_CEO_Dashboard.py", label="Open →", icon="📊")
 
 st.markdown("")
 st.divider()
@@ -625,7 +640,7 @@ st.divider()
 st.markdown("### Platform Metrics")
 m1, m2, m3, m4, m5, m6 = st.columns(6)
 m1.metric("MARKETS", "17", "1,700+ GW Global")
-m2.metric("PAGES", "26", "Full Product Suite")
+m2.metric("PAGES", "27", "Full Product Suite")
 m3.metric("DIVISIONS", "3", "Grid · Eureka · Research")
 m4.metric("ENGINES", "6", "NH₃ · H₂ · Turbine")
 m5.metric("REPOS", "22", "Enterprise Fleet")

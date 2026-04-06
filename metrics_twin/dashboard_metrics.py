@@ -23,7 +23,7 @@ except ImportError:
 from metrics.granas_metrics import (
     OpticsMetrics, SDLMetrics, SIBOMetrics, HolisticGranas,
     GranasComposition, ThermalModel, CFRPModel, load_experiment_log,
-    AlbedoMetrics, GHBMetrics, ETFEMetrics, TOPConMetrics, BlueprintMetrics,
+    AlbedoMetrics, GHBMetrics, H2Metrics, ETFEMetrics, TOPConMetrics, BlueprintMetrics,
 )
 
 st.set_page_config(
@@ -244,10 +244,10 @@ m9.metric("🏗️ Weight", f"{h.cfrp.weight_kg_m2} kg/m²")
 # ═══════════════════════════════════════════════════════════
 # TABS
 # ═══════════════════════════════════════════════════════════
-tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11 = st.tabs([
+tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12 = st.tabs([
     "🎯 Holistic", "🔬 Optics", "🧬 SDL",
     "🌡️ Thermal", "🏗️ CFRP", "🧪 SIBO",
-    "🌿 Albedo", "⚗️ GHB", "🛡️ ETFE", "🔬 TOPCon", "📐 Blueprint"
+    "🌿 Albedo", "💧 H2", "⚗️ GHB", "🛡️ ETFE", "🔬 TOPCon", "📐 Blueprint"
 ])
 
 # ─── Tab 1: Holistic Radar ───────────────────────────────────
@@ -482,8 +482,73 @@ with tab7:
     )
     st.plotly_chart(fig_alb, use_container_width=True)
 
-# ─── Tab 8: GHB ─────────────────────────────────────────────
+# ─── Tab 8: H2 (NEW) ─────────────────────────────────────────
 with tab8:
+    st.markdown("### 💧 H2 — PEM Electrolysis Green Hydrogen")
+    h2m = h.h2
+    h2_1, h2_2, h2_3 = st.columns(3)
+    h2_1.metric("⚗️ Electrolyzer Eff.", f"{h2m.electrolyzer_efficiency_pct:.0f}%")
+    h2_2.metric("⚡ Energy/kg H₂", f"{h2m.h2_energy_kwh_per_kg:.0f} kWh")
+    h2_3.metric("💧 H₂O / kg H₂", f"{h2m.water_consumption_kg_per_kg_h2:.0f} kg")
+
+    h2_4, h2_5, h2_6 = st.columns(3)
+    h2_4.metric("🔋 Cell Voltage", f"{h2m.stack_voltage_V:.3f} V")
+    h2_5.metric("⚡ Cell Efficiency", f"{h2m.cell_efficiency_pct:.1f}%")
+    h2_6.metric("🏭 System Efficiency", f"{h2m.system_efficiency_pct:.1f}%")
+
+    h2_7, h2_8, h2_9 = st.columns(3)
+    h2_7.metric("💰 LCOH", f"${h2m.lcoh_usd_kg:.2f}/kg")
+    h2_8.metric("🏢 H₂ Annual", f"{h2m.h2_annual_tonnes:.0f} tonnes")
+    h2_9.metric("💵 Revenue", f"${h2m.revenue_annual_M_usd:.1f}M/yr")
+
+    h2_10, h2_11, h2_12 = st.columns(3)
+    h2_10.metric("☀️ Solar Fraction", f"{h2m.solar_fraction_pct:.0f}%")
+    h2_11.metric("📉 Degradation", f"{h2m.stack_degradation_uV_per_h:.0f} μV/h")
+    h2_12.metric("⏱️ Stack Lifetime", f"{h2m.stack_lifetime_kh:.0f} kh")
+
+    # LCOH Sensitivity to Electricity Price
+    elec_prices = np.arange(10, 110, 5)
+    lcohs = []
+    for ep in elec_prices:
+        crf = (0.08 * 1.08**10) / (1.08**10 - 1)
+        annual_capex = 810 * 1000 * crf
+        annual_opex = 810 * 1000 * 0.03
+        annual_kwh = 1000 * 0.50 * 8760
+        annual_elec = annual_kwh * ep / 1000
+        kwh_kg = 39.4 / 0.65
+        h2_kg = annual_kwh / kwh_kg
+        lcohs.append((annual_capex + annual_opex + annual_elec) / h2_kg)
+
+    fig_lcoh = go.Figure(go.Scatter(
+        x=elec_prices, y=lcohs, name="LCOH",
+        line=dict(color="#00d1ff", width=3),
+        fill="tozeroy", fillcolor="rgba(0,209,255,0.08)",
+    ))
+    fig_lcoh.add_hline(y=4.50, line_dash="dash", line_color="#00ff64",
+                        annotation_text="Green H₂ Market ($4.50/kg)")
+    fig_lcoh.add_hline(y=1.50, line_dash="dash", line_color="#ff4444",
+                        annotation_text="Grey H₂ SMR ($1.50/kg)")
+    fig_lcoh.update_layout(
+        template="plotly_dark", paper_bgcolor="#020608", plot_bgcolor="#020608",
+        title="LCOH Sensitivity to Electricity Price",
+        xaxis_title="Electricity Price ($/MWh)", yaxis_title="LCOH ($/kg H₂)",
+        height=450, font=dict(family="Inter", color="#e2e8f0"),
+    )
+    st.plotly_chart(fig_lcoh, use_container_width=True)
+
+    st.markdown("""
+    **Reaction:** 2H₂O → 2H₂ + O₂  (E° = 1.229 V)
+
+    Granas panels generate excess solar electricity. **15%** is diverted to a PEM
+    electrolyzer (Nafion membrane, IrO₂ anode, Pt/C cathode), producing zero-carbon
+    green hydrogen. This H₂ feeds downstream:
+    - **PEM fuel cells** (PEM-PB-50) for clean power
+    - **H₂ turbines** (HY-P100) for fast dispatchable generation
+    - **Haber-Bosch** synthesis for green ammonia (NH₃)
+    """)
+
+# ─── Tab 9: GHB ─────────────────────────────────────────────
+with tab9:
     st.markdown("### ⚗️ GHB — Green Haber-Bosch Electrochemical NRR")
     ghb = h.ghb
     g1, g2, g3 = st.columns(3)
@@ -508,8 +573,8 @@ with tab8:
     This enables decentralized green fertilizer production at the module level.
     """)
 
-# ─── Tab 9: ETFE ─────────────────────────────────────────────
-with tab9:
+# ─── Tab 10: ETFE ────────────────────────────────────────────
+with tab10:
     st.markdown("### 🛡️ ETFE — Front Encapsulation Architecture")
     etfe = h.etfe
     e1, e2, e3 = st.columns(3)
@@ -544,8 +609,8 @@ with tab9:
     )
     st.plotly_chart(fig_etfe, use_container_width=True)
 
-# ─── Tab 10: TOPCon ──────────────────────────────────────────
-with tab10:
+# ─── Tab 11: TOPCon ──────────────────────────────────────────
+with tab11:
     st.markdown("### 🔬 TOPCon — Silicon Bottom Cell")
     tc = h.topcon
     tc1, tc2, tc3 = st.columns(3)
@@ -591,8 +656,8 @@ with tab10:
     )
     st.plotly_chart(fig_tc, use_container_width=True)
 
-# ─── Tab 11: Blueprint ───────────────────────────────────────
-with tab11:
+# ─── Tab 12: Blueprint ───────────────────────────────────────
+with tab12:
     st.markdown("### 📐 Blueprint — Master Geometric Engine")
     bp = h.blueprint
     bp1, bp2, bp3 = st.columns(3)
