@@ -112,6 +112,21 @@ if "running" not in st.session_state:
 if "trials_df" not in st.session_state:
     st.session_state.trials_df = None
 
+# ─── Grid Handshake ─────────────────────────────────────────
+try:
+    from lib.granas_handshake import (
+        require_grid_handshake,
+        get_simulation_defaults,
+        show_handshake_sidebar,
+    )
+    _sim_defaults = get_simulation_defaults()
+    show_handshake_sidebar()
+except Exception:
+    _sim_defaults = {
+        "n_calls": 50, "n_initial": 8,
+        "label": "DORMANT (Handshake N/A)",
+    }
+
 
 def run_optimization(n_calls, n_initial, acq_func, multi_obj, seed):
     """Run the optimizer and cache results."""
@@ -134,11 +149,15 @@ def run_optimization(n_calls, n_initial, acq_func, multi_obj, seed):
 # ─────────────────────────────────────────────────────────────
 # Header
 # ─────────────────────────────────────────────────────────────
-st.markdown("""
+st.markdown(f"""
 <div class="main-header">
     <h1>⚡ Granas — Perovskite Bayesian Optimizer</h1>
     <p>Physics-informed optimization for perovskite solar cell ink recipes &bull;
-    PRIMEnergeia S.A.S.</p>
+    PRIMEnergeia S.A.S. &bull;
+    <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;
+                 color: {'#00ff88' if _sim_defaults.get('n_calls', 50) >= 200 else '#ff8c00' if _sim_defaults.get('n_calls', 50) >= 80 else '#8b5cf6'};">
+        {_sim_defaults.get('label', 'UNKNOWN')}
+    </span></p>
 </div>
 """, unsafe_allow_html=True)
 
@@ -149,8 +168,10 @@ with st.sidebar:
     st.markdown("### 🔬 Optimization Controls")
     st.markdown("---")
 
-    n_calls = st.slider("Total Experiments", 10, 200, 50, step=5)
-    n_initial = st.slider("Initial Random Points", 3, 30, 8)
+    _def_n = _sim_defaults.get("n_calls", 50)
+    _def_init = _sim_defaults.get("n_initial", 8)
+    n_calls = st.slider("Total Experiments", 10, 200, min(_def_n, 200), step=5)
+    n_initial = st.slider("Initial Random Points", 3, 30, min(_def_init, 30))
     acq_func = st.selectbox(
         "Acquisition Function",
         ["EI", "PI", "LCB"],

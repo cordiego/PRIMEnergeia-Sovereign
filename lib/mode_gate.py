@@ -2,10 +2,11 @@
 PRIMEnergeia — Demo Banner & Mode Gate
 =========================================
 Injects a prominent DEMO/LIVE banner at the top of every Streamlit page
-based on whether real data has been loaded.
+based on whether real data has been loaded.  Also integrates the Granas
+Grid Handshake status when a power‑input signature is available.
 
 Usage in a page:
-    from lib.mode_gate import show_mode_banner, is_live_mode
+    from lib.mode_gate import show_mode_banner, is_live_mode, is_grid_verified
 
     show_mode_banner()
 
@@ -18,10 +19,22 @@ PRIMEnergeia S.A.S. — Grid Optimization Division
 import streamlit as st
 
 
+# ─── Data Mode Checks ──────────────────────────────────────
+
 def is_live_mode() -> bool:
     """Check if real data has been loaded into session state."""
     return "prime_dataset" in st.session_state
 
+
+def is_grid_verified() -> bool:
+    """Check if the Granas grid handshake is in HIGH_LOAD state."""
+    hs = st.session_state.get("granas_grid_handshake")
+    if hs is None:
+        return False
+    return getattr(hs, "mode", "DORMANT") == "HIGH_LOAD"
+
+
+# ─── Banners ───────────────────────────────────────────────
 
 def show_mode_banner():
     """Show a prominent DEMO or LIVE banner at the top of the page."""
@@ -56,6 +69,13 @@ def show_mode_banner():
             Navigate to 📂 Data Upload to connect real market data.
         </div>
         """, unsafe_allow_html=True)
+
+    # ── Grid Handshake sub‑banner (shown after data banner) ──────
+    try:
+        from lib.granas_handshake import show_handshake_banner
+        show_handshake_banner()
+    except Exception:
+        pass  # Don't crash if handshake module isn't available
 
 
 def require_live_data(page_name: str = "this page"):

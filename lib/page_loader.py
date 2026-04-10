@@ -91,6 +91,13 @@ def load_dashboard(module_path: str, module_name: str = None):
         except Exception:
             pass  # Don't crash if mode_gate isn't available
 
+        # Inject Grid Stabilizer handshake widget in sidebar
+        try:
+            from lib.granas_handshake import show_handshake_sidebar
+            show_handshake_sidebar()
+        except Exception:
+            pass  # Don't crash if handshake module isn't available
+
         code = compile(source, module_path, "exec")
         exec(code, module.__dict__)
     except SystemExit:

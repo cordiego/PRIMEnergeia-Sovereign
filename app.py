@@ -27,6 +27,19 @@ logout_button()
 from lib.mode_gate import show_mode_banner
 show_mode_banner()
 
+# ─── Grid Handshake ─────────────────────────────────────────
+try:
+    from lib.granas_handshake import verify_power_input, show_handshake_sidebar
+    _hs = verify_power_input()
+    _hs_available = True
+except Exception:
+    _hs_available = False
+    class _hs_stub:
+        mode = "DORMANT"
+        grid_freq_hz = 0.0
+        grid_voltage_kv = 0.0
+    _hs = _hs_stub()
+
 # Premium CSS
 st.markdown("""
 <style>
@@ -154,7 +167,21 @@ with h1:
     st.markdown("# ⚡ PRIMEnergeia Sovereign")
     st.markdown("<div class='hero-tagline'>Dispatching the future of energy — one HJB solve at a time.</div>", unsafe_allow_html=True)
 with h2:
-    st.markdown("<span class='status-live'>● SYSTEMS ONLINE</span>", unsafe_allow_html=True)
+    if _hs.mode == "HIGH_LOAD":
+        _sys_color = "#00ff88"
+        _sys_label = f"⚡ GRID VERIFIED │ {_hs.grid_freq_hz:.3f} Hz"
+    elif _hs.mode == "LOW_POWER":
+        _sys_color = "#ff8c00"
+        _sys_label = f"⚠ LOW-POWER │ {_hs.grid_freq_hz:.3f} Hz"
+    else:
+        _sys_color = "#818cf8"
+        _sys_label = "● SYSTEMS ONLINE"
+    st.markdown(
+        f"<span style='display:inline-block; background:rgba({','.join(str(int(_sys_color.lstrip('#')[i:i+2],16)) for i in (0,2,4))},0.12); "
+        f"color:{_sys_color}; font-family:JetBrains Mono,monospace; font-size:11px; font-weight:700; "
+        f"padding:4px 10px; border-radius:4px; animation:pulse 2s infinite;'>{_sys_label}</span>",
+        unsafe_allow_html=True,
+    )
     st.link_button("🌐 PRIME Platform ↗", "https://cordiego.github.io/PRIME-Platform/", type="primary")
 
 st.divider()
@@ -174,6 +201,11 @@ _quick = {
 for _label, _page in _quick.items():
     st.sidebar.page_link(_page, label=_label)
 st.sidebar.divider()
+
+# ─── Grid Stabilizer sidebar widget ─────────────────────────
+if _hs_available:
+    show_handshake_sidebar()
+    st.sidebar.divider()
 
 # ============================================================
 #  PRODUCT SUITE — ORGANIZED BY DIVISION
