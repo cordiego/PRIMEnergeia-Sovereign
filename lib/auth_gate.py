@@ -12,12 +12,11 @@ Setup:
 
 Template for .streamlit/secrets.toml:
   [auth]
-  admin_password = "your-secure-password-here"
+  admin_password = "<your-secure-password>"
   
   [auth.users]
-  admin = {password = "admin123", role = "admin", name = "Admin"}
-  client_demo = {password = "demo2026", role = "viewer", name = "Demo Client"}
-  cfe_viewer = {password = "cfe-prime-2026", role = "viewer", name = "CFE Viewer"}
+  admin = {password = "<change-me>", role = "admin", name = "Admin"}
+  client_demo = {password = "<change-me>", role = "viewer", name = "Demo Client"}
 
 PRIMEnergeia S.A.S. — Grid Optimization Division
 """
@@ -37,11 +36,8 @@ def _get_users() -> dict:
     try:
         return dict(st.secrets.get("auth", {}).get("users", {}))
     except Exception:
-        # Fallback: single admin password
-        return {
-            "admin": {"password": "prime-admin-2026", "role": "admin", "name": "Administrator"},
-            "demo": {"password": "demo-2026", "role": "viewer", "name": "Demo Access"},
-        }
+        # No fallback credentials — secrets.toml must be configured
+        return {}
 
 
 def require_auth() -> bool:
