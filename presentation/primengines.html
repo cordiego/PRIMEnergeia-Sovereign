@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRIMEngines — Zero-Emission Engine Control</title>
+  <meta name="description" content="PRIMEngines by PRIMEnergeia — Control software for hydrogen and ammonia engines powering trucks, ships, and generators." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ─── NAVIGATION ─── -->
+  <nav id="nav-bar">
+    <div class="nav-logo">⚡ PRIM<span class="accent">Engines</span></div>
+    <div class="nav-dots" id="nav-dots"></div>
+    <div class="nav-label" id="nav-label">Start</div>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SLIDE 1 — HERO                                  -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="slide slide--hero" id="slide-1">
+    <div class="hero-bg-orb orb-1" style="background: rgba(139,92,246,0.18);"></div>
+    <div class="hero-bg-orb orb-2" style="background: rgba(56,189,248,0.12);"></div>
+    <div class="hero-bg-orb orb-3" style="background: rgba(251,191,36,0.1);"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow animate-in">PRIMEnergeia S.A.S. — Power Division</p>
+      <h1 class="hero-title animate-in delay-1">Engines that run on<br/><span class="gradient-text">hydrogen & ammonia.</span></h1>
+      <p class="hero-subtitle animate-in delay-2">PRIMEngines builds the control software for the next generation of zero-carbon engines. We sell the brain, not the body — our software tells engines exactly how to burn clean fuel safely and efficiently.</p>
+      <div class="hero-stats animate-in delay-3">
+        <div class="stat-pill"><span class="stat-number">3</span><span class="stat-label">engine platforms</span></div>
+        <div class="stat-pill"><span class="stat-number">0 g</span><span class="stat-label">CO₂ per kWh</span></div>
+        <div class="stat-pill"><span class="stat-number">485 kW</span><span class="stat-label">combined power</span></div>
+      </div>
+      <div class="scroll-cue animate-in delay-4">
+        <span>Scroll to explore</span>
+        <div class="scroll-arrow">↓</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SLIDE 2 — THE PROBLEM                           -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="slide" id="slide-2">
+    <div class="slide-inner">
+      <div class="section-tag">The Problem</div>
+      <h2 class="section-title">Trucks and ships can't yet<br/>run on <span class="gradient-text">batteries alone.</span></h2>
+      <div class="grid-3">
+        <div class="card card--glass">
+          <div class="card-icon">🔋</div>
+          <h3>Batteries Are Too Heavy</h3>
+          <p>A 40-ton truck needs a gigantic battery to go 800 km. That battery weighs thousands of kilos — taking away cargo space and adding cost.</p>
+        </div>
+        <div class="card card--glass">
+          <div class="card-icon">🚢</div>
+          <h3>Ships Need Dense Fuel</h3>
+          <p>Container ships cross oceans for weeks. No battery can store enough energy. They need a liquid fuel they can pump into a tank — like ammonia.</p>
+        </div>
+        <div class="card card--glass">
+          <div class="card-icon">⛽</div>
+          <h3>Diesel Is Dirty</h3>
+          <p>Heavy transport produces ~8% of global CO₂. But you can't just swap diesel for hydrogen without re-engineering how the engine thinks.</p>
+        </div>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">🔑</span>
+        The answer isn't new engines — it's <strong>new brains for existing engines</strong>. Software that knows how to burn H₂ and NH₃ cleanly.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SLIDE 3 — THREE ENGINES                         -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="slide" id="slide-3">
+    <div class="slide-inner">
+      <div class="section-tag">Three Platforms</div>
+      <h2 class="section-title">One fuel. <span class="gradient-text">Three ways to use it.</span></h2>
+      <div class="grid-divisions" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+        <!-- A-ICE-G1 -->
+        <div class="division-card div--grid">
+          <div class="div-icon">🔥</div>
+          <h3>A-ICE-G1</h3>
+          <p class="div-tagline">Ammonia Internal Combustion Engine</p>
+          <p>A V8 spark-ignited engine that burns liquid ammonia with a small hydrogen pilot flame. Think of it like a big diesel truck engine, but running on ammonia — zero CO₂.</p>
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.4rem;">
+            <div class="spec-line"><span>Power</span><span>335 kW (450 HP)</span></div>
+            <div class="spec-line"><span>Config</span><span>V8 60°, 12.8 L</span></div>
+            <div class="spec-line"><span>Fuel</span><span>NH₃ + 8% H₂ pilot</span></div>
+            <div class="spec-line"><span>BTE</span><span>~44% peak</span></div>
+            <div class="spec-line"><span>NOx</span><span>< 0.4 g/kWh (Euro VI)</span></div>
+            <div class="spec-line"><span>CO₂</span><span>0 g/kWh</span></div>
+          </div>
+          <div class="div-status status--active" style="margin-top: 1rem;">🟡 SIMULATION</div>
+        </div>
+        <!-- PEM-PB-50 -->
+        <div class="division-card div--quant">
+          <div class="div-icon">⚡</div>
+          <h3>PEM-PB-50</h3>
+          <p class="div-tagline">Hydrogen Fuel Cell Stack</p>
+          <p>A 370-cell PEM fuel cell that converts hydrogen directly into electricity — no combustion, no noise, just water vapor out the exhaust. Perfect for delivery trucks and forklifts.</p>
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.4rem;">
+            <div class="spec-line"><span>Power</span><span>50 kW</span></div>
+            <div class="spec-line"><span>Cells</span><span>370 × 300 cm² Nafion</span></div>
+            <div class="spec-line"><span>Fuel</span><span>Green H₂ (99.999%)</span></div>
+            <div class="spec-line"><span>Efficiency</span><span>~55% system</span></div>
+            <div class="spec-line"><span>Weight</span><span>45 kg</span></div>
+            <div class="spec-line"><span>Exhaust</span><span>Pure water</span></div>
+          </div>
+          <div class="div-status status--active" style="margin-top: 1rem;">🟡 SIMULATION</div>
+        </div>
+        <!-- HY-P100 -->
+        <div class="division-card div--materials">
+          <div class="div-icon">🌀</div>
+          <h3>HY-P100</h3>
+          <p class="div-tagline">Hydrogen Micro Gas Turbine</p>
+          <p>A compact Brayton-cycle turbine spinning at 70,000 RPM that burns hydrogen. It starts in 1 minute and ramps at 10%/second — perfect for grid peaking or ship propulsion.</p>
+          <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.4rem;">
+            <div class="spec-line"><span>Power</span><span>100 kW</span></div>
+            <div class="spec-line"><span>Cycle</span><span>Brayton, PR 7.5:1</span></div>
+            <div class="spec-line"><span>TIT</span><span>1,050°C</span></div>
+            <div class="spec-line"><span>Efficiency</span><span>33% elec / 85% CHP</span></div>
+            <div class="spec-line"><span>Ramp</span><span>10%/second</span></div>
+            <div class="spec-line"><span>Weight</span><span>350 kg</span></div>
+          </div>
+          <div class="div-status status--active" style="margin-top: 1rem;">🟡 SIMULATION</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SLIDE 4 — A-ICE DEEP DIVE                       -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="slide" id="slide-4">
+    <div class="slide-inner">
+      <div class="section-tag">A-ICE-G1 Deep Dive</div>
+      <h2 class="section-title">The ammonia engine <span class="gradient-text">explained.</span></h2>
+      <div class="grid-2">
+        <div class="solution-steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h4>Why Ammonia?</h4>
+              <p>Ammonia (NH₃) is zero-carbon: it's just nitrogen + hydrogen. It's liquid at mild pressure (8.6 bar), easy to store, and we already ship millions of tons of it globally for fertilizer.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h4>The Challenge: Hard to Ignite</h4>
+              <p>Ammonia's flame speed is 7 cm/s — six times slower than gasoline. It needs help. That's where the H₂ pilot comes in: a tiny 8% hydrogen jet that lights the ammonia instantly.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h4>Our Software Handles the Hard Part</h4>
+              <p>We compute the combustion model (Wiebe function), manage the dual-fuel injection timing, control NOx with SCR aftertreatment, and run the thermal management — all in software.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h4>Result: 335 kW, Zero Carbon</h4>
+              <p>Enough power for a 40-ton long-haul truck. 44% brake thermal efficiency. Euro VI emissions compliant. Zero CO₂. Drop-in replacement for diesel ECU software.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card card--glass">
+          <h3 style="margin-bottom: 1.5rem;">Ammonia vs. Diesel</h3>
+          <div style="display: flex; flex-direction: column; gap: 0.9rem;">
+            <div class="compare-row"><span>Energy density</span><span class="val-old">42.7 MJ/kg</span><span class="val-new">18.6 MJ/kg</span></div>
+            <div class="compare-row"><span>CO₂ per kWh</span><span class="val-old">~270 g</span><span class="val-new">0 g</span></div>
+            <div class="compare-row"><span>Storage pressure</span><span class="val-old">Ambient</span><span class="val-new">8.6 bar</span></div>
+            <div class="compare-row"><span>Flame speed</span><span class="val-old">40 cm/s</span><span class="val-new">7 cm/s</span></div>
+            <div class="compare-row"><span>Octane number</span><span class="val-old">~25</span><span class="val-new">130</span></div>
+            <div class="compare-row"><span>Global supply</span><span class="val-old">Fossil</span><span class="val-new">Green NH₃</span></div>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 1rem;">Left = Diesel · Right = Ammonia</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SLIDE 5 — PEM DEEP DIVE                         -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="slide" id="slide-5">
+    <div class="slide-inner">
+      <div class="section-tag">PEM-PB-50 Deep Dive</div>
+      <h2 class="section-title">Hydrogen in, <span class="gradient-text">electricity out.</span></h2>
+      <p class="section-subtitle">A fuel cell is the opposite of an electrolyzer. Instead of splitting water with electricity, it combines hydrogen + oxygen to produce electricity + water. No combustion. Silent. No vibration.</p>
+      <div class="grid-2">
+        <div class="solution-steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <h4>Nernst Equation</h4>
+              <p>Every cell generates ~1.0 V from the thermodynamic potential of the H₂ + O₂ reaction. Stack 370 cells = ~370 V DC bus.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <h4>Three Kinds of Losses</h4>
+              <p><strong>Activation</strong> (catalyst needs energy to start the reaction), <strong>Ohmic</strong> (membrane resistance), and <strong>Mass transport</strong> (running out of gas at high current).</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <h4>Balance of Plant</h4>
+              <p>Air compressor, coolant pump, and hydrogen recirculation consume ~10% of gross power. Our software optimizes these to maximize net output.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <h4>10,000 Hour Durability</h4>
+              <p>We model voltage degradation at 2.5 µV/h — matching DOE 2030 targets. After 10,000 hours, the stack still retains ~97% of its power.</p>
+            </div>
+          </div>
+        </div>
+        <div class="card card--glass" style="text-align: center;">
+          <h3 style="margin-bottom: 1.5rem;">Polarization Curve</h3>
+          <div class="pol-curve">
+            <div class="pol-axis-y">Cell Voltage (V)</div>
+            <div class="pol-visual">
+              <div class="pol-bar" style="--h: 95%"><span>1.1V</span></div>
+              <div class="pol-bar" style="--h: 85%"><span>0.95</span></div>
+              <div class="pol-bar" style="--h: 77%"><span>0.85</span></div>
+              <div class="pol-bar" style="--h: 70%"><span>0.78</span></div>
+              <div class="pol-bar" style="--h: 63%"><span>0.70</span></div>
+              <div class="pol-bar" style="--h: 55%"><span>0.61</span></div>
+              <div class="pol-bar" style="--h: 45%"><span>0.50</span></div>
+              <div class="pol-bar" style="--h: 30%"><span>0.33</span></div>
+            </div>
+            <div class="pol-axis-x">Current Density (A/cm²) →</div>
+          </div>
+          <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;">Voltage drops as you draw more current — classic fuel cell behavior</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SLIDE 6 — HY-P100 DEEP DIVE                     -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="slide" id="slide-6">
+    <div class="slide-inner">
+      <div class="section-tag">HY-P100 Deep Dive</div>
+      <h2 class="section-title">A tiny turbine. <span class="gradient-text">Massive flexibility.</span></h2>
+      <p class="section-subtitle">The HY-P100 is a micro gas turbine that spins at 70,000 RPM using hydrogen. It can start cold in 5 minutes, hot in 1 minute, and ramp from idle to full power in 10 seconds.</p>
+      <div class="grid-2-cards">
+        <div class="card card--glass">
+          <h3>🌀 Brayton Cycle</h3>
+          <p>Compress air → add H₂ → burn in a lean premixed combustor → expand through a turbine → spin a permanent magnet generator. The exhaust is hot (280°C) — perfect for heat recovery (CHP) reaching 85% total efficiency.</p>
+        </div>
+        <div class="card card--glass">
+          <h3>🏭 Use Cases</h3>
+          <p><strong>Grid peaking:</strong> start fast, ramp fast, fill in gaps when solar/wind drops. <strong>Ship propulsion:</strong> compact, lightweight, hydrogen-ready. <strong>Remote power:</strong> microgrids and mining camps where diesel is the only option today.</p>
+        </div>
+      </div>
+      <div class="results-grid" style="margin-top: 2rem;">
+        <div class="result-card">
+          <div class="result-value">100 kW</div>
+          <div class="result-label">Electrical Output</div>
+        </div>
+        <div class="result-card">
+          <div class="result-value">85%</div>
+          <div class="result-label">CHP Efficiency</div>
+        </div>
+        <div class="result-card">
+          <div class="result-value">1 min</div>
+          <div class="result-label">Hot Start</div>
+        </div>
+        <div class="result-card">
+          <div class="result-value">350 kg</div>
+          <div class="result-label">Total Weight</div>
+        </div>
+        <div class="result-card">
+          <div class="result-value">15 ppm</div>
+          <div class="result-label">NOx @ 15% O₂</div>
+        </div>
+        <div class="result-card">
+          <div class="result-value">0 g</div>
+          <div class="result-label">CO₂ per kWh</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SLIDE 7 — WHAT WE SELL                          -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="slide" id="slide-7">
+    <div class="slide-inner">
+      <div class="section-tag">What We Sell</div>
+      <h2 class="section-title">The software, <span class="gradient-text">not the hardware.</span></h2>
+      <p class="section-subtitle">We don't manufacture engines. We write the control software that tells existing engine hardware how to burn hydrogen and ammonia efficiently. Think of it like selling Android, not a phone.</p>
+      <div class="grid-2">
+        <div class="solution-steps">
+          <div class="step">
+            <div class="step-num">🔥</div>
+            <div class="step-body">
+              <h4>Combustion Model</h4>
+              <p>Wiebe function + Zeldovich NOx + dual-fuel injection maps. Our code replaces the diesel ECU brain.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">🌡️</div>
+            <div class="step-body">
+              <h4>Thermal Management</h4>
+              <p>Coolant, oil, exhaust, intercooler temperatures — all predicted and controlled in real-time.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">⚡</div>
+            <div class="step-body">
+              <h4>Power Electronics</h4>
+              <p>Inverter models, generator coupling, reactive power — for genset and grid-connected modes.</p>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-num">📊</div>
+            <div class="step-body">
+              <h4>Drive Cycle Simulation</h4>
+              <p>Run VECTO or EPA cycles in software before spending $1 on hardware. Predict fuel consumption, emissions, range.</p>
+            </div>
+          </div>
+        </div>
+        <div class="projection-card">
+          <h3>Business Model</h3>
+          <div style="display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1.5rem;">
+            <div class="revenue-item">
+              <div class="rev-icon">💻</div>
+              <div>
+                <strong>$15K per engine</strong>
+                <p>One-time license fee for the control software package.</p>
+              </div>
+            </div>
+            <div class="revenue-item">
+              <div class="rev-icon">🔄</div>
+              <div>
+                <strong>$2K/year maintenance</strong>
+                <p>OTA updates, performance tuning, new emission standards.</p>
+              </div>
+            </div>
+            <div class="revenue-item">
+              <div class="rev-icon">🎯</div>
+              <div>
+                <strong>$25M TAM</strong>
+                <p>Logistics fleets, maritime, off-grid mining, backup power.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SLIDE 8 — APPLICATIONS                          -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="slide" id="slide-8">
+    <div class="slide-inner">
+      <div class="section-tag">Applications</div>
+      <h2 class="section-title">Where these engines <span class="gradient-text">go to work.</span></h2>
+      <div class="grid-regions">
+        <div class="region-card">
+          <div class="region-flag">🚛</div>
+          <h4>Long-Haul Trucks</h4>
+          <p class="region-detail">A-ICE-G1 replaces diesel in 40-ton rigs. 800+ km range on a single ammonia tank.</p>
+          <div class="region-stat">A-ICE-G1</div>
+        </div>
+        <div class="region-card">
+          <div class="region-flag">🚐</div>
+          <h4>Delivery Fleets</h4>
+          <p class="region-detail">PEM-PB-50 powers last-mile delivery vans. Silent, zero-emission, no vibration.</p>
+          <div class="region-stat">PEM-PB-50</div>
+        </div>
+        <div class="region-card">
+          <div class="region-flag">🚢</div>
+          <h4>Maritime</h4>
+          <p class="region-detail">Container ships and ferries running on ammonia or hydrogen. IMO 2050 compliant.</p>
+          <div class="region-stat">A-ICE + HY-P</div>
+        </div>
+        <div class="region-card">
+          <div class="region-flag">⛏️</div>
+          <h4>Remote Mining</h4>
+          <p class="region-detail">HY-P100 replaces diesel generators at mine sites. Clean, fast-ramping, CHP-capable.</p>
+          <div class="region-stat">HY-P100</div>
+        </div>
+        <div class="region-card">
+          <div class="region-flag">🏗️</div>
+          <h4>Backup Power</h4>
+          <p class="region-detail">Data centers and hospitals need instant backup. Fuel cells start in seconds, no emissions.</p>
+          <div class="region-stat">PEM-PB-50</div>
+        </div>
+        <div class="region-card">
+          <div class="region-flag">🌾</div>
+          <h4>Agriculture</h4>
+          <p class="region-detail">Tractors and harvester engines converted from diesel to ammonia. PRIME-powered farm-to-fork.</p>
+          <div class="region-stat">A-ICE-G1</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SLIDE 9 — PORTFOLIO RANGE                        -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="slide" id="slide-9">
+    <div class="slide-inner">
+      <div class="section-tag">The Full Portfolio</div>
+      <h2 class="section-title">Beyond these three. <span class="gradient-text">Many more planned.</span></h2>
+      <p class="section-subtitle">PRIMEngines™ is a platform, not just three engines. The same physics-based software framework extends to cars, F1, trains, drones, aircraft, and wind turbines.</p>
+      <div class="granas-grid">
+        <div class="granas-item"><span class="gi-icon">🏎️</span><span class="gi-name">Sport Car</span><span class="gi-desc">High-RPM H₂ engines for performance vehicles</span></div>
+        <div class="granas-item"><span class="gi-icon">🚗</span><span class="gi-name">SUV 4×4</span><span class="gi-desc">All-terrain hydrogen powertrain simulation</span></div>
+        <div class="granas-item"><span class="gi-icon">🏁</span><span class="gi-name">F1</span><span class="gi-desc">Hydrogen-powered racing powerunit control</span></div>
+        <div class="granas-item"><span class="gi-icon">🚆</span><span class="gi-name">Trains</span><span class="gi-desc">Locomotive engines — both ICE and fuel cell</span></div>
+        <div class="granas-item"><span class="gi-icon">🚄</span><span class="gi-name">TGV</span><span class="gi-desc">High-speed rail hydrogen turbine control</span></div>
+        <div class="granas-item"><span class="gi-icon">🛩️</span><span class="gi-name">Commercial Air</span><span class="gi-desc">Hydrogen jet engine combustor optimization</span></div>
+        <div class="granas-item"><span class="gi-icon">✈️</span><span class="gi-name">Supersonic</span><span class="gi-desc">Scramjet & afterburner H₂ control models</span></div>
+        <div class="granas-item"><span class="gi-icon">🤖</span><span class="gi-name">Drones</span><span class="gi-desc">Lightweight fuel cell stacks for long-endurance UAVs</span></div>
+        <div class="granas-item"><span class="gi-icon">🌬️</span><span class="gi-name">PRIM Wind</span><span class="gi-desc">Offshore wind turbine control & pitch optimization</span></div>
+        <div class="granas-item"><span class="gi-icon">🔌</span><span class="gi-name">PRIM Hub</span><span class="gi-desc">Microgrid energy hub — batteries + H₂ + solar</span></div>
+        <div class="granas-item"><span class="gi-icon">🌊</span><span class="gi-name">MAERI</span><span class="gi-desc">Marine energy — tidal and wave power control</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ -->
+  <!-- SLIDE 10 — CTA                                  -->
+  <!-- ═══════════════════════════════════════════════ -->
+  <section class="slide slide--final" id="slide-10">
+    <div class="hero-bg-orb orb-1" style="background: rgba(139,92,246,0.15);"></div>
+    <div class="hero-bg-orb orb-2" style="background: rgba(56,189,248,0.12);"></div>
+    <div class="slide-inner">
+      <div class="section-tag">Let's Power the Future</div>
+      <h2 class="final-title">Zero carbon.<br/><span class="gradient-text">Full power.</span></h2>
+      <p class="final-subtitle">PRIMEnergeia S.A.S. — PRIMEngines Power Division</p>
+      <div class="final-meta">
+        <p><strong>Diego Córdoba Urrutia</strong></p>
+        <p>Lead Computational Physicist</p>
+      </div>
+      <div class="final-links">
+        <a href="https://github.com/cordiego/PRIMEngines-AICE" class="cta-btn" id="cta-aice" target="_blank">🔥 A-ICE-G1</a>
+        <a href="https://github.com/cordiego/PRIMEngines-PEM" class="cta-btn cta-btn--secondary" id="cta-pem" target="_blank">⚡ PEM-PB-50</a>
+        <a href="https://github.com/cordiego/PRIMEngines-HYP" class="cta-btn cta-btn--secondary" id="cta-hyp" target="_blank">🌀 HY-P100</a>
+        <a href="index.html" class="cta-btn cta-btn--ghost" id="cta-main">← Main Deck</a>
+      </div>
+      <p class="final-flag">⚡🔥🇲🇽</p>
+    </div>
+  </section>
+
+  <!-- ─── KEYBOARD HINTS ─── -->
+  <div class="keyboard-hint" id="keyboard-hint">
+    <span>↑↓ or scroll to navigate</span>
+  </div>
+
+  <script>
+    // ─── Slide labels for nav ───
+    const SLIDE_LABELS = [
+      'Start',
+      'The Problem',
+      'Three Platforms',
+      'A-ICE-G1',
+      'PEM-PB-50',
+      'HY-P100',
+      'What We Sell',
+      'Applications',
+      'Full Portfolio',
+      'Let\'s Go',
+    ];
+  </script>
+  <script src="script.js"></script>
+</body>
+</html>
