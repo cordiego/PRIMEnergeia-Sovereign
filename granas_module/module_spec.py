@@ -206,6 +206,62 @@ class GranasProductionModule:
     def subcell_active_cm2(self) -> float:
         return SUBCELL_ACTIVE_AREA_CM2
 
+    # ── PCE from Recipe (mirrors granas_metrics.py SDLMetrics) ─
+    def _compute_pce_from_recipe(self, rpm: float = 4000, temp: float = 120,
+                                  conc: float = 1.2, additive: float = 3.0,
+                                  sol_ratio: float = 0.7) -> None:
+        """
+        Compute tandem PCE using the same recipe-based quality factors
+        as granas_metrics.py SDLMetrics.from_recipe().
+        This ensures Module and Metrics pages show identical PCE.
+        """
+        # Film thickness
+        thickness = 1200.0 * conc / np.sqrt(rpm / 1000)
+
+        # Grain size (sigmoid + Mn passivation bonus)
+        growth = 500.0 / (1.0 + np.exp(-(temp - 90) / 15))
+        growth = max(growth, 50.0)
+        rpm_factor = max(0.5, 1.0 + 0.15 * (4000 - rpm) / 4000)
+        mn_boost = 1.0 + self.composition.mn_frac * 5  # +10% at 2% Mn
+        decomp = 1.0
+        if temp > 150:
+            decomp = max(0.3, 1.0 - 0.02 * (temp - 150))
+        grain = float(np.clip(growth * rpm_factor * mn_boost * decomp, 50, 700))
+
+        # Score components (identical to granas_metrics.py)
+        t_score = np.exp(-((thickness - 600) / 600)**2)
+        g_score = 1.0 - np.exp(-grain / 150)
+        c_score = np.exp(-((conc - 1.2) / 0.5)**2)
+        r_score = np.exp(-((rpm - 4000) / 3000)**2)
+        a_score = 1.0
+        if temp > 150:
+            a_score = max(0.1, np.exp(-0.05 * (temp - 150)))
+        if temp < 60:
+            a_score *= 0.5
+        add_score = np.exp(-((additive - 3.0) / 2.0)**2)
+        sol_score = np.exp(-((sol_ratio - 0.7) / 0.3)**2)
+
+        # Mn²⁺ defect passivation
+        # Mn²⁺ defect passivation (calibrated to ~33.5% tandem at optimal recipe)
+        passivation = min(1.0, 0.82 + self.composition.mn_frac * 5)
+
+        # Perovskite top cell with fabrication quality factors
+        green_sacrifice = 0.95  # ~5% Jsc loss from green reflection
+        perovskite_pce = (23.0 * t_score * g_score * c_score * r_score
+                          * a_score * add_score * sol_score * passivation
+                          * green_sacrifice)
+
+        # TOPCon silicon bottom cell
+        si_coupling = min(1.0, (g_score + t_score) / 2 + 0.1)
+        silicon_pce = 15.0 * si_coupling
+
+        # Total tandem
+        self.perovskite_pce_pct = float(perovskite_pce)
+        self.topcon_pce_pct = float(silicon_pce)
+        self.tandem_pce_pct = float(np.clip(
+            max(3.0, perovskite_pce + silicon_pce), 0, 42
+        ))
+
     # ── Compute All Parameters ───────────────────────────────
     def compute(self) -> "GranasProductionModule":
         """Recalculate all electrical parameters from geometry + physics."""
@@ -225,12 +281,13 @@ class GranasProductionModule:
         self.module_voc_V = self.n_series * cell_voc_V
 
         # ── Tandem PCE ───────────────────────────────────────
-        # Compute PCE using the same recipe-based quality factors as
-        # granas_metrics.py SDLMetrics for cross-page consistency.
-        # Default optimal recipe: 4000 rpm, 120°C, 1.2M, 3.0%, 0.7
-        self._compute_pce_from_recipe(
-            rpm=4000, temp=120, conc=1.2, additive=3.0, sol_ratio=0.7
-        )
+        # Perovskite top cell: ~23% × quality factors (green sacrifice)
+        green_sacrifice = 0.95  # ~5% Jsc loss from green reflection
+        self.perovskite_pce_pct = 23.0 * 0.95 * 0.95 * green_sacrifice
+        # TOPCon bottom cell: ~15% (NIR collection)
+        self.topcon_pce_pct = 15.0 * 0.92
+        # Total tandem
+        self.tandem_pce_pct = self.perovskite_pce_pct + self.topcon_pce_pct
 
         # ── Cell-Level Jsc ───────────────────────────────────
         # From PCE = Voc × Jsc × FF / G

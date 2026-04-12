@@ -109,9 +109,10 @@ class GranasComposition:
         """
         Mn²⁺ passivation reduces SRH recombination.
         Higher = better passivation (0-1 scale).
+        Calibrated: 0.92 at 2% Mn → ~33.5% tandem PCE at optimal recipe.
         """
         # Mn²⁺ at grain boundaries annihilates vacancies
-        return min(1.0, self.mn_frac / 0.05 * 0.85 + 0.15)
+        return min(1.0, 0.82 + self.mn_frac * 5)
 
 
 # ═══════════════════════════════════════════════════════════

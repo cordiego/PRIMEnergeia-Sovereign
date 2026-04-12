@@ -116,12 +116,16 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
+# ─── Compute default module for slider defaults ─────────────
+_default_module = GranasProductionModule()
+_default_pce = round(_default_module.tandem_pce_pct, 1)
+
 # ─── Sidebar ─────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("### ⚙️ Module Parameters")
     st.markdown("---")
 
-    pce_adjust = st.slider("Tandem PCE (%)", 20.0, 42.0, 33.6, 0.1,
+    pce_adjust = st.slider("Tandem PCE (%)", 20.0, 42.0, _default_pce, 0.1,
                             help="Total tandem PCE (perovskite + TOPCon)")
     capacity_factor = st.slider("Capacity Factor", 0.10, 0.35, 0.22, 0.01,
                                  help="Solar capacity factor (Mexico avg: 0.22)")
