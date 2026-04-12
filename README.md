@@ -140,7 +140,7 @@ The `optimization/` module uses **Bayesian Optimization** with Gaussian Process 
 
 - **Crystallization kinetics** — LaMer nucleation, Scherrer grain-size estimation
 - **Defect density** — Urbach-tail passivation via additives (Cl⁻, GuaBr, MACl)
-- **Shockley-Queisser-bounded PCE** — capped at practical champion ~25.8%
+- **Shockley-Queisser-bounded PCE** — tandem champion ~33.5%
 
 **6D Search Space:** Molar concentration, DMSO:DMF ratio, spin speed, additive %, annealing temperature, annealing time.
 
