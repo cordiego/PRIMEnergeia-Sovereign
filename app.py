@@ -341,7 +341,7 @@ with c2:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/16_PRIMEnergeia_Battery.py", label="Open →", icon="🔋")
+    st.page_link("pages/16_🔋_Battery_Storage.py", label="Open →", icon="🔋")
 
 with c3:
     st.markdown("""
@@ -354,7 +354,7 @@ with c3:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/18_PRIM_Wind.py", label="Open →", icon="🌊")
+    st.page_link("pages/18_🌊_PRIM_Wind.py", label="Open →", icon="🌊")
 
 c4, c5, c6 = st.columns(3)
 
@@ -698,7 +698,7 @@ with g13:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/15_🧠_SIBO_API.py", label="Open →", icon="🧠")
+    st.page_link("pages/15_🧠_SIBO_Optimizer.py", label="Open →", icon="🧠")
 
 with g14:
     st.markdown("""
@@ -711,7 +711,7 @@ with g14:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/19_PRIMEngines.py", label="Open →", icon="🚀")
+    st.page_link("pages/19_🚀_PRIMEngines.py", label="Open →", icon="🚀")
 
 with g15:
     st.markdown("""
@@ -740,7 +740,7 @@ with g16:
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.page_link("pages/17_PRIMEcycle.py", label="Open →", icon="♻️")
+    st.page_link("pages/17_♻️_PRIMEcycle_Recycling.py", label="Open →", icon="♻️")
 
 with g17:
     st.markdown("""

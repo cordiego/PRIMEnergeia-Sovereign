@@ -22,7 +22,7 @@ st.caption("100 MW → 1 GW → 10 GW | Perovskite Module Scaling | CapEx · LCO
 
 # ─── Module Specs ───
 MODULE_AREA = 7.14       # 2.1×3.4 m production module (m²)
-MODULE_PCE = 25.6        # %
+MODULE_PCE = 33.5        # % (tandem: perovskite ~19.7% + TOPCon ~13.8%)
 IRRADIANCE = 1000        # W/m²
 MODULE_WP = MODULE_AREA * IRRADIANCE * (MODULE_PCE / 100)  # 435.2 Wp
 LIFETIME = 30            # years

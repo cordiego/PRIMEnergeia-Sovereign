@@ -21,11 +21,11 @@ st.caption("96% Transmittance | Self-Cleaning Lotus Effect | Thermoformed on CFR
 
 # ─── KPIs ───
 k1, k2, k3, k4, k5 = st.columns(5)
-k1.metric("☀️ Transmittance", "96.0%", "+5.5% vs glass")
-k2.metric("💨 Weight", "0.17 kg/m²", "2.1% of glass")
-k3.metric("🧹 Self-Cleaning", "✅ Lotus effect")
-k4.metric("🔬 Haze", "12%", "controlled scattering")
-k5.metric("🏗️ UV Lifetime", "30 years")
+k1.metric("☀️ Transmittance", "96.0%", "+5.5% vs glass", help="Broadband optical transmittance of the ETFE frontsheet. At 96%, ETFE passes more light than glass (~91%). The fluoropolymer's low refractive index (n=1.40) reduces Fresnel reflection, directly boosting Granas Jsc.")
+k2.metric("💨 Weight", "0.17 kg/m²", "2.1% of glass", help="Areal weight of the ETFE encapsulation film. At 0.17 kg/m² vs 8 kg/m² for glass, ETFE is ~47× lighter. Combined with the CFRP skeleton, this makes Granas modules among the lightest tandem panels available.")
+k3.metric("🧹 Self-Cleaning", "✅ Lotus effect", help="ETFE's low surface energy creates a lotus-like hydrophobic surface. Water beads and rolls off, carrying dust and debris. This self-cleaning property maintains >95% transmittance in the field without manual washing.")
+k4.metric("🔬 Haze", "12%", "controlled scattering", help="Forward light scattering percentage from ETFE surface texture. Controlled haze increases effective optical path length in the absorber, improving absorption of weakly-absorbed near-bandgap photons within the Granas tandem.")
+k5.metric("🏗️ UV Lifetime", "30 years", help="Projected UV-stable operational lifetime of the ETFE frontsheet. Fluoropolymer C-F bonds are highly resistant to UV photodegradation. At 0.1%/yr transmittance loss, ETFE stays above 90% T for 60+ years, protecting the perovskite underneath.")
 
 st.divider()
 c1, c2 = st.columns(2)
@@ -98,6 +98,6 @@ with p2:
     """)
 with p3:
     jsc_gain = 22.0 * (96/91) * 1.06
-    st.metric("Jsc with ETFE", f"{jsc_gain:.1f} mA/cm²", f"+{jsc_gain-22:.1f} vs glass")
-    st.metric("Hail Resistance", "25 mm")
-    st.metric("Cleaning Savings", "$2/m²/yr")
+    st.metric("Jsc with ETFE", f"{jsc_gain:.1f} mA/cm²", f"+{jsc_gain-22:.1f} vs glass", help="Net short-circuit current with ETFE encapsulation. Combines transmittance gain (96% vs 91% glass), AR coating effect, and haze path-enhancement (1.06×). This is the real-world Jsc boost from choosing ETFE over glass in Granas.")
+    st.metric("Hail Resistance", "25 mm", help="Maximum hail stone diameter the ETFE frontsheet can withstand without damage (IEC 61215 compliant). ETFE's flexibility absorbs impact energy that would crack rigid glass, improving field reliability for Granas modules.")
+    st.metric("Cleaning Savings", "$2/m²/yr", help="Annual O&M cost savings from ETFE's self-cleaning lotus effect vs manual panel washing. Over a 30-year module lifetime, this saves ~$60/m² in maintenance costs for each Granas module deployed.")

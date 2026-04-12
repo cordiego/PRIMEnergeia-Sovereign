@@ -54,10 +54,10 @@ if not KERNEL_LOADED:
 
 st.markdown("### 📊 Kernel Status")
 m1, m2, m3, m4 = st.columns(4)
-m1.metric("VERSION", __version__)
-m2.metric("SBUs", len(SBU_REGISTRY))
-m3.metric("TOTAL REPOS", sum(len(sbu["repos"]) for sbu in SBU_REGISTRY.values()))
-m4.metric("TOTAL TAM", f"${sum(sbu['tam_usd'] for sbu in SBU_REGISTRY.values()) / 1e6:.0f}M")
+m1.metric("VERSION", __version__, help="Current PRIME-Kernel package version. This shared IP core provides physics constants, HJB solver, and telemetry modules used by all 5 Strategic Business Units of PRIMEnergeia.")
+m2.metric("SBUs", len(SBU_REGISTRY), help="Number of Strategic Business Units consuming PRIME-Kernel. Each SBU (Granas, Eureka, PRIMEngines, etc.) imports shared constants and the HJB solver from this central kernel.")
+m3.metric("TOTAL REPOS", sum(len(sbu["repos"]) for sbu in SBU_REGISTRY.values()), help="Total number of repositories across all SBUs that depend on PRIME-Kernel. Reflects the breadth of the PRIMEnergeia ecosystem: from solar modules to financial engines.")
+m4.metric("TOTAL TAM", f"${sum(sbu['tam_usd'] for sbu in SBU_REGISTRY.values()) / 1e6:.0f}M", help="Combined Total Addressable Market across all SBUs in USD. Sum of individual SBU market sizes (solar manufacturing, grid services, hydrogen, etc.).")
 
 st.divider()
 
@@ -99,7 +99,7 @@ with tab2:
     t_hot = c1.slider("T_hot (K)", 400, 2000, 800, 50)
     t_cold = c2.slider("T_cold (K)", 200, 500, 300, 10)
     eta = PhysicsConstants.carnot_efficiency(t_hot, t_cold)
-    st.metric("η_Carnot", f"{eta:.2%}", f"T_hot={t_hot}K, T_cold={t_cold}K")
+    st.metric("η_Carnot", f"{eta:.2%}", f"T_hot={t_hot}K, T_cold={t_cold}K", help="Carnot efficiency: the maximum theoretical efficiency for any heat engine operating between T_hot and T_cold. η = 1 - T_cold/T_hot. Used as the ultimate thermodynamic benchmark for all PRIMEngines.")
 
     st.markdown("### ⚡ Engine Fleet")
     for eid, eng in EngineConstants.ENGINES.items():
@@ -129,9 +129,9 @@ with tab3:
                 result = solver.solve().simulate(np.array([0.5, 30.0]))
 
             m1, m2, m3 = st.columns(3)
-            m1.metric("Total Cost", f"{result.total_cost:.2f}")
-            m2.metric("Sweeps", result.n_sweeps)
-            m3.metric("Converged", "✅" if result.converged else "⏳")
+            m1.metric("Total Cost", f"{result.total_cost:.2f}", help="Cumulative HJB running cost along the optimal trajectory. Integrates Lagrangian L(x,u) over the simulation horizon. Lower cost = better control policy for grid frequency stabilization.")
+            m2.metric("Sweeps", result.n_sweeps, help="Number of Gauss-Seidel sweeps completed by the HJB value-iteration solver. More sweeps = more refined value function approximation. Typically converges in 3-6 sweeps.")
+            m3.metric("Converged", "✅" if result.converged else "⏳", help="Whether the HJB value function converged within the maximum sweep budget. ✅ = the control policy is optimal to within tolerance. ⏳ = may need more grid points or sweeps.")
 
             fig = make_subplots(rows=2, cols=1, shared_xaxes=True,
                                 subplot_titles=["Frequency Deviation (Hz)", "Optimal Injection (MW)"])
@@ -163,10 +163,10 @@ with tab3:
                 result = solver.solve().simulate(np.array([50.0, 1.5, 25.0]))
 
             m1, m2, m3, m4 = st.columns(4)
-            m1.metric("Final Grain", f"{result.state_trajectory[-1, 0]:.0f} nm")
-            m2.metric("Final Defects", f"{result.state_trajectory[-1, 1]:.3f}")
-            m3.metric("Total Cost", f"{result.total_cost:.2f}")
-            m4.metric("Converged", "✅" if result.converged else "⏳")
+            m1.metric("Final Grain", f"{result.state_trajectory[-1, 0]:.0f} nm", help="Terminal grain size from the HJB-optimized annealing trajectory. The solver maximizes grain growth via optimal temperature ramping while avoiding perovskite decomposition at high temperatures.")
+            m2.metric("Final Defects", f"{result.state_trajectory[-1, 1]:.3f}", help="Terminal defect density after HJB-optimized annealing. Lower defect density means fewer non-radiative recombination centers, directly improving PCE and device operational lifetime.")
+            m3.metric("Total Cost", f"{result.total_cost:.2f}", help="Accumulated HJB cost functional over the annealing trajectory. Penalizes high defects, insufficient grain growth, and excessive temperature ramp rates. The optimal policy minimizes this integral.")
+            m4.metric("Converged", "✅" if result.converged else "⏳", help="Convergence status of the HJB value iteration for the perovskite annealing dynamics. ✅ means the optimal temperature trajectory is reliable for fabrication use.")
 
             fig = make_subplots(rows=3, cols=1, shared_xaxes=True,
                                 subplot_titles=["Grain Size (nm)", "Defect Density", "Temperature (°C)"])
@@ -189,10 +189,10 @@ with tab4:
 
     for mid, market in MarketConstants.MARKETS.items():
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric(f"{market['region']}", mid)
-        c2.metric("Nodes", market["nodes"])
-        c3.metric("Frequency", f"{market['frequency_hz']:.0f} Hz")
-        c4.metric("Pricing", market["pricing"])
+        c1.metric(f"{market['region']}", mid, help=f"ISO market identifier for the {market['region']} electricity grid. Each market has unique pricing rules, node counts, and frequency standards that the PRIME grid stabilizer must adapt to.")
+        c2.metric("Nodes", market["nodes"], help="Number of electrical pricing nodes in this market. More nodes = more granular locational marginal pricing. Each node is a potential deployment point for PRIME frequency stabilization.")
+        c3.metric("Frequency", f"{market['frequency_hz']:.0f} Hz", help="Nominal grid frequency for this market. 60 Hz in the Americas; 50 Hz in Europe/Asia. The PRIME HJB controller adapts its injection strategy to each market's frequency standard.")
+        c4.metric("Pricing", market["pricing"], help="Pricing mechanism used in this electricity market. LMP (Locational Marginal Pricing) is most common. Determines how PRIME grid stabilization interventions are compensated.")
 
     st.divider()
     st.markdown("### 💰 Revenue Projections")
@@ -203,7 +203,7 @@ with tab4:
         st.code(f"Annual Rescue:  ${proj['annual_rescue_usd'] / 1e6:.1f}M {proj['currency']}\n"
                 f"PRIME Revenue:  ${proj['prime_revenue_usd'] / 1e6:.1f}M {proj['currency']}")
         total_rev += proj["prime_revenue_usd"]
-    st.metric("TOTAL PRIME REVENUE", f"${total_rev / 1e6:.1f}M USD/yr")
+    st.metric("TOTAL PRIME REVENUE", f"${total_rev / 1e6:.1f}M USD/yr", help="Projected total annual revenue across all electricity markets. Calculated as nodes × $180K/month × 25% PRIME royalty rate. This is the combined TAM for the grid stabilization SBU.")
 
 st.divider()
 st.caption("PRIMEnergeia S.A.S. — PRIME-Kernel v" + __version__ + " | Shared IP Core")

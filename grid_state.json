@@ -1,14 +1,14 @@
 {
- "f": 59.986,
- "v": 115.13,
+ "f": 59.985,
+ "v": 114.78,
  "status": "NOMINAL",
- "timestamp": 1776016769.604623,
+ "timestamp": 1776020997.656675,
  "markets": {
   "SEN": {
-   "f": 59.986,
-   "v": 115.13,
+   "f": 59.985,
+   "v": 114.78,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "05-VZA-400",
    "nominal_f": 60.0,
    "nominal_v": 115.0,
@@ -16,10 +16,10 @@
    "verified": true
   },
   "ERCOT": {
-   "f": 60.005,
-   "v": 344.9,
+   "f": 59.997,
+   "v": 345.44,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "HOU-345-01",
    "nominal_f": 60.0,
    "nominal_v": 345.0,
@@ -27,10 +27,10 @@
    "verified": true
   },
   "MIBEL": {
-   "f": 49.994,
-   "v": 220.18,
+   "f": 50.002,
+   "v": 220.0,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "ES-MAD-400",
    "nominal_f": 50.0,
    "nominal_v": 220.0,
@@ -38,10 +38,10 @@
    "verified": true
   },
   "PJM": {
-   "f": 60.005,
-   "v": 500.14,
+   "f": 59.999,
+   "v": 499.07,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "PJM-WH-500",
    "nominal_f": 60.0,
    "nominal_v": 500.0,
@@ -49,10 +49,10 @@
    "verified": true
   },
   "CAISO": {
-   "f": 59.995,
-   "v": 500.0,
+   "f": 60.009,
+   "v": 500.17,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "CA-LA-500",
    "nominal_f": 60.0,
    "nominal_v": 500.0,
@@ -60,10 +60,10 @@
    "verified": true
   },
   "NYISO": {
-   "f": 59.986,
-   "v": 344.12,
+   "f": 59.987,
+   "v": 345.21,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "NY-NYC-345",
    "nominal_f": 60.0,
    "nominal_v": 345.0,
@@ -71,10 +71,10 @@
    "verified": true
   },
   "SPP": {
-   "f": 59.999,
-   "v": 345.59,
+   "f": 59.993,
+   "v": 344.38,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "SPP-OKC-345",
    "nominal_f": 60.0,
    "nominal_v": 345.0,
@@ -82,10 +82,10 @@
    "verified": true
   },
   "MISO": {
-   "f": 59.997,
-   "v": 344.48,
+   "f": 59.996,
+   "v": 345.32,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "MISO-CHI-345",
    "nominal_f": 60.0,
    "nominal_v": 345.0,
@@ -93,10 +93,10 @@
    "verified": true
   },
   "ISO-NE": {
-   "f": 60.003,
-   "v": 345.5,
+   "f": 60.002,
+   "v": 345.57,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "NE-BOS-345",
    "nominal_f": 60.0,
    "nominal_v": 345.0,
@@ -104,10 +104,10 @@
    "verified": true
   },
   "AESO": {
-   "f": 59.993,
-   "v": 240.24,
+   "f": 59.994,
+   "v": 239.54,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "AB-CGY-240",
    "nominal_f": 60.0,
    "nominal_v": 240.0,
@@ -115,10 +115,10 @@
    "verified": true
   },
   "IESO": {
-   "f": 60.005,
-   "v": 500.0,
+   "f": 59.997,
+   "v": 499.39,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "ON-TOR-500",
    "nominal_f": 60.0,
    "nominal_v": 500.0,
@@ -126,10 +126,10 @@
    "verified": true
   },
   "NEM": {
-   "f": 50.0,
-   "v": 330.42,
+   "f": 50.005,
+   "v": 329.62,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "AU-SYD-330",
    "nominal_f": 50.0,
    "nominal_v": 330.0,
@@ -137,10 +137,10 @@
    "verified": true
   },
   "JEPX": {
-   "f": 49.995,
-   "v": 274.77,
+   "f": 49.993,
+   "v": 274.96,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "JP-TKY-500",
    "nominal_f": 50.0,
    "nominal_v": 275.0,
@@ -148,10 +148,10 @@
    "verified": true
   },
   "NORD POOL": {
-   "f": 50.014,
-   "v": 399.47,
+   "f": 50.0,
+   "v": 399.41,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "NO-OSL-400",
    "nominal_f": 50.0,
    "nominal_v": 400.0,
@@ -160,9 +160,9 @@
   },
   "EPEX": {
    "f": 50.001,
-   "v": 379.88,
+   "v": 380.61,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "DE-BER-380",
    "nominal_f": 50.0,
    "nominal_v": 380.0,
@@ -170,10 +170,10 @@
    "verified": true
   },
   "EMC": {
-   "f": 50.0,
-   "v": 230.17,
+   "f": 50.001,
+   "v": 230.48,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "SG-TUA-230",
    "nominal_f": 50.0,
    "nominal_v": 230.0,
@@ -182,9 +182,9 @@
   },
   "CCEE": {
    "f": 60.0,
-   "v": 500.03,
+   "v": 499.91,
    "status": "NOMINAL",
-   "timestamp": 1776016769.604623,
+   "timestamp": 1776020997.656675,
    "master_node": "BR-SPO-500",
    "nominal_f": 60.0,
    "nominal_v": 500.0,

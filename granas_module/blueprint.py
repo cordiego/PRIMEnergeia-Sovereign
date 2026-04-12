@@ -13,6 +13,8 @@ Architecture:
 Author: Diego Córdoba Urrutia — PRIMEnergeia S.A.S.
 """
 
+from __future__ import annotations
+
 import numpy as np
 
 try:
@@ -39,7 +41,7 @@ GRID_COLOR = "#1e3a2a"         # Subtle dark green grid
 CFRP_COLOR = "#00d1ff"         # Cyan for CFRP skeleton
 ANNOTATION_COLOR = "#94a3b8"   # Muted text
 BG_COLOR = "#020608"           # Dark background
-ACTIVE_BORDER = "#00ff6440"    # Semi-transparent green for active zone
+ACTIVE_BORDER = "rgba(0,255,100,0.25)"  # Semi-transparent green for active zone
 
 
 def create_blueprint(show_annotations: bool = True,

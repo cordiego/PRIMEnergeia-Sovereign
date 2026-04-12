@@ -1,0 +1,118 @@
+# ============================================================
+#  PRIMEnergeia — Tag Mapping Configuration (Example)
+#  ============================================================
+#  This file maps plant-specific SCADA tags to PRIMEnergeia's
+#  internal signal names. Create one of these per client site.
+#
+#  Copy this file and rename it for the target plant:
+#    vza400_sen.yaml
+#    hou345_ercot.yaml
+#    mad400_mibel.yaml
+#
+#  PRIMEnergeia S.A.S. — Grid Optimization Division
+# ============================================================
+
+# --- Site Identification ---
+site:
+  name: "VZA-400 Valle de México"
+  node_id: "05-VZA-400"
+  market: "SEN"
+  operator: "CENACE"
+  f_nom: 60.0          # Hz
+  v_nom: 400.0         # kV (transmission voltage)
+  capacity_mw: 100.0
+
+# --- Protocol Selection ---
+# Options: csv, api, opcua, modbus, iec61850
+protocol: opcua
+
+# --- Connection ---
+connection:
+  # OPC UA
+  opcua_url: "opc.tcp://192.168.1.100:4840"
+  opcua_security: "Basic256Sha256"
+  opcua_certificate: "/etc/prime/certs/client.der"
+  opcua_private_key: "/etc/prime/certs/client.key"
+
+  # Modbus TCP (alternative)
+  modbus_host: "192.168.1.100"
+  modbus_port: 502
+  modbus_unit_id: 1
+
+  # IEC 61850 (alternative)
+  iec61850_host: "192.168.1.100"
+  iec61850_port: 102
+
+  # REST API (cloud)
+  api_url: "https://api.primenergeia.com"
+  api_key: "${PRIME_API_KEY}"
+
+# --- OPC UA Tag Mapping ---
+# Map PRIMEnergeia signal names → plant SCADA tag IDs.
+# Get these from the client's SCADA tag export (CSV/Excel).
+read_tags:
+  frequency_hz:        "ns=2;s=Grid.Frequency.Hz"
+  voltage_a_kv:        "ns=2;s=Grid.Voltage.PhaseA.kV"
+  voltage_b_kv:        "ns=2;s=Grid.Voltage.PhaseB.kV"
+  voltage_c_kv:        "ns=2;s=Grid.Voltage.PhaseC.kV"
+  active_power_mw:     "ns=2;s=Gen.ActivePower.MW"
+  reactive_power_mvar: "ns=2;s=Gen.ReactivePower.MVAR"
+  power_factor:        "ns=2;s=Grid.PowerFactor"
+
+write_tags:
+  mw_setpoint:   "ns=2;s=Control.MW.Setpoint"
+  mvar_setpoint:  "ns=2;s=Control.MVAR.Setpoint"
+  mode:           "ns=2;s=Control.Mode"
+
+# --- Modbus Register Map (if using Modbus) ---
+# Format: (register_address, register_count, data_type, scale_factor)
+modbus_read_registers:
+  frequency_hz:        [1, 2, "float32", 1.0]
+  voltage_a_kv:        [3, 2, "float32", 1.0]
+  voltage_b_kv:        [5, 2, "float32", 1.0]
+  voltage_c_kv:        [7, 2, "float32", 1.0]
+  active_power_mw:     [9, 2, "float32", 1.0]
+  reactive_power_mvar: [11, 2, "float32", 1.0]
+  power_factor:        [13, 2, "float32", 1.0]
+
+# Format: (register_address, data_type, scale_factor)
+modbus_write_registers:
+  mw_setpoint:   [100, "uint16", 10.0]    # MW × 10
+  mvar_setpoint: [101, "uint16", 10.0]    # MVAR × 10
+  mode:          [102, "uint16", 1.0]     # 0=HOLD, 1=CHARGE, 2=DISCHARGE
+
+# --- IEC 61850 Logical Node Paths (if using IEC 61850) ---
+iec61850_paths:
+  frequency:      "GenProtection/MMXU1.Hz.mag.f"
+  voltage_a:      "GenMeter/MMXU1.PhV.phsA.cVal.mag.f"
+  voltage_b:      "GenMeter/MMXU1.PhV.phsB.cVal.mag.f"
+  voltage_c:      "GenMeter/MMXU1.PhV.phsC.cVal.mag.f"
+  active_power:   "GenMeter/MMXU1.TotW.mag.f"
+  reactive_power: "GenMeter/MMXU1.TotVAr.mag.f"
+  power_factor:   "GenMeter/MMXU1.TotPF.mag.f"
+  mw_setpoint:    "GenController/GGIO1.AnOut1.setMag.f"
+  mvar_setpoint:  "GenController/GGIO1.AnOut2.setMag.f"
+  mode_setpoint:  "GenController/GGIO1.IntOut1.stVal"
+  goose_cb:       "GenProtection/LLN0$GO$gcbAnalogValues"
+
+# --- Control Parameters ---
+control:
+  # Control loop timing
+  loop_interval_seconds: 1.0    # Main control loop period
+  fast_loop_seconds: 0.01       # Frequency control loop (10ms)
+  
+  # Safety limits
+  max_mw_setpoint: 120.0        # Never write above this
+  min_mw_setpoint: 0.0          # Never write below this
+  max_ramp_mw_per_second: 10.0  # Rate limiter
+
+  # Mode
+  read_only: false              # Set true for shadow/observe mode
+  shadow_mode_days: 3           # Days in shadow before auto-control
+
+# --- Logging ---
+logging:
+  level: INFO
+  file: "/var/log/prime/vza400.log"
+  rotate_mb: 50
+  telemetry_interval_seconds: 60  # How often to log state snapshots
