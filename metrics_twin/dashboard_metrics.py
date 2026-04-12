@@ -166,6 +166,15 @@ with st.sidebar:
             st.session_state.opt_conc = round(best_params["conc"] / 0.1) * 0.1
             st.session_state.opt_additive = round(best_params["additive"] / 0.5) * 0.5
             st.session_state.opt_sol_ratio = round(best_params["sol_ratio"] / 0.1) * 0.1
+            # Push optimized values into the actual widget keys so sliders
+            # pick them up on rerun (Streamlit ignores `value=` once a key exists)
+            st.session_state.sl_radius = st.session_state.opt_radius
+            st.session_state.sl_density = st.session_state.opt_density
+            st.session_state.sl_rpm = st.session_state.opt_rpm
+            st.session_state.sl_temp = st.session_state.opt_temp
+            st.session_state.sl_conc = st.session_state.opt_conc
+            st.session_state.sl_additive = st.session_state.opt_additive
+            st.session_state.sl_sol_ratio = st.session_state.opt_sol_ratio
             st.session_state.auto_optimized = True
             st.session_state._auto_compute = True
             st.session_state.best_fom = best_fom
@@ -413,7 +422,7 @@ with tab5:
     c5.metric("Rigidity Gain", f"+{h.cfrp.rigidity_gain_pct:.0f}%")
     c6.metric("Photon Recycling", f"{h.cfrp.photon_recycling_pct:.0f}%")
 
-    st.markdown("### Blueprint: 17 × 10.5 Geometric Matrix")
+    st.markdown("### Blueprint: 21 × 34 Geometric Matrix (2.1 × 3.4 m)")
     st.markdown("""
     | Edge | Length (units) | Role |
     |------|---------------|------|

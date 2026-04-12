@@ -7,6 +7,10 @@ try:
     from lib.mode_gate import show_mode_banner
     show_mode_banner()
 except Exception: pass
+try:
+    from lib.granas_handshake import show_handshake_sidebar
+    show_handshake_sidebar()
+except Exception: pass
 # --- End Banner ---
 import streamlit as st
 import numpy as np
@@ -17,7 +21,7 @@ st.header("🏭 Granas Scale — Industrial Manufacturing Roadmap")
 st.caption("100 MW → 1 GW → 10 GW | Perovskite Module Scaling | CapEx · LCOE · Revenue · BOM")
 
 # ─── Module Specs ───
-MODULE_AREA = 1.7        # m²
+MODULE_AREA = 7.14       # 2.1×3.4 m production module (m²)
 MODULE_PCE = 25.6        # %
 IRRADIANCE = 1000        # W/m²
 MODULE_WP = MODULE_AREA * IRRADIANCE * (MODULE_PCE / 100)  # 435.2 Wp

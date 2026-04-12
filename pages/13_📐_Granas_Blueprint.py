@@ -7,17 +7,21 @@ try:
     from lib.mode_gate import show_mode_banner
     show_mode_banner()
 except Exception: pass
+try:
+    from lib.granas_handshake import show_handshake_sidebar
+    show_handshake_sidebar()
+except Exception: pass
 # --- End Banner ---
 import streamlit as st
 import numpy as np
 import plotly.graph_objects as go
 
 st.header("📐 Granas Blueprint — Master Geometric Engine")
-st.caption("17×10.5 Dimensional Matrix | COMSOL-Validated Optomechanics | Continuous Fiber RTM")
+st.caption("21×34 Dimensional Matrix (2.1×3.4 m) | COMSOL-Validated Optomechanics | Continuous Fiber RTM")
 
 # ─── KPIs ───
 k1, k2, k3, k4, k5 = st.columns(5)
-k1.metric("📏 Module Area", "1.785 m²")
+k1.metric("📏 Module Area", "7.14 m²")
 k2.metric("🔩 Total Vertices", "14")
 k3.metric("♻️ Photon Recycling", "89%")
 k4.metric("⬇️ Deflection", "1.8 mm")
@@ -29,40 +33,40 @@ with c1:
     # Blueprint visualization
     fig = go.Figure()
     # Module outline
-    fig.add_shape(type="rect", x0=0, y0=0, x1=17, y1=10.5,
+    fig.add_shape(type="rect", x0=0, y0=0, x1=21, y1=34,
         line=dict(color="#00c878", width=3), fillcolor='rgba(0,200,120,0.05)')
     # Peripheral edges (5.5)
-    peripheral = [(0,0,5.5,0), (5.5,0,11,0), (11,0,17,0),
-                  (0,10.5,5.5,10.5), (5.5,10.5,11,10.5), (11,10.5,17,10.5)]
+    peripheral = [(0,0,7,0), (7,0,14,0), (14,0,21,0),
+                  (0,34,7,34), (7,34,14,34), (14,34,21,34)]
     for x0,y0,x1,y1 in peripheral:
         fig.add_trace(go.Scatter(x=[x0,x1], y=[y0,y1], mode='lines',
             line=dict(color='#FF6347', width=4), showlegend=False))
     # Internal diagonal ridges (3.5)
-    internal = [(0,0,5.5,5.25), (5.5,5.25,11,0), (11,0,17,5.25),
-                (0,10.5,5.5,5.25), (5.5,5.25,11,10.5), (11,10.5,17,5.25)]
+    internal = [(0,0,7,17), (7,17,14,0), (14,0,21,17),
+                (0,34,7,17), (7,17,14,34), (14,34,21,17)]
     for x0,y0,x1,y1 in internal:
         fig.add_trace(go.Scatter(x=[x0,x1], y=[y0,y1], mode='lines',
             line=dict(color='#FFD700', width=3), showlegend=False))
     # Central network (3.0)
-    fig.add_trace(go.Scatter(x=[5.5,5.5], y=[0,10.5], mode='lines',
+    fig.add_trace(go.Scatter(x=[7,7], y=[0,34], mode='lines',
         line=dict(color='#00BFFF', width=2), showlegend=False))
-    fig.add_trace(go.Scatter(x=[11,11], y=[0,10.5], mode='lines',
+    fig.add_trace(go.Scatter(x=[14,14], y=[0,34], mode='lines',
         line=dict(color='#00BFFF', width=2), showlegend=False))
-    fig.add_trace(go.Scatter(x=[0,17], y=[5.25,5.25], mode='lines',
+    fig.add_trace(go.Scatter(x=[0,21], y=[17,17], mode='lines',
         line=dict(color='#00BFFF', width=2), showlegend=False))
     # Vertices
-    vx = [0, 5.5, 11, 17, 0, 5.5, 11, 17, 5.5, 11, 0, 17, 5.5, 11]
-    vy = [0, 0, 0, 0, 10.5, 10.5, 10.5, 10.5, 5.25, 5.25, 5.25, 5.25, 5.25, 5.25]
+    vx = [0, 7, 14, 21, 0, 7, 14, 21, 7, 14, 0, 21, 7, 14]
+    vy = [0, 0, 0, 0, 34, 34, 34, 34, 17, 17, 17, 17, 17, 17]
     fig.add_trace(go.Scatter(x=vx, y=vy, mode='markers',
         marker=dict(size=10, color='white', line=dict(color='#00c878', width=2)),
         showlegend=False))
-    fig.update_layout(title="17×10.5 Geometric Blueprint (unit scale)",
-        xaxis=dict(range=[-1,18], showgrid=False, zeroline=False),
-        yaxis=dict(range=[-1,11.5], showgrid=False, zeroline=False, scaleanchor="x"),
-        height=350, margin=dict(t=40, b=20, l=20, r=20),
+    fig.update_layout(title="21×34 Geometric Blueprint (unit scale → 2.1×3.4 m)",
+        xaxis=dict(range=[-1,22], showgrid=False, zeroline=False),
+        yaxis=dict(range=[-2,36], showgrid=False, zeroline=False, scaleanchor="x"),
+        height=450, margin=dict(t=40, b=20, l=20, r=20),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     # Legend annotations
-    fig.add_annotation(x=8.5, y=-0.5, text="🔴 5.5u peripheral  🟡 3.5u internal  🔵 3.0u central",
+    fig.add_annotation(x=10.5, y=-1.5, text="🔴 5.5u peripheral  🟡 3.5u internal  🔵 3.0u central",
         showarrow=False, font=dict(size=11))
     st.plotly_chart(fig, use_container_width=True)
 
@@ -91,7 +95,7 @@ with m1:
     st.markdown("""
 **Mold Specification:**
 - 🔩 Material: CNC-machined aluminum
-- 📐 Pattern: 17×10.5 unit matrix
+- 📐 Pattern: 21×34 unit matrix (2.1×3.4 m)
 - 🔴 5.5u: Deep channels (anchoring)
 - 🟡 3.5u: Medium channels (stress routing)
 - 🟢 3.0u: Fine channels (precision vertices)

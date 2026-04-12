@@ -186,6 +186,93 @@ with h2:
 
 st.divider()
 
+# ============================================================
+#  🌐 GLOBAL GRID STATUS — ALL 17 MARKETS
+# ============================================================
+if _hs_available:
+    try:
+        from lib.granas_handshake import get_market_states
+        _markets = get_market_states()
+    except Exception:
+        _markets = None
+
+    if _markets:
+        _v_count = sum(1 for m in _markets.values() if m.get("verified", False))
+        _n_total = len(_markets)
+        _all_ok = _v_count == _n_total
+        _status_color = "#00ff88" if _all_ok else "#ff8c00"
+        _status_text = "ALL NOMINAL" if _all_ok else "DEGRADED"
+
+        st.markdown(f"""
+        <div style='margin-bottom: 20px; padding: 16px 24px;
+             background: linear-gradient(135deg, #060e1a 0%, #0a1628 100%);
+             border: 1px solid {_status_color}22; border-radius: 12px;'>
+            <div style='display: flex; justify-content: space-between; align-items: center;
+                        margin-bottom: 12px;'>
+                <div>
+                    <span style='font-family: JetBrains Mono; font-size: 11px; color: {_status_color};
+                                 letter-spacing: 2px; font-weight: 600;'>🌐 GLOBAL GRID STATUS</span>
+                    <span style='font-family: JetBrains Mono; font-size: 11px; color: #64748b;
+                                 margin-left: 12px;'>PRIME MULTI-MARKET GRID STABILIZER</span>
+                </div>
+                <div style='font-family: JetBrains Mono; font-size: 12px; color: {_status_color};
+                            font-weight: 700;'>
+                    {_v_count}/{_n_total} VERIFIED │ {_status_text}
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Market flags for display
+        _flags = {
+            "SEN": "🇲🇽", "ERCOT": "🇺🇸", "MIBEL": "🇪🇸", "PJM": "🇺🇸",
+            "CAISO": "🇺🇸", "NYISO": "🇺🇸", "SPP": "🇺🇸", "MISO": "🇺🇸",
+            "ISO-NE": "🇺🇸", "AESO": "🇨🇦", "IESO": "🇨🇦", "NEM": "🇦🇺",
+            "JEPX": "🇯🇵", "NORD POOL": "🇳🇴", "EPEX": "🇩🇪", "EMC": "🇸🇬", "CCEE": "🇧🇷",
+        }
+
+        # Render in rows of 4 columns
+        _market_list = list(_markets.items())
+        for row_start in range(0, len(_market_list), 4):
+            row_items = _market_list[row_start:row_start + 4]
+            cols = st.columns(4)
+            for col, (iso, m) in zip(cols, row_items):
+                f_val = m.get("f", 0)
+                v_val = m.get("v", 0)
+                sig = m.get("verified", False)
+                flag = _flags.get(iso, "🌐")
+                node = m.get("master_node", "—")
+                nom_f = m.get("nominal_f", 60)
+                dot_color = "#00ff88" if sig else "#ff4b4b"
+                border_color = "#00ff8822" if sig else "#ff4b4b22"
+
+                col.markdown(f"""
+                <div style='background: linear-gradient(135deg, #0d1520, #111b2a);
+                            border: 1px solid {border_color}; border-radius: 8px;
+                            padding: 12px 14px; margin-bottom: 8px;'>
+                    <div style='display:flex; justify-content:space-between; align-items:center;'>
+                        <span style='font-family: JetBrains Mono; font-size: 12px;
+                                     color: #e2e8f0; font-weight: 600;'>
+                            {flag} {iso}
+                        </span>
+                        <span style='color: {dot_color}; font-size: 14px;'>●</span>
+                    </div>
+                    <div style='font-family: JetBrains Mono; font-size: 20px;
+                                color: {dot_color}; font-weight: 700; margin: 4px 0;'>
+                        {f_val:.3f} <span style='font-size: 11px; color: #64748b;'>Hz</span>
+                    </div>
+                    <div style='font-family: JetBrains Mono; font-size: 12px; color: #94a3b8;'>
+                        {v_val:.1f} kV │ {node}
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            # Fill empty columns in last row
+            for col in cols[len(row_items):]:
+                col.empty()
+
+        st.markdown("")
+
 # ─── Sidebar Quick-Launch ──────────────────────────────────
 st.sidebar.markdown("### 🚀 Quick Launch")
 _quick = {
@@ -193,6 +280,7 @@ _quick = {
     "⚡ Grid Control":    "pages/1_⚡_Grid_Control.py",
     "🔌 Grid Outputs":    "pages/27_🔌_Grid_Outputs.py",
     "🧪 Granas Optimizer":"pages/3_🧪_Granas_Optimizer.py",
+    "📐 Granas Module":   "pages/28_📐_Granas_Module.py",
     "🧠 HJB Control":     "pages/20_🧠_HJB_Control.py",
     "🏭 PRIMStack":       "pages/22_🏭_PRIMStack.py",
     "🔬 Engine Research":  "pages/21_🔬_Engine_Research.py",
@@ -474,7 +562,7 @@ with g5:
         <div class='product-desc'>Structural skeleton. Kirchhoff orthotropic plate + photon recycling.</div>
         <div>
             <span class='product-badge'>KIRCHHOFF</span>
-            <span class='product-badge'>17×10.5</span>
+            <span class='product-badge'>2.1×3.4m</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -579,6 +667,23 @@ with g12:
     """, unsafe_allow_html=True)
     st.page_link("pages/14_🏭_Granas_Scale.py", label="Open →", icon="🏭")
 
+# Granas Row 5 — Module
+g_mod, _, _ = st.columns(3)
+
+with g_mod:
+    st.markdown("""
+    <div class='product-card' style='border-color: rgba(0,255,100,0.35);'>
+        <div class='product-title' style='color: #00ff64;'>📐 Granas Module</div>
+        <div class='product-desc'>2.1m × 3.4m production module. 100 tandem sub-cells, 50S×2P. Power scaling Home→Continent. CFRP blueprint.</div>
+        <div>
+            <span class='product-badge'>2.1×3.4m</span>
+            <span class='product-badge'>2,092 W</span>
+            <span class='status-live'>● LIVE</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/28_📐_Granas_Module.py", label="Open Module →", icon="📐")
+
 # Engines + SIBO + Cycle
 g13, g14, g15 = st.columns(3)
 
@@ -672,7 +777,7 @@ st.divider()
 st.markdown("### Platform Metrics")
 m1, m2, m3, m4, m5, m6 = st.columns(6)
 m1.metric("MARKETS", "17", "1,700+ GW Global")
-m2.metric("PAGES", "27", "Full Product Suite")
+m2.metric("PAGES", "28", "Full Product Suite")
 m3.metric("DIVISIONS", "3", "Grid · Eureka · Research")
 m4.metric("ENGINES", "6", "NH₃ · H₂ · Turbine")
 m5.metric("REPOS", "22", "Enterprise Fleet")

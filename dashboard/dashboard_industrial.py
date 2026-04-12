@@ -15,7 +15,7 @@ def draw():
                 print(f"{BD}{B}======================================================================{E}")
                 print(f"{BD}{C}      PRIMEnergeia Granas | SISTEMA DE CONTROL DE ESTABILIDAD ACTIVE{E}")
                 print(f"{BD}{B}======================================================================{E}")
-                print(f"{BD} NODO OPERATIVO: {E} VZA-400 (Villa de Arriaga, SLP)")
+                print(f"{BD} NODO REFERENCIA (datos públicos CENACE): {E} VZA-400 (Valle de México)")
                 print(f"{BD} STATUS SENSORIAL: {E} {G}SYNC OK{E} | {BD}ESTADO HJB:{E} {G}OPTIMIZED{E}")
                 print(f"{BD}{B}----------------------------------------------------------------------{E}")
                 bar_len = min(int(abs(inercia) * 50), 50)

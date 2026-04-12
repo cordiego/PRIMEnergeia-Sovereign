@@ -46,13 +46,13 @@
 
 ### Cold Outreach Template
 
-> **Subject:** Recovering $150K+/month in Grid Losses — Proven at VZA-400
+> **Subject:** Recovering $150K+/month in Grid Losses — Modeled at VZA-400 (Public CENACE Data)
 >
 > Hi [Name],
 >
 > I'm Diego Córdoba, computational physicist at PRIMEnergeia. We solve the Hamilton-Jacobi-Bellman equation in real-time to eliminate frequency penalty losses from power injection nodes.
 >
-> At our proof-of-concept node (VZA-400, SEN), we recovered $231,243 USD in capital that was being lost to suboptimal control — with zero hardware changes.
+> Using publicly available CENACE market data at node VZA-400 (SEN), our model projected $231,243 USD in recoverable capital being lost to suboptimal control — addressable with zero hardware changes.
 >
 > I'd like to show you a 15-min demo of our dashboard for [their company]'s portfolio. Would [day] work?
 >

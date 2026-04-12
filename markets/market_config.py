@@ -140,7 +140,7 @@ ERCOT_CONFIG = MarketConfig(
 
 SEN_NODES = [
     # — Central —
-    {"id": "05-VZA-400", "loc": "Valle de México", "region": "Central", "cap": 100, "kv": 400},
+    {"id": "05-VZA-400", "loc": "Valle de México", "region": "Central", "cap": 100, "kv": 400, "source": "public_cenace_data"},
     {"id": "01-QRO-230", "loc": "Querétaro", "region": "Central", "cap": 80, "kv": 230},
     {"id": "01-TUL-400", "loc": "Tula, Hidalgo", "region": "Central", "cap": 100, "kv": 400},
     {"id": "06-SLP-400", "loc": "San Luis Potosí", "region": "Central", "cap": 100, "kv": 400},

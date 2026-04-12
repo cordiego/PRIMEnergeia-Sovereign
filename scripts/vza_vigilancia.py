@@ -12,7 +12,7 @@ def check_sovereignty():
             data = json.load(f)
             freq = data['f']
             status = "ALERTA ⚠️" if freq < 59.95 or freq > 60.05 else "NOMINAL ✅"
-            print(f"PRIME (VZA-400): {freq} Hz | {status}")
+            print(f"PRIME (VZA-400, public CENACE data): {freq} Hz | {status}")
     
     # 2. Check Eureka Node (Simulado)
     print(f"EUREKA (Capital): $550.00 USD | Sincronizado")

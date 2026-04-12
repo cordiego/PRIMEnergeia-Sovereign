@@ -47,7 +47,7 @@ shared_data = mp.Manager().dict({'inercia': 0.0, 'rescate': 0.0})
 def read_root():
     return {
         "status": "OPERATIONAL",
-        "node": "VZA-400",
+        "node": "VZA-400 (public CENACE data)",
         "metrics": {
             "current_inertia_mw": f"{shared_data['inercia']:+.4f}",
             "fiduciary_rescue_usd": f"${shared_data['rescate']:,.2f}",

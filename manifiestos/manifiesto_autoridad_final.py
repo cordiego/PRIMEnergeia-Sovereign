@@ -21,7 +21,7 @@ pdf.ln(10)
 
 pdf.set_font('Arial', '', 12)
 pdf.multi_cell(0, 8, (
-    "El despliegue del núcleo HJB+DRL de PRIMEnergeia en el nodo VZA-400 ha sido validado "
+    "El análisis del nodo VZA-400 con datos públicos CENACE muestra que el modelo HJB+DRL de PRIMEnergeia podría "
     "técnicamente. La inacción operativa representa un costo hundido de $83,333.33 USD "
     "por cada hora de retraso en la firma del presente protocolo."
 ))

@@ -26,7 +26,7 @@ class PRIMELogger:
 
     Usage:
         logger = PRIMELogger("PRIME Grid")
-        logger.info("VZA-400 frequency stabilized")
+        logger.info("VZA-400 frequency stabilized (public CENACE data model)")
         logger.metric("capital_rescued_usd", 231243)
     """
 
@@ -99,7 +99,7 @@ class PRIMETelemetry:
 
     Usage:
         telemetry = PRIMETelemetry()
-        telemetry.send_telegram("🔌 VZA-400: $57,811 USD rescued")
+        telemetry.send_telegram("🔌 VZA-400 (public data): $57,811 USD projected recoverable")
     """
 
     MAX_RETRIES = 3

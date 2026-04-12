@@ -12,7 +12,7 @@
 |--------------|--------|
 | **Product** | Real-time HJB frequency control + exergy recovery |
 | **Markets** | 17 global ISOs — 1,700+ GW (ERCOT, PJM, CAISO, MISO, SPP, NYISO, ISONE, IESO, AESO, SEN, MIBEL, EPEX, EPEX_FR, Nord Pool, Elexon, NEM, JEPX) |
-| **Proven ROI** | $231,243 USD rescued at VZA-400 (proof of concept) |
+| **Market Reference** | $231,243 USD projected recoverable at VZA-400 (public CENACE data) |
 | **Pricing** | $50K deployment + 25% royalty on capital rescued |
 | **Latency** | < 0.5 ms control loop |
 | **Deliverable** | Turnkey software integration — no hardware changes |

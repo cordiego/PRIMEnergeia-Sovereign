@@ -196,7 +196,7 @@ This figure should match PRIMEngine's reported Capital Rescued within rounding t
 | **Simulated vs. Real** | All dashboard results are clearly labeled as "🔮 Simulated" or "📂 Historical" via the mode banner. Simulated results are NOT used for fee calculation. |
 | **Proxy Data** | When real data is unavailable, proxy data is generated from documented ERCOT price patterns. All proxy data is labeled with `[PROXY DATA]` tags and an orange warning banner. |
 | **Backtest ≠ Future** | Past performance does not guarantee future results. Backtest results use historical settlement prices and assume perfect execution. Real-world execution may vary due to ramp rate limits, communication latency, and curtailment orders. |
-| **Single Node Validation** | The VZA-400 result ($231,243 rescued) is from a single node in one market. Extrapolations to other nodes assume similar grid dynamics, which may not hold. |
+| **Single Node Reference** | The VZA-400 result ($231,243 projected recoverable) is modeled from publicly available CENACE data at a single node. No proprietary work was performed at this node. Extrapolations to other nodes assume similar grid dynamics, which may not hold. |
 | **Battery Degradation Model** | The Rainflow cycle counting model uses manufacturer-typical parameters. Actual degradation varies by cell chemistry, ambient temperature, and operating history. |
 
 ---

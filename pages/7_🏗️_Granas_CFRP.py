@@ -7,6 +7,10 @@ try:
     from lib.mode_gate import show_mode_banner
     show_mode_banner()
 except Exception: pass
+try:
+    from lib.granas_handshake import show_handshake_sidebar
+    show_handshake_sidebar()
+except Exception: pass
 # --- End Banner ---
 import streamlit as st
 import numpy as np
@@ -14,7 +18,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 st.header("🏗️ Granas CFRP — Structural Skeleton Engine")
-st.caption("17×10.5 Geometric Blueprint | Kirchhoff Orthotropic Plate | Photon Recycling Ridges")
+st.caption("21×34 Geometric Blueprint (2.1×3.4 m) | Kirchhoff Orthotropic Plate | Photon Recycling Ridges")
 
 # ─── Parameters ───
 with st.expander("⚙️ Engineering Parameters", expanded=False):
@@ -33,8 +37,8 @@ Dx = E1 * h**3 / (12 * (1 - nu**2))
 Dy = E2 * h**3 / (12 * (1 - nu**2))
 H = G12 * h**3 / 6 * 1.42
 D_eff = np.sqrt(Dx * Dy)
-w_max = 0.0056 * pressure * 1.7**4 / D_eff * 1000
-sigma = pressure * 1.7**2 / (8 * h) / 1e6
+w_max = 0.0056 * pressure * 2.1**4 / D_eff * 1000
+sigma = pressure * 2.1**2 / (8 * h) / 1e6
 sf = 2550 / max(sigma, 0.01)
 weight = 1600 * h * 1.4
 theta = np.radians(chamfer)
@@ -75,7 +79,7 @@ with c1:
 with c2:
     # Deflection vs pressure sweep
     pressures = np.linspace(1000, 8000, 50)
-    deflections = 0.0056 * pressures * 1.7**4 / D_eff * 1000
+    deflections = 0.0056 * pressures * 2.1**4 / D_eff * 1000
     fig2 = go.Figure()
     fig2.add_trace(go.Scatter(x=pressures, y=deflections, mode='lines',
         line=dict(color='#00c878', width=3), fill='tozeroy',
@@ -108,8 +112,8 @@ with b1:
 with b2:
     st.markdown("**Module Specs**")
     st.markdown(f"""
-- **Dimensions**: 1.7m × 1.05m
-- **Area**: 1.785 m²
+- **Dimensions**: 2.1m × 3.4m
+- **Area**: 7.14 m²
 - **Fiber**: Toray T700S 12K
 - **Matrix**: UV-resistant cycloaliphatic epoxy
 - **Cure**: {120}°C × 4h

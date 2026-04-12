@@ -191,7 +191,7 @@ def generate_simulation_state():
 
     # --- Node Network ---
     nodes = [
-        {"id": "05-VZA-400", "loc": "Valle de México", "region": "Central", "cap": 100, "load": np.random.randint(78, 92), "status": "MASTER", "f": 60.0 + np.random.normal(0, 0.008)},
+        {"id": "05-VZA-400", "loc": "Valle de México", "region": "Central", "cap": 100, "load": np.random.randint(78, 92), "status": "REFERENCE", "f": 60.0 + np.random.normal(0, 0.008), "source": "public_cenace_data"},
         {"id": "01-QRO-230", "loc": "Querétaro", "region": "Central", "cap": 80, "load": np.random.randint(50, 75), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.011)},
         {"id": "01-TUL-400", "loc": "Tula, Hidalgo", "region": "Central", "cap": 100, "load": np.random.randint(55, 80), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.009)},
         {"id": "06-SLP-400", "loc": "San Luis Potosí", "region": "Central", "cap": 100, "load": np.random.randint(40, 70), "status": "ONLINE", "f": 60.0 + np.random.normal(0, 0.012)},

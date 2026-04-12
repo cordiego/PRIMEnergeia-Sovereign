@@ -5,12 +5,12 @@ RESCATE_TOTAL = 231243.00
 FEE_REGALIA = RESCATE_TOTAL * 0.25
 AHORRO_NETO_CLIENTE = RESCATE_TOTAL * 0.75
 EVENTOS = 6
-NODO = "VZA-400 (Villa de Arriaga, SLP)"
+NODO = "VZA-400 (Valle de México, datos públicos CENACE)"
 
 reporte = f"""
 ======================================================================
           PRIMENERGEIA GRANAS | EUREKA STRATEGIC OPERATIONS
-              CERTIFICADO DE ESTABILIZACIÓN Y RESCATE
+               REFERENCIA DE MERCADO (DATOS PÚBLICOS CENACE)
 ======================================================================
 FECHA DE OPERACIÓN: {datetime.date.today()}
 ID DE SISTEMA:      PRIME-HJB-V8.0-MPS
@@ -29,15 +29,16 @@ ESTADO DEL NODO:    OPTIMIZADO (LATENCIA <0.5ms)
 Se ha evitado la pérdida de capital mediante la inyección de inercia
 sintética predictiva, eliminando penalizaciones del CENACE.
 
-> TOTAL CAPITAL RESCATADO:             $ {RESCATE_TOTAL:,.2f} USD
+> TOTAL CAPITAL RECUPERABLE PROYECTADO:   $ {RESCATE_TOTAL:,.2f} USD
 > AHORRO NETO PARA EL CLIENTE (75%):   $ {AHORRO_NETO_CLIENTE:,.2f} USD
 > FEE OPERATIVO PRIMENERGEIA (25%):    $ {FEE_REGALIA:,.2f} USD
 
 3. DECLARACIÓN DE SOBERANÍA
 ---------------------------
-Este reporte certifica que el ahorro generado es producto directo de la
-implementación de la arquitectura PRIMEnergeia. El capital rescatado
-ha sido validado contra los precios marginales locales (PML).
+Este reporte documenta el capital recuperable proyectado a partir de datos
+públicos CENACE en el nodo VZA-400. No se realizó trabajo propietario en
+este nodo. El capital proyectado ha sido modelado contra los precios
+marginales locales (PML) públicamente disponibles.
 
 ----------------------------------------------------------------------
 FIRMA DE AUTORIDAD:

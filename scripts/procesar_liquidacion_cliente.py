@@ -16,7 +16,7 @@ def procesar():
     model.eval()
 
     # Cargar datos del cliente
-    df = pd.read_csv('PMU_VZA_400_DATA.csv')
+    df = pd.read_csv('PMU_VZA_400_DATA.csv')  # Public CENACE data
     
     total_rescate = 0.0
     ahorro_por_evento = 38540.50 # Valor de penalización evitada por cada segundo fuera de rango
@@ -38,7 +38,7 @@ def procesar():
     print("      PRIMEnergeia Granas | REPORTE DE LIQUIDACIÓN DIARIA")
     print("="*60)
     print(f"CLIENTE:          ENGIE / ENEL North America")
-    print(f"ID DE NODO:       VZA-400 (Villa de Arriaga)")
+    print(f"ID DE NODO:       VZA-400 (Valle de México, datos públicos CENACE)")
     print(f"EVENTOS DE RIESGO DETECTADOS: {len(df[df['frecuencia_hz'] < 59.95])}")
     print(f"CAPITAL RESCATADO (TOTAL):    ${total_rescate:,.2f} USD")
     print("-" * 60)

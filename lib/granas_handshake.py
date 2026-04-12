@@ -81,6 +81,14 @@ def _read_grid_state() -> Optional[dict]:
     return None
 
 
+def get_market_states() -> Optional[dict]:
+    """Return per-market grid states if multi-market bridge is running."""
+    state = _read_grid_state()
+    if state and "markets" in state:
+        return state["markets"]
+    return None
+
+
 def _detect_nominal_freq(measured_hz: float) -> float:
     """Identify whether the grid is 50 Hz or 60 Hz based on measurement."""
     if abs(measured_hz - FREQ_NOMINAL_60) < 5.0:
@@ -241,8 +249,9 @@ def show_handshake_banner():
 
 
 def show_handshake_sidebar():
-    """Compact sidebar widget showing Grid Stabilizer status."""
+    """Compact sidebar widget showing Grid Stabilizer status for all markets."""
     hs = verify_power_input()
+    markets = get_market_states()
 
     if hs.mode == "HIGH_LOAD":
         color = "#00ff88"
@@ -257,6 +266,7 @@ def show_handshake_sidebar():
         icon = "🔌"
         label = "OFFLINE"
 
+    # ── Header card ──────────────────────────────────────────
     st.sidebar.markdown(f"""
     <div style='background: rgba(13, 21, 32, 0.9); border: 1px solid {color}33;
                 border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;'>
@@ -276,6 +286,51 @@ def show_handshake_sidebar():
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+    # ── Multi-market grid (if available) ─────────────────────
+    if markets:
+        verified_count = sum(1 for m in markets.values() if m.get("verified", False))
+        total = len(markets)
+        all_ok = verified_count == total
+        bar_color = "#00ff88" if all_ok else "#ff8c00"
+
+        rows_html = ""
+        for iso, m in markets.items():
+            f_val = m.get("f", 0)
+            v_val = m.get("v", 0)
+            sig = m.get("verified", False)
+            sig_dot = f"<span style='color:#00ff88;'>●</span>" if sig else f"<span style='color:#ff4b4b;'>●</span>"
+            nom_f = m.get("nominal_f", 60)
+            rows_html += (
+                f"<div style='display:flex; justify-content:space-between; "
+                f"padding: 2px 0; border-bottom: 1px solid #1a2744;'>"
+                f"<span style='color:#94a3b8; width:70px;'>{iso}</span>"
+                f"<span style='color:#e2e8f0;'>{f_val:.3f}</span>"
+                f"<span style='color:#64748b;'>{v_val:.0f}</span>"
+                f"<span>{sig_dot}</span>"
+                f"</div>"
+            )
+
+        st.sidebar.markdown(f"""
+        <div style='background: rgba(13, 21, 32, 0.9); border: 1px solid {bar_color}22;
+                    border-radius: 8px; padding: 10px 12px; margin-bottom: 12px;'>
+            <div style='font-family: "JetBrains Mono", monospace; font-size: 10px;
+                        color: {bar_color}; letter-spacing: 1.5px; font-weight: 600;
+                        margin-bottom: 8px;'>
+                🌐 {verified_count}/{total} MARKETS VERIFIED
+            </div>
+            <div style='font-family: "JetBrains Mono", monospace; font-size: 10px;
+                        display:flex; justify-content:space-between; color:#64748b;
+                        padding-bottom: 4px; border-bottom: 1px solid #1a2744;
+                        margin-bottom: 4px;'>
+                <span style='width:70px;'>ISO</span>
+                <span>Hz</span>
+                <span>kV</span>
+                <span>SIG</span>
+            </div>
+            {rows_html}
+        </div>
+        """, unsafe_allow_html=True)
 
 
 def require_grid_handshake(page_name: str = "this simulation") -> bool:

@@ -48,7 +48,7 @@ def run_dashboard():
         with placeholder.container():
             c1, c2 = st.columns([3, 1])
             with c1:
-                st.title("⚡ PRIMEnergeia: Nodo VZA-400")
+                st.title("⚡ PRIMEnergeia: Nodo VZA-400 (Datos Públicos CENACE)")
                 st.write(f"ENTIDAD LEGAL: **PRIMEnergeia S.A.S.** | SOCIO: DIEGO")
             with c2:
                 st.markdown("<p class='status-active'>● SISTEMA LIVE</p>", unsafe_allow_html=True)

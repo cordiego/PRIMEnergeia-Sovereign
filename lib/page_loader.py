@@ -58,9 +58,17 @@ def load_dashboard(module_path: str, module_name: str = None):
         st.stop()
         return
 
+    def _preserve_lines(match):
+        """Replace set_page_config but keep the same number of newlines
+        so that line numbers in the compiled code match the original file.
+        This prevents Streamlit's @st.cache_data from hitting TokenError
+        when it uses inspect.getsource() against the on-disk file."""
+        newlines = match.group(0).count('\n')
+        return '# page_config handled by app.py' + '\n' * newlines
+
     source = re.sub(
         r'st\.set_page_config\s*\(.*?\)',
-        '# page_config handled by app.py',
+        _preserve_lines,
         source,
         count=1,
         flags=re.DOTALL,

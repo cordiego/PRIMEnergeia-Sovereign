@@ -38,28 +38,28 @@ class MaterialComponent:
 
 
 def granas_module_bom() -> List[MaterialComponent]:
-    """BOM for a Granas perovskite-silicon tandem module (1.7 m², 22 kg)."""
+    """BOM for a Granas perovskite-silicon tandem module (7.14 m², 92 kg)."""
     return [
-        MaterialComponent("Glass (front)", 8500, False, 0.80, 0.995, 0.5, 0.6),
-        MaterialComponent("ETFE Film", 850, False, 12.0, 0.92, 2.0, 4.5),
-        MaterialComponent("EVA Encapsulant", 1100, False, 1.2, 0.85, 1.5, 2.0),
-        MaterialComponent("Silicon Cell", 2640, False, 12.0, 0.95, 8.0, 15.0),
-        MaterialComponent("Perovskite (FAPbI₃)", 180, True, 85.0, 0.93, 5.0, 12.0),
-        MaterialComponent("PbI₂ (lead iodide)", 95, True, 45.0, 0.975, 3.0, 8.0),
-        MaterialComponent("FAI (formamidinium)", 42, False, 180.0, 0.90, 4.0, 6.0),
-        MaterialComponent("MAI (methylammonium)", 28, False, 200.0, 0.88, 4.0, 6.0),
-        MaterialComponent("Lead (Pb, trace)", 11, True, 2.10, 0.998, 2.0, 3.0),
-        MaterialComponent("Silver (Ag)", 8.8, False, 850.0, 0.98, 15.0, 45.0),
-        MaterialComponent("Copper (Cu)", 704, False, 8.50, 0.99, 3.0, 4.0),
-        MaterialComponent("Aluminum (frame)", 2200, False, 2.20, 0.995, 5.0, 12.0),
-        MaterialComponent("CFRP Substrate", 1760, False, 15.0, 0.88, 12.0, 25.0),
-        MaterialComponent("TiO₂ (ETL)", 15, False, 3.0, 0.80, 6.0, 8.0),
-        MaterialComponent("Spiro-OMeTAD (HTL)", 8, False, 5000.0, 0.75, 8.0, 20.0),
-        MaterialComponent("ITO / FTO", 35, False, 25.0, 0.70, 10.0, 18.0),
-        MaterialComponent("Backsheet", 1500, False, 1.5, 0.90, 1.0, 2.0),
-        MaterialComponent("Junction Box", 450, False, 3.0, 0.95, 2.0, 3.0),
-        MaterialComponent("Solder / Ribbon", 180, False, 5.0, 0.92, 4.0, 5.0),
-        MaterialComponent("Other / Misc", 200, False, 0.5, 0.70, 1.0, 1.0),
+        MaterialComponent("Glass (front)", 35700, False, 0.80, 0.995, 0.5, 0.6),
+        MaterialComponent("ETFE Film", 3570, False, 12.0, 0.92, 2.0, 4.5),
+        MaterialComponent("EVA Encapsulant", 4620, False, 1.2, 0.85, 1.5, 2.0),
+        MaterialComponent("Silicon Cell", 11088, False, 12.0, 0.95, 8.0, 15.0),
+        MaterialComponent("Perovskite (FAPbI₃)", 756, True, 85.0, 0.93, 5.0, 12.0),
+        MaterialComponent("PbI₂ (lead iodide)", 399, True, 45.0, 0.975, 3.0, 8.0),
+        MaterialComponent("FAI (formamidinium)", 176, False, 180.0, 0.90, 4.0, 6.0),
+        MaterialComponent("MAI (methylammonium)", 118, False, 200.0, 0.88, 4.0, 6.0),
+        MaterialComponent("Lead (Pb, trace)", 46, True, 2.10, 0.998, 2.0, 3.0),
+        MaterialComponent("Silver (Ag)", 37, False, 850.0, 0.98, 15.0, 45.0),
+        MaterialComponent("Copper (Cu)", 2957, False, 8.50, 0.99, 3.0, 4.0),
+        MaterialComponent("Aluminum (frame)", 9240, False, 2.20, 0.995, 5.0, 12.0),
+        MaterialComponent("CFRP Substrate", 7392, False, 15.0, 0.88, 12.0, 25.0),
+        MaterialComponent("TiO₂ (ETL)", 63, False, 3.0, 0.80, 6.0, 8.0),
+        MaterialComponent("Spiro-OMeTAD (HTL)", 34, False, 5000.0, 0.75, 8.0, 20.0),
+        MaterialComponent("ITO / FTO", 147, False, 25.0, 0.70, 10.0, 18.0),
+        MaterialComponent("Backsheet", 6300, False, 1.5, 0.90, 1.0, 2.0),
+        MaterialComponent("Junction Box", 1890, False, 3.0, 0.95, 2.0, 3.0),
+        MaterialComponent("Solder / Ribbon", 756, False, 5.0, 0.92, 4.0, 5.0),
+        MaterialComponent("Other / Misc", 840, False, 0.5, 0.70, 1.0, 1.0),
     ]
 
 

@@ -86,11 +86,11 @@ Nuestra plataforma resuelve la ecuación **Hamilton-Jacobi-Bellman (HJB)** en ti
 
 ---
 
-## 3. Resultados Certificados — Nodo VZA-400 (SEN)
+## 3. Referencia de Mercado — Nodo VZA-400 (SEN, Datos Públicos CENACE)
 
 | Métrica | Resultado |
 |---------|-----------|
-| **Capital Total Rescatado** | **$231,243 USD** |
+| **Capital Recuperable Proyectado** | **$231,243 USD** |
 | Ahorro Neto para el Cliente (75%) | $173,432 USD |
 | Fee Operativo PRIMEnergeia (25%) | $57,811 USD |
 | Estabilidad de Frecuencia | 99.96% |

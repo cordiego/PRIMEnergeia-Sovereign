@@ -2,11 +2,11 @@
 
 ## Executive Summary
 
-PRIMEnergeia recovers capital lost through suboptimal power injection by solving the HJB optimal control equation in real-time. This document presents validated results from SEN (Mexico) and projections for international expansion into ERCOT (Texas) and MIBEL (Iberian Peninsula).
+PRIMEnergeia recovers capital lost through suboptimal power injection by solving the HJB optimal control equation in real-time. This document presents projected results modeled from publicly available CENACE data (SEN, Mexico) and projections for international expansion into ERCOT (Texas) and MIBEL (Iberian Peninsula).
 
 ---
 
-## 1. Validated Results — Node VZA-400 (SEN Mexico)
+## 1. Market Reference — Node VZA-400 (SEN Mexico, Public CENACE Data)
 
 **Period:** March 2026 (operational cycle)  
 **Node capacity:** 100 MW  
@@ -17,7 +17,7 @@ PRIMEnergeia recovers capital lost through suboptimal power injection by solving
 | Instability events detected | 6 |
 | Frequency deviation (avg, mitigated) | 0.042 Hz |
 | Asset protection index | 99.96% |
-| **Total capital rescued** | **$231,243 USD** |
+| **Total projected recoverable capital** | **$231,243 USD** |
 | Client net savings (75%) | $173,432 USD |
 | PRIMEnergeia fee (25%) | $57,811 USD |
 
@@ -152,14 +152,14 @@ MIBEL operates on the ENTSO-E Continental synchronous area with higher system in
 | Scenario | Assumption | Annual Revenue |
 |----------|-----------|----------------|
 | **Conservative** | 50% of projected rescue | ~$24M |
-| **Base** | Validated SEN performance extrapolated | ~$48M |
+| **Base** | SEN public data model extrapolated | ~$48M |
 | **Optimistic** | Higher volatility + scarcity events (+20%) | ~$57M |
 
 ---
 
 ## 6. Key Assumptions & Disclaimers
 
-- SEN projections based on VZA-400 validated performance, scaled by capacity
+- SEN projections based on VZA-400 public CENACE data model, scaled by capacity
 - ERCOT projections reflect higher LMP volatility and scarcity pricing events
 - MIBEL projections account for OMIE pool dynamics and 50 Hz grid specifics
 - **ERCOT advantage:** Islanded grid with lower inertia → more frequent rescue events

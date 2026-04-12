@@ -20,7 +20,7 @@ fig, ax = plt.subplots(figsize=(10, 5))
 ax.plot(base_freq, color='#e74c3c', label='Frecuencia Legacy (Inestable)', alpha=0.6)
 ax.plot(hjb_freq, color='#2ecc71', label='Frecuencia PRIMEnergeia (Auto-Healing)', linewidth=2)
 ax.axhline(y=59.5, color='white', linestyle='--', label='Umbral Crítico (Multa)')
-ax.set_title('AUDITORÍA DE ESTABILIDAD ESTOCÁSTICA - NODO VZA-400', color='white', fontsize=14)
+ax.set_title('REFERENCIA DE MERCADO (DATOS PÚBLICOS CENACE) - NODO VZA-400', color='white', fontsize=14)
 ax.set_ylabel('Frecuencia (Hz)')
 ax.legend()
 plt.savefig('evidencia_autohealing.png', dpi=300)
@@ -78,6 +78,6 @@ for row in data:
 
 pdf.ln(20)
 pdf.set_font('Arial', 'I', 10)
-pdf.multi_cell(0, 5, "Sello Digital: HJB-DRL-OPTIMIZER-Sovereign-Execution-Node-VZA-400")
+pdf.multi_cell(0, 5, "Sello Digital: HJB-DRL-OPTIMIZER-Sovereign-Reference-Node-VZA-400-PublicData")
 
 pdf.output('Manifiesto_Soberania_VZA-400.pdf')

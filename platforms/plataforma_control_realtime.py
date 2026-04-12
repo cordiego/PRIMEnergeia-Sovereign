@@ -20,7 +20,7 @@ class AutoHealing_Actor(nn.Module):
 # --- PROCESO 1: INGESTA DE DATOS (SENSOR DE NODO) ---
 def sensor_loop(data_queue):
     """Simula la recepción de telemetría a 10Hz desde el PMU del cliente"""
-    print("[INGESTA] Conectado al sensor del Nodo VZA-400...")
+    print("[INGESTA] Datos públicos CENACE — Nodo VZA-400...")
     while True:
         # Generamos el vector de estado: [Frecuencia, Voltaje, Demanda, PML]
         freq = 60.0 + np.random.normal(0, 0.02)

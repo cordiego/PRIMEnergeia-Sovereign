@@ -1,1 +1,197 @@
-{"f": 60.0, "v": 114.92, "status": "NOMINAL", "timestamp": 1775837164.2091231}
+{
+ "f": 59.986,
+ "v": 115.13,
+ "status": "NOMINAL",
+ "timestamp": 1776016769.604623,
+ "markets": {
+  "SEN": {
+   "f": 59.986,
+   "v": 115.13,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "05-VZA-400",
+   "nominal_f": 60.0,
+   "nominal_v": 115.0,
+   "market": "SEN",
+   "verified": true
+  },
+  "ERCOT": {
+   "f": 60.005,
+   "v": 344.9,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "HOU-345-01",
+   "nominal_f": 60.0,
+   "nominal_v": 345.0,
+   "market": "ERCOT",
+   "verified": true
+  },
+  "MIBEL": {
+   "f": 49.994,
+   "v": 220.18,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "ES-MAD-400",
+   "nominal_f": 50.0,
+   "nominal_v": 220.0,
+   "market": "MIBEL",
+   "verified": true
+  },
+  "PJM": {
+   "f": 60.005,
+   "v": 500.14,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "PJM-WH-500",
+   "nominal_f": 60.0,
+   "nominal_v": 500.0,
+   "market": "PJM",
+   "verified": true
+  },
+  "CAISO": {
+   "f": 59.995,
+   "v": 500.0,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "CA-LA-500",
+   "nominal_f": 60.0,
+   "nominal_v": 500.0,
+   "market": "CAISO",
+   "verified": true
+  },
+  "NYISO": {
+   "f": 59.986,
+   "v": 344.12,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "NY-NYC-345",
+   "nominal_f": 60.0,
+   "nominal_v": 345.0,
+   "market": "NYISO",
+   "verified": true
+  },
+  "SPP": {
+   "f": 59.999,
+   "v": 345.59,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "SPP-OKC-345",
+   "nominal_f": 60.0,
+   "nominal_v": 345.0,
+   "market": "SPP",
+   "verified": true
+  },
+  "MISO": {
+   "f": 59.997,
+   "v": 344.48,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "MISO-CHI-345",
+   "nominal_f": 60.0,
+   "nominal_v": 345.0,
+   "market": "MISO",
+   "verified": true
+  },
+  "ISO-NE": {
+   "f": 60.003,
+   "v": 345.5,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "NE-BOS-345",
+   "nominal_f": 60.0,
+   "nominal_v": 345.0,
+   "market": "ISO-NE",
+   "verified": true
+  },
+  "AESO": {
+   "f": 59.993,
+   "v": 240.24,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "AB-CGY-240",
+   "nominal_f": 60.0,
+   "nominal_v": 240.0,
+   "market": "AESO",
+   "verified": true
+  },
+  "IESO": {
+   "f": 60.005,
+   "v": 500.0,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "ON-TOR-500",
+   "nominal_f": 60.0,
+   "nominal_v": 500.0,
+   "market": "IESO",
+   "verified": true
+  },
+  "NEM": {
+   "f": 50.0,
+   "v": 330.42,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "AU-SYD-330",
+   "nominal_f": 50.0,
+   "nominal_v": 330.0,
+   "market": "NEM",
+   "verified": true
+  },
+  "JEPX": {
+   "f": 49.995,
+   "v": 274.77,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "JP-TKY-500",
+   "nominal_f": 50.0,
+   "nominal_v": 275.0,
+   "market": "JEPX",
+   "verified": true
+  },
+  "NORD POOL": {
+   "f": 50.014,
+   "v": 399.47,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "NO-OSL-400",
+   "nominal_f": 50.0,
+   "nominal_v": 400.0,
+   "market": "NORD POOL",
+   "verified": true
+  },
+  "EPEX": {
+   "f": 50.001,
+   "v": 379.88,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "DE-BER-380",
+   "nominal_f": 50.0,
+   "nominal_v": 380.0,
+   "market": "EPEX",
+   "verified": true
+  },
+  "EMC": {
+   "f": 50.0,
+   "v": 230.17,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "SG-TUA-230",
+   "nominal_f": 50.0,
+   "nominal_v": 230.0,
+   "market": "EMC",
+   "verified": true
+  },
+  "CCEE": {
+   "f": 60.0,
+   "v": 500.03,
+   "status": "NOMINAL",
+   "timestamp": 1776016769.604623,
+   "master_node": "BR-SPO-500",
+   "nominal_f": 60.0,
+   "nominal_v": 500.0,
+   "market": "CCEE",
+   "verified": true
+  }
+ },
+ "n_markets": 17,
+ "all_verified": true
+}

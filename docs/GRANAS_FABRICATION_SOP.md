@@ -24,7 +24,7 @@ Granas is a **5-layer integrated energy architecture**:
 │  Layer 4: PG-MoSA-BC (Haber-Bosch Back Contact)│  Mo single-site NRR catalyst
 │           N₂ + 6H⁺ + 6e⁻ → 2NH₃               │  58.4% Faradaic Efficiency
 ├─────────────────────────────────────────────────┤
-│  Layer 5: CFRP Structural Skeleton              │  17×10.5 geometric blueprint
+│  Layer 5: CFRP Structural Skeleton              │  21×34 geometric blueprint (2.1×3.4 m)
 │           89% photon recycling ridges           │  5× lighter than glass
 └─────────────────────────────────────────────────┘
 ```
@@ -38,10 +38,10 @@ Granas is a **5-layer integrated energy architecture**:
 |----------|------|----------|
 | Carbon fiber tow | Aerospace-grade, continuous 12K | Toray T700S |
 | Epoxy resin | Cycloaliphatic, UV-resistant | Huntsman LY556 |
-| Mold | CNC-machined aluminum, 17×10.5 unit pattern | Custom |
+| Mold | CNC-machined aluminum, 21×34 unit pattern | Custom |
 
 ### Procedure
-1. **CNC the mold** — machine the 17×10.5 geometric pattern with edge lengths 5.5, 3.5, and 3.0 units (1 unit = 10cm). Include chamfered ridges at 15° angle for photon recycling.
+1. **CNC the mold** — machine the 21×34 geometric pattern with edge lengths 5.5, 3.5, and 3.0 units (1 unit = 10cm → 2.1m × 3.4m module). Include chamfered ridges at 15° angle for photon recycling.
 2. **Lay up CF tow** — wind continuous carbon fiber through multi-axis robotic arm, ensuring uninterrupted fibers across ALL internal vertices. Fiber must loop from 3.0-unit central network through 5.5-unit peripheral triangles without cutting.
 3. **Resin transfer molding** — infuse cycloaliphatic epoxy at 60°C under 3 bar vacuum. Hold for 90 min.
 4. **Cure** — ramp to 120°C at 2°C/min, hold 4h. Cool at 1°C/min.
@@ -218,7 +218,7 @@ Green-reflecting Granas modules installed on rooftops **reduce urban heat island
 ## Phase 6: Final Assembly
 
 1. **Bond Layers 2-4** (perovskite/TOPCon/back contact) into monolithic stack using optical-grade silicone adhesive.
-2. **Mount into CFRP skeleton** — insert monolithic stack into the green-hued polygonal fields of the 17×10.5 frame. Seal edges with CFRP-compatible gasket.
+2. **Mount into CFRP skeleton** — insert monolithic stack into the green-hued polygonal fields of the 21×34 frame (2.1×3.4 m). Seal edges with CFRP-compatible gasket.
 3. **ETFE front encapsulation** — thermoform macroscopic ETFE sheet onto CFRP skeleton. Heat-seal at 270°C. The ETFE provides anti-reflection + self-cleaning + UV protection.
 4. **Wire bonding** — connect Au top contacts to bus bars routed through CFRP ridges.
 5. **N₂ feed** — connect gas diffusion back contact to pressurized N₂ line (50 bar) via rear manifold.

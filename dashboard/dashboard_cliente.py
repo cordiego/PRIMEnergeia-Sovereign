@@ -30,7 +30,7 @@ def draw_dashboard():
             print(f"{BOLD}{BLUE}======================================================================{END}")
             print(f"{BOLD}{CYAN}      PRIMEnergeia Granas | SISTEMA DE CONTROL DE ESTABILIDAD ACTIVE{END}")
             print(f"{BOLD}{BLUE}======================================================================{END}")
-            print(f"{BOLD} NODO OPERATIVO: {END} VZA-400 (Villa de Arriaga, SLP)")
+            print(f"{BOLD} NODO REFERENCIA (datos públicos CENACE): {END} VZA-400 (Valle de México)")
             print(f"{BOLD} STATUS SENSORIAL: {END} {GREEN}SYNC OK{END} | {BOLD}ESTADO HJB:{END} {GREEN}OPTIMIZED{END}")
             print(f"{BOLD}{BLUE}----------------------------------------------------------------------{END}")
             

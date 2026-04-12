@@ -326,7 +326,7 @@ class HJBSolver:
 class GridFrequencyDynamics(HJBDynamics):
     """
     HJB dynamics for grid frequency stabilization.
-    Used by PRIME Grid (VZA-400, ERCOT, MIBEL).
+    Used by PRIME Grid (VZA-400 [public CENACE data], ERCOT, MIBEL).
 
     State: [frequency_deviation_hz, power_injection_mw]
     Control: injection_ramp_rate (MW/s)

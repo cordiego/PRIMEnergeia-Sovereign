@@ -55,7 +55,7 @@ def get_metrics():
         conn.close()
         return {
             "status": "ONLINE",
-            "node": "VZA-400",
+            "node": "VZA-400 (public CENACE data)",
             "data": {
                 "inertia_mw": f"{row[0]:+.4f}",
                 "fiduciary_rescue_usd": f"${row[1]:,.2f}",

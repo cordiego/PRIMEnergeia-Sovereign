@@ -17,7 +17,7 @@ pdf.add_page()
 pdf.set_font('Arial', 'B', 28)
 pdf.cell(0, 20, 'CONTRATO DE ACTIVACIÓN SOBERANA', 0, 1, 'L')
 pdf.set_font('Arial', 'I', 14)
-pdf.cell(0, 10, f'Nodo: VZA-400 | Auditoría Estocástica Final | {datetime.date.today()}', 0, 1, 'L')
+pdf.cell(0, 10, f'Nodo: VZA-400 (Datos Públicos CENACE) | Auditoría Estocástica Final | {datetime.date.today()}', 0, 1, 'L')
 pdf.ln(15)
 
 # La Realidad del Mercado

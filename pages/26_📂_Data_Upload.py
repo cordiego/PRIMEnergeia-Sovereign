@@ -10,6 +10,14 @@ Provides:
 PRIMEnergeia S.A.S. — Grid Optimization Division
 """
 
+import sys as _sys, os as _os
+_root = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+if _root not in _sys.path: _sys.path.insert(0, _root)
+try:
+    from lib.granas_handshake import show_handshake_sidebar
+    show_handshake_sidebar()
+except Exception: pass
+
 import streamlit as st
 import numpy as np
 import pandas as pd
@@ -154,7 +162,7 @@ with market_tab_sen:
             "05-CHI-400", "06-SLP-400", "09-LAP-115", "08-MXL-230",
         ]
         sen_labels = {
-            "05-VZA-400": "⭐ VZA-400 ($231K validated)",
+            "05-VZA-400": "⭐ VZA-400 (public CENACE data, $231K projected)",
             "07-HER-230": "🏜️ Hermosillo (Noroeste)",
             "04-MTY-400": "🏭 Monterrey (Noreste)",
             "03-GDL-400": "🌮 Guadalajara (Occidental)",

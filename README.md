@@ -9,7 +9,7 @@
 
 ---
 
-> **$231,243 USD** in capital recovered at a single node (VZA-400) through optimal frequency control.  
+> **$231,243 USD** in projected recoverable capital modeled at node VZA-400 using publicly available CENACE data.  
 > **17 global markets** covering **1,700+ GW** — ERCOT · PJM · CAISO · MISO · SPP · NYISO · ISONE · IESO · AESO · SEN · MIBEL · EPEX · Nord Pool · Elexon · NEM · JEPX  
 > **~$48M USD** projected annual recurring revenue.
 
@@ -63,11 +63,11 @@ The unified dashboard includes a **sidebar market selector** to switch between a
 
 ---
 
-## Proven Results — Node VZA-400 (SEN, Valle de México)
+## Market Reference — Node VZA-400 (SEN, Public CENACE Data)
 
 | Metric | Value |
 |--------|-------|
-| **Capital Rescued** | **$231,243 USD** |
+| **Projected Recoverable Capital** | **$231,243 USD** |
 | Client Net Savings (75%) | $173,432 USD |
 | PRIMEnergeia Fee (25%) | $57,811 USD |
 | Frequency Stability | 99.96% |

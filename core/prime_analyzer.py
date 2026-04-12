@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 def analizar_datos_engie(file_path):
-    print(f"[🔍] ANALIZANDO NODO VZA-400: {file_path}")
+    print(f"[🔍] ANALIZANDO NODO VZA-400 (datos públicos CENACE): {file_path}")
     try:
         # Cargar datos (ajusta el nombre de columnas según el archivo)
         df = pd.read_csv(file_path)

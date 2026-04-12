@@ -16,7 +16,7 @@ pdf.add_page()
 pdf.set_font('Arial', 'B', 24)
 pdf.cell(0, 20, 'PROTOCOLO DE RESCATE FIDUCIARIO', 0, 1, 'L')
 pdf.set_font('Arial', 'I', 12)
-pdf.cell(0, 10, f'Análisis de Nodo Crítico VZA-400 | Emisión: {datetime.date.today()}', 0, 1, 'L')
+pdf.cell(0, 10, f'Análisis de Nodo VZA-400 (Datos Públicos CENACE) | Emisión: {datetime.date.today()}', 0, 1, 'L')
 pdf.ln(15)
 
 # La Verdad Matemática

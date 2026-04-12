@@ -17,7 +17,7 @@ pdf.add_page()
 pdf.set_font('Arial', 'B', 26)
 pdf.cell(0, 20, 'Propuesta de Activación de Soberanía', 0, 1, 'L')
 pdf.set_font('Arial', 'I', 12)
-pdf.cell(0, 10, f'Nodo: VZA-400 | Proyección Técnica | {datetime.date.today()}', 0, 1, 'L')
+pdf.cell(0, 10, f'Nodo: VZA-400 (Datos Públicos CENACE) | Proyección Técnica | {datetime.date.today()}', 0, 1, 'L')
 pdf.ln(10)
 
 # El Argumento de la Realidad

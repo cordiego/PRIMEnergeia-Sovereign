@@ -333,7 +333,7 @@ def generate_pdf(output_path: str = None) -> str:
         pdf.multi_cell(0, 5,
             "CONFIDENTIAL — This document contains proprietary financial projections. "
             "Distribution is restricted to authorized recipients. Projections are based on "
-            "validated VZA-400 SEN performance data, market-specific capacity and pricing "
+            "VZA-400 SEN public CENACE data model, market-specific capacity and pricing "
             "characteristics, and the PRIMEnergeia 25% value share pricing model.",
             align="C"
         )
@@ -362,7 +362,7 @@ def generate_pdf(output_path: str = None) -> str:
             f"\n\n"
             f"Year 5 EBITDA is projected at ${yr5_ebitda:.0f}M ({yr5_margin:.0f}% margin), driven by "
             f"the capital-light SaaS model with >95% gross margins. Revenue is anchored by the "
-            f"validated VZA-400 deployment in Mexico's SEN, which rescued $231,243 USD in a single "
+            f"VZA-400 public CENACE data model in Mexico's SEN, which projected $231,243 USD in recoverable capital "
             f"operational cycle using real-time HJB stochastic optimal control."
         ))
         pdf.ln(5)
@@ -389,7 +389,7 @@ def generate_pdf(output_path: str = None) -> str:
             ("Year 5 Grid Markets Active", f"{len(proj['grid'][5])} of 17"),
             ("Pricing Model", "25% of capital rescued (value share)"),
             ("Deployment Fee", "$50,000 per node"),
-            ("Validated Proof of Concept", "$231,243 rescued @ VZA-400 (SEN)"),
+            ("Market Reference (Public Data)", "$231,243 projected @ VZA-400 (SEN, public CENACE data)"),
             ("Gross Margin", ">95% (pure software, no hardware)"),
         ]
         for label, value in metrics:
@@ -568,7 +568,7 @@ def generate_pdf(output_path: str = None) -> str:
         pdf.set_text_color(120, 120, 120)
         pdf.multi_cell(0, 4, (
             "Assumptions: Revenue per GW is market-specific, based on price volatility profiles "
-            "and validated VZA-400 rescue rates. FX rates: EUR/USD=1.08, GBP/USD=1.27, "
+            "and VZA-400 public CENACE data model rescue rates. FX rates: EUR/USD=1.08, GBP/USD=1.27, "
             "CAD/USD=0.74, AUD/USD=0.65, JPY/USD=0.0067. Rollout assumes phased market entry "
             "with regulatory approvals. Past performance does not guarantee future results."
         ))

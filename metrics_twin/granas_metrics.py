@@ -7,7 +7,7 @@ Complete model of the PRIMEnergeia Granas architecture:
   Precursor:   Ni(OH)₂ → Ni²⁺ at Pb-site (bandgap tuning)
   Passivation: Mn²⁺ → grain boundary trap passivation
   Reflectance: Green peak at 535nm (quarter-wave interference)
-  Substrate:   CFRP skeleton (17×10.5 geometric blueprint)
+  Substrate:   CFRP skeleton (21×34 geometric blueprint, 2.1×3.4 m module)
   Bottom cell: TOPCon silicon (enhanced NIR response)
   Encapsulation: ETFE frontsheet (anti-reflection + self-cleaning)
   Albedo:      Green reflection → Tj=42°C vs 68°C → Voc +45mV
@@ -185,10 +185,10 @@ class ThermalModel:
 class CFRPModel:
     """
     Carbon Fiber Reinforced Polymer structural skeleton.
-    17×10.5 geometric blueprint with interlocking triangles and rhombi.
+    21×34 geometric blueprint with interlocking triangles and rhombi.
     """
-    width_units: float = 17.0
-    height_units: float = 10.5
+    width_units: float = 21.0
+    height_units: float = 34.0
     edge_lengths: tuple = (5.5, 3.5, 3.0)  # unit edge lengths
 
     @property
@@ -587,9 +587,9 @@ class TOPConMetrics:
 # ═══════════════════════════════════════════════════════════
 @dataclass
 class BlueprintMetrics:
-    """17×10.5 master geometric engine with edge catalog."""
-    width_units: float = 17.0
-    height_units: float = 10.5
+    """21×34 master geometric engine with edge catalog."""
+    width_units: float = 21.0
+    height_units: float = 34.0
     peripheral_edges: int = 6
     peripheral_length: float = 5.5
     internal_edges: int = 8

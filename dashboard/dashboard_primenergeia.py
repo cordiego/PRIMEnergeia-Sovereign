@@ -37,7 +37,7 @@ MARKETS = {
         "penalty_label": "CENACE Penalty",
         "load_vol": 0.008, "dist1": 0.04, "dist2": 0.06, "cap_mw": 100,
         "nodes": [
-            {"id": "05-VZA-400", "loc": "Valle de México", "region": "Central", "cap": 100, "status": "MASTER", "fσ": 0.008},
+            {"id": "05-VZA-400", "loc": "Valle de México", "region": "Central", "cap": 100, "status": "REFERENCE", "fσ": 0.008, "source": "public_cenace_data"},
             {"id": "01-QRO-230", "loc": "Querétaro", "region": "Central", "cap": 80, "status": "ONLINE", "fσ": 0.011},
             {"id": "01-TUL-400", "loc": "Tula, Hidalgo", "region": "Central", "cap": 100, "status": "ONLINE", "fσ": 0.009},
             {"id": "06-SLP-400", "loc": "San Luis Potosí", "region": "Central", "cap": 100, "status": "ONLINE", "fσ": 0.012},

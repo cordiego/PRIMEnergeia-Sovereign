@@ -5,7 +5,7 @@ Common physics, control, and telemetry modules shared across
 all PRIMEnergeia Strategic Business Units (SBUs).
 
 SBUs:
-  🔌 PRIME Grid    — VZA-400, HJB frequency control, SCADA
+  🔌 PRIME Grid    — VZA-400 (public CENACE data), HJB frequency control, SCADA
   ⚡ PRIME Power   — PRIMEngines (AICE, PEM, HYP), Battery, Wind
   ♻️ PRIME Circular — PRIMEcycle panel recycling
   📈 PRIME Quant   — Eureka Sovereign VIX-regime allocation

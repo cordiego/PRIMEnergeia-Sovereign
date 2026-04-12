@@ -12,7 +12,7 @@ Data Sources (in priority order):
 Usage:
     python fetch_sen_real.py                           # Default: node 07-HER-230
     python fetch_sen_real.py --node 04-MTY-400         # Monterrey
-    python fetch_sen_real.py --node 05-VZA-400         # VZA-400 (validated)
+    python fetch_sen_real.py --node 05-VZA-400         # VZA-400 (public CENACE data)
     python fetch_sen_real.py --days 30                 # Last 30 days
 
 Output:
@@ -38,7 +38,7 @@ NODOS_DIR = os.path.join(PROJECT_ROOT, "data", "nodos")
 # Available SEN nodes with pre-downloaded data
 SEN_NODES = {
     "07-HER-230": "Hermosillo (Noroeste)",
-    "05-VZA-400": "VZA-400 — Validated ($231K rescued)",
+    "05-VZA-400": "VZA-400 — Market Reference (public CENACE data, $231K projected)",
     "04-MTY-400": "Monterrey (Noreste)",
     "03-GDL-400": "Guadalajara (Occidental)",
     "01-QRO-230": "Querétaro (Central)",

@@ -41,25 +41,43 @@ st.markdown("""
     background: linear-gradient(135deg, #0d1520 0%, #111b2a 100%);
     border: 1px solid #1a2744;
     border-radius: 8px;
-    padding: 18px 20px;
+    padding: 16px 14px;
     box-shadow: 0 4px 20px rgba(0, 209, 255, 0.04);
+    overflow: visible;
+    min-width: 0;
 }
 div[data-testid="stMetricValue"] {
     color: #00d1ff;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 36px;
+    font-size: clamp(18px, 2.2vw, 32px) !important;
     font-weight: 700;
     text-shadow: 0 0 12px rgba(0,209,255,0.3);
+    white-space: nowrap;
+    overflow: visible !important;
+    text-overflow: unset !important;
 }
-div[data-testid="stMetricDelta"] { font-family: 'JetBrains Mono', monospace; color: #c8d6e5; }
+div[data-testid="stMetricDelta"] {
+    font-family: 'JetBrains Mono', monospace;
+    color: #c8d6e5;
+    font-size: clamp(11px, 1.1vw, 14px) !important;
+    white-space: nowrap;
+    overflow: visible !important;
+    text-overflow: unset !important;
+}
 div[data-testid="stMetricLabel"] {
     color: #c8d6e5;
     font-family: 'Inter', sans-serif;
     font-weight: 600;
-    font-size: 13px;
-    letter-spacing: 1px;
+    font-size: clamp(10px, 1vw, 13px) !important;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
+    white-space: nowrap;
+    overflow: visible !important;
+    text-overflow: unset !important;
 }
+/* Force Streamlit metric inner container to not clip */
+[data-testid="stMetric"] > div { overflow: visible !important; }
+[data-testid="stMetric"] label { overflow: visible !important; white-space: nowrap !important; }
 
 .stTabs [data-baseweb="tab-list"] {
     gap: 0px; background-color: #0a0f1a; border-radius: 8px; padding: 4px;
@@ -471,14 +489,15 @@ st.divider()
 #  PRIMARY KPI BAR
 # ============================================================
 st.markdown("<div class='section-header'>VTIP CORE (100% ALLOCATION)</div>", unsafe_allow_html=True)
-k1, k2, k3, k4, k5, k6 = st.columns(6)
-k1.metric("VIX LEVEL", f"{data['current_vix']:.2f}", f"{data['vix_label']}")
-k2.metric("VTIP RETURN", f"{data['total_return']:+.2f}%", f"vs SPY {data['spy_return']:+.1f}%")
-k3.metric("MAX DRAWDOWN", f"{data['max_dd']:.2f}%", "Peak-to-Trough")
-k4.metric("SHARPE", f"{data['sharpe']:.3f}", "Annualized")
+k1, k2, k3 = st.columns(3)
+k1.metric("VIX LEVEL", f"{data['current_vix']:.2f}", f"↑ {data['vix_label']}")
+k2.metric("VTIP RETURN", f"{data['total_return']:+.2f}%", f"↑ vs SPY {data['spy_return']:+.1f}%")
+k3.metric("MAX DRAWDOWN", f"{data['max_dd']:.2f}%", "↑ Peak-to-Trough")
+k4, k5, k6 = st.columns(3)
+k4.metric("SHARPE", f"{data['sharpe']:.3f}", "↑ Annualized")
 rv20_last = data['rolling_vol_20'].iloc[-1]
-k5.metric("ROLLING VOL", f"{float(rv20_last)*100:.1f}%" if pd.notna(rv20_last) else "N/A", "20d Ann.")
-k6.metric("α vs SPY", f"{data['alpha']:+.2f}%", "Excess Return")
+k5.metric("ROLLING VOL", f"{float(rv20_last)*100:.1f}%" if pd.notna(rv20_last) else "N/A", "↑ 20d Annualized")
+k6.metric("α vs SPY", f"{data['alpha']:+.2f}%", "↑ Excess Return")
 
 # ============================================================
 #  GAINS ALLOCATION CARDS
@@ -513,21 +532,23 @@ for i, (tk, w) in enumerate(all_display):
         """, unsafe_allow_html=True)
 
 st.markdown("")
-fk1, fk2, fk3, fk4, fk5 = st.columns(5)
-fk1.metric("SAT VALUE", f"${data['total_sat_value']:.4f}", "Per $1 Invested")
-fk2.metric("COMPOSITE", f"{data['full_total_return']:+.2f}%", f"vs SPY {data['spy_return']:+.1f}%")
-fk3.metric("MAX DD", f"{data['full_max_dd']:.2f}%", "Composite")
-fk4.metric("SHARPE", f"{data['full_sharpe']:.3f}", "Composite")
-fk5.metric("α vs SPY", f"{data['full_alpha']:+.2f}%", "Composite")
+fk1, fk2, fk3 = st.columns(3)
+fk1.metric("SAT VALUE", f"${data['total_sat_value']:.4f}", "↑ Per $1 Invested")
+fk2.metric("COMPOSITE RETURN", f"{data['full_total_return']:+.2f}%", f"↑ vs SPY {data['spy_return']:+.1f}%")
+fk3.metric("COMPOSITE MAX DD", f"{data['full_max_dd']:.2f}%", "↑ Peak-to-Trough")
+fk4, fk5 = st.columns(2)
+fk4.metric("COMPOSITE SHARPE", f"{data['full_sharpe']:.3f}", "↑ Annualized")
+fk5.metric("COMPOSITE α vs SPY", f"{data['full_alpha']:+.2f}%", "↑ Excess Return")
 
 st.markdown("")
 
 # ============================================================
 #  TABS
 # ============================================================
-tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
+tab1, tab2, tab_ms, tab3, tab4, tab5, tab6, tab7 = st.tabs([
     "📈 PERFORMANCE",
     "🎯 TICKER SIGNALS",
+    "📡 MARKET SIGNALS",
     "⚡ SWEEP ENGINE",
     "🛡️ RISK",
     "🔬 DEEP-DIVE",
@@ -703,7 +724,263 @@ with tab2:
 
 
 # ═══════════════════════════════════════════════
-#  TAB 3: SWEEP ENGINE
+#  TAB MARKET SIGNALS: PER-TICKER CHARTS & TRADE LOG
+# ═══════════════════════════════════════════════
+with tab_ms:
+    st.markdown("<div class='section-header'>MARKET SIGNALS — PER-TICKER PRICE ACTION & TRADE LOG</div>", unsafe_allow_html=True)
+
+    # ── Build trade log from historical RSI crossovers ──
+    all_trades = []
+    for tk in FULL_UNIVERSE:
+        if tk not in data["prices"].columns:
+            continue
+        closes = data["prices"][tk].dropna()
+        if len(closes) < 52:
+            continue
+
+        rsi_series = compute_rsi(closes, 14).dropna()
+        ema20 = compute_ema(closes, 20)
+        ema50 = compute_ema(closes, 50)
+
+        # Detect RSI crossover trades
+        in_position = False
+        entry_date = None
+        entry_price = 0.0
+        tk_trades = []
+
+        for idx in rsi_series.index:
+            rsi_val = rsi_series.loc[idx]
+            price_val = closes.loc[idx]
+            if not in_position and rsi_val < 30:
+                in_position = True
+                entry_date = idx
+                entry_price = float(price_val)
+            elif in_position and rsi_val > 70:
+                exit_price = float(price_val)
+                pnl_pct = ((exit_price / entry_price) - 1) * 100 if entry_price > 0 else 0
+                hold_days = (idx - entry_date).days
+                tk_trades.append({
+                    "Ticker": tk,
+                    "Entry Date": entry_date.strftime("%Y-%m-%d"),
+                    "Entry Price": f"${entry_price:.2f}",
+                    "Exit Date": idx.strftime("%Y-%m-%d"),
+                    "Exit Price": f"${exit_price:.2f}",
+                    "P&L": f"{pnl_pct:+.2f}%",
+                    "Hold Days": hold_days,
+                    "_pnl_val": pnl_pct,
+                })
+                in_position = False
+
+        # If still in position, mark as open
+        if in_position:
+            current_price = float(closes.iloc[-1])
+            pnl_pct = ((current_price / entry_price) - 1) * 100 if entry_price > 0 else 0
+            hold_days = (closes.index[-1] - entry_date).days
+            tk_trades.append({
+                "Ticker": tk,
+                "Entry Date": entry_date.strftime("%Y-%m-%d"),
+                "Entry Price": f"${entry_price:.2f}",
+                "Exit Date": "OPEN",
+                "Exit Price": f"${current_price:.2f}",
+                "P&L": f"{pnl_pct:+.2f}%",
+                "Hold Days": hold_days,
+                "_pnl_val": pnl_pct,
+            })
+        all_trades.extend(tk_trades)
+
+    # ── Per-ticker mini charts: Price + EMA + RSI ──
+    st.markdown("<div class='section-header'>PRICE ACTION — EMA 20/50 OVERLAY + RSI(14)</div>", unsafe_allow_html=True)
+
+    for tk in FULL_UNIVERSE:
+        if tk not in data["prices"].columns:
+            continue
+        closes = data["prices"][tk].dropna()
+        if len(closes) < 52:
+            continue
+
+        rsi_series = compute_rsi(closes, 14).dropna()
+        ema20 = compute_ema(closes, 20)
+        ema50 = compute_ema(closes, 50)
+        color = ASSET_META[tk]["color"]
+        sig = data["ticker_signals"].get(tk, {})
+        signal = sig.get("signal", "HOLD")
+        signal_color = "#00ff88" if signal == "BUY" else ("#ff4b4b" if signal == "SELL" else "#6b7fa3")
+        signal_emoji = "🟢" if signal == "BUY" else ("🔴" if signal == "SELL" else "⚪")
+
+        stats = data["asset_stats"].get(tk, {})
+        ret_val = stats.get("return", 0)
+        ret_color = "#00ff88" if ret_val > 0 else "#ff4b4b"
+
+        # Header card
+        st.markdown(f"""
+        <div style='background: linear-gradient(135deg, #0d1520, #111b2a); border: 1px solid {color}33;
+                    border-left: 4px solid {signal_color}; border-radius: 10px; padding: 14px 20px;
+                    margin-top: 20px; margin-bottom: 4px;
+                    display:flex; justify-content:space-between; align-items:center;'>
+            <div>
+                <span style='font-family:JetBrains Mono; font-size:20px; font-weight:700; color:{color};'>{tk}</span>
+                <span style='font-size:13px; color:#94a3b8; margin-left:14px;'>{ASSET_META[tk]["desc"]} · {ASSET_META[tk]["category"]}</span>
+                <span style='font-family:JetBrains Mono; font-size:14px; color:#00d1ff; margin-left:20px;'>${stats.get("last_price", 0):.2f}</span>
+                <span style='font-family:JetBrains Mono; font-size:13px; color:{ret_color}; margin-left:12px;'>{ret_val:+.2f}%</span>
+            </div>
+            <span style='font-family:JetBrains Mono; font-size:18px; font-weight:700; color:{signal_color};'>
+                {signal_emoji} {signal}
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Build chart
+        fig_tk = make_subplots(
+            rows=2, cols=1, shared_xaxes=True, vertical_spacing=0.08,
+            row_heights=[0.70, 0.30]
+        )
+
+        # Price + EMA
+        fig_tk.add_trace(go.Scatter(
+            x=closes.index, y=closes.values, name="Price",
+            line=dict(color=color, width=2.5)
+        ), row=1, col=1)
+        fig_tk.add_trace(go.Scatter(
+            x=ema20.index, y=ema20.values, name="EMA 20",
+            line=dict(color="#fbc02d", width=1.2, dash="dash"), opacity=0.7
+        ), row=1, col=1)
+        fig_tk.add_trace(go.Scatter(
+            x=ema50.index, y=ema50.values, name="EMA 50",
+            line=dict(color="#a78bfa", width=1.2, dash="dot"), opacity=0.7
+        ), row=1, col=1)
+
+        # Mark trades on chart
+        for trade in all_trades:
+            if trade["Ticker"] != tk:
+                continue
+            try:
+                e_date = pd.Timestamp(trade["Entry Date"])
+                e_price = float(trade["Entry Price"].replace("$", ""))
+                fig_tk.add_trace(go.Scatter(
+                    x=[e_date], y=[e_price], mode="markers",
+                    marker=dict(symbol="triangle-up", size=12, color="#00ff88", line=dict(width=1, color="white")),
+                    name="BUY", showlegend=False, hovertext=f"BUY {tk} @ ${e_price:.2f}"
+                ), row=1, col=1)
+                if trade["Exit Date"] != "OPEN":
+                    x_date = pd.Timestamp(trade["Exit Date"])
+                    x_price = float(trade["Exit Price"].replace("$", ""))
+                    fig_tk.add_trace(go.Scatter(
+                        x=[x_date], y=[x_price], mode="markers",
+                        marker=dict(symbol="triangle-down", size=12, color="#ff4b4b", line=dict(width=1, color="white")),
+                        name="SELL", showlegend=False, hovertext=f"SELL {tk} @ ${x_price:.2f}"
+                    ), row=1, col=1)
+            except Exception:
+                pass
+
+        # RSI sub-panel
+        rsi_colors = ["#00ff88" if v < 30 else ("#ff4b4b" if v > 70 else "#6b7fa3") for v in rsi_series.values]
+        fig_tk.add_trace(go.Scatter(
+            x=rsi_series.index, y=rsi_series.values, name="RSI(14)",
+            line=dict(color="#00d1ff", width=1.8)
+        ), row=2, col=1)
+        fig_tk.add_hline(y=70, line_dash="dash", line_color="#ff4b4b44", row=2, col=1)
+        fig_tk.add_hline(y=30, line_dash="dash", line_color="#00ff8844", row=2, col=1)
+        fig_tk.add_hrect(y0=0, y1=30, fillcolor="rgba(0,255,136,0.04)", line_width=0, row=2, col=1)
+        fig_tk.add_hrect(y0=70, y1=100, fillcolor="rgba(255,75,75,0.04)", line_width=0, row=2, col=1)
+
+        fig_tk.update_layout(
+            template="plotly_dark", height=420, showlegend=True,
+            paper_bgcolor="#050810", plot_bgcolor="#0a0f1a",
+            margin=dict(l=50, r=16, t=16, b=30),
+            legend=dict(orientation="h", y=1.06, x=0.5, xanchor="center", font=dict(size=9)),
+            font=dict(family="JetBrains Mono", size=10, color="#6b7fa3")
+        )
+        fig_tk.update_xaxes(gridcolor="#1a274422")
+        fig_tk.update_yaxes(gridcolor="#1a274422")
+        fig_tk.update_yaxes(title_text="Price ($)", row=1, col=1)
+        fig_tk.update_yaxes(title_text="RSI", range=[0, 100], row=2, col=1)
+
+        st.plotly_chart(fig_tk, use_container_width=True)
+
+    # ── Trade Log Table ──
+    st.markdown("<div class='section-header'>TRADE LOG — RSI CROSSOVER SIGNALS</div>", unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class='math-block'>
+    <strong>Entry:</strong>&nbsp;&nbsp; RSI(14) crosses below 30 (oversold)<br>
+    <strong>Exit:</strong>&nbsp;&nbsp; RSI(14) crosses above 70 (overbought)<br>
+    <strong>Status:</strong>&nbsp;&nbsp; OPEN trades are still active
+    </div>
+    """, unsafe_allow_html=True)
+
+    if all_trades:
+        df_trades = pd.DataFrame(all_trades)
+        display_cols = ["Ticker", "Entry Date", "Entry Price", "Exit Date", "Exit Price", "P&L", "Hold Days"]
+        df_display = df_trades[display_cols]
+
+        def style_pnl(val):
+            try:
+                v = float(str(val).replace("%", "").replace("+", ""))
+                return f"color: {'#00ff88' if v > 0 else '#ff4b4b'}; font-weight: 700"
+            except:
+                return ""
+        def style_open(val):
+            if val == "OPEN":
+                return "color: #fbc02d; font-weight: 700"
+            return ""
+
+        try:
+            styled_trades = df_display.style.map(style_pnl, subset=["P&L"]).map(style_open, subset=["Exit Date"])
+        except AttributeError:
+            styled_trades = df_display.style.applymap(style_pnl, subset=["P&L"]).applymap(style_open, subset=["Exit Date"])
+
+        st.dataframe(styled_trades, use_container_width=True, hide_index=True, height=400)
+
+        # Summary stats
+        n_trades = len(all_trades)
+        n_winners = sum(1 for t in all_trades if t["_pnl_val"] > 0)
+        n_open = sum(1 for t in all_trades if t.get("Exit Date") == "OPEN" or (isinstance(t.get("Exit Date"), str) and t["Exit Date"] == "OPEN"))
+        avg_pnl = np.mean([t["_pnl_val"] for t in all_trades]) if all_trades else 0
+        total_pnl = sum(t["_pnl_val"] for t in all_trades)
+
+        ts1, ts2, ts3, ts4, ts5 = st.columns(5)
+        ts1.metric("TOTAL TRADES", n_trades, f"{n_open} Open")
+        ts2.metric("WINNERS", n_winners, f"{(n_winners/n_trades*100):.0f}% Win Rate" if n_trades > 0 else "—")
+        ts3.metric("AVG P&L", f"{avg_pnl:+.2f}%", "Per Trade")
+        ts4.metric("TOTAL P&L", f"{total_pnl:+.2f}%", "All Signals")
+        ts5.metric("LOSERS", n_trades - n_winners, f"{((n_trades-n_winners)/n_trades*100):.0f}%" if n_trades > 0 else "—")
+
+        # Per-ticker trade summary
+        st.markdown("")
+        st.markdown("<div class='section-header'>PER-TICKER TRADE SUMMARY</div>", unsafe_allow_html=True)
+        tk_summary = []
+        for tk in FULL_UNIVERSE:
+            tk_trades_list = [t for t in all_trades if t["Ticker"] == tk]
+            if not tk_trades_list:
+                continue
+            n_tk = len(tk_trades_list)
+            win_tk = sum(1 for t in tk_trades_list if t["_pnl_val"] > 0)
+            avg_tk = np.mean([t["_pnl_val"] for t in tk_trades_list])
+            total_tk = sum(t["_pnl_val"] for t in tk_trades_list)
+            best_tk = max(t["_pnl_val"] for t in tk_trades_list)
+            worst_tk = min(t["_pnl_val"] for t in tk_trades_list)
+            tk_summary.append({
+                "Ticker": tk,
+                "Trades": n_tk,
+                "Win Rate": f"{(win_tk/n_tk*100):.0f}%" if n_tk > 0 else "—",
+                "Avg P&L": f"{avg_tk:+.2f}%",
+                "Total P&L": f"{total_tk:+.2f}%",
+                "Best": f"{best_tk:+.2f}%",
+                "Worst": f"{worst_tk:+.2f}%",
+            })
+        if tk_summary:
+            df_tk_summary = pd.DataFrame(tk_summary)
+            try:
+                styled_summary = df_tk_summary.style.map(style_pnl, subset=["Avg P&L", "Total P&L", "Best", "Worst"])
+            except AttributeError:
+                styled_summary = df_tk_summary.style.applymap(style_pnl, subset=["Avg P&L", "Total P&L", "Best", "Worst"])
+            st.dataframe(styled_summary, use_container_width=True, hide_index=True)
+    else:
+        st.info("No RSI crossover trades detected in the current lookback period.")
+
+
+# ═══════════════════════════════════════════════
+#  TAB 4: SWEEP ENGINE
 # ═══════════════════════════════════════════════
 with tab3:
     st.markdown("<div class='section-header'>DAILY GAINS SWEEP ENGINE</div>", unsafe_allow_html=True)

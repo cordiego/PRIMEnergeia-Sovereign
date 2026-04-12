@@ -9,6 +9,10 @@ try:
     from lib.mode_gate import show_mode_banner
     show_mode_banner()
 except Exception: pass
+try:
+    from lib.granas_handshake import show_handshake_sidebar
+    show_handshake_sidebar()
+except Exception: pass
 # --- End Banner ---
 import streamlit as st
 import sys, os, re, importlib, importlib.util, types

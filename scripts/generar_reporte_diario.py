@@ -12,7 +12,7 @@ def generar():
         print(f"REPORT DE OPERACIONES - PRIMEnergeia Granas")
         print(f"FECHA DE CORTE: {datetime.date.today()}")
         print("="*50)
-        print(f"NODO:           VZA-400 (Villa de Arriaga)")
+        print(f"NODO:           VZA-400 (Valle de México, datos públicos CENACE)")
         print(f"RESCATE TOTAL:  ${rescate:,.2f} USD")
         print(f"ESTABILIDAD:    {100 - (inercia_avg*10):.2f}% Deviation Index")
         print(f"STATUS:         CUMPLIMIENTO TOTAL (CENACE SAFE)")
