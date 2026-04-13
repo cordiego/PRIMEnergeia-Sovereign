@@ -41,7 +41,7 @@ GRID_COLOR = "#1e3a2a"         # Subtle dark green grid
 CFRP_COLOR = "#00d1ff"         # Cyan for CFRP skeleton
 ANNOTATION_COLOR = "#94a3b8"   # Muted text
 BG_COLOR = "#020608"           # Dark background
-ACTIVE_BORDER = "rgba(0,255,100,0.25)"  # Semi-transparent green for active zone
+ACTIVE_BORDER = "#00ff64"              # Green for active zone (opacity set on trace)
 
 
 def create_blueprint(show_annotations: bool = True,
@@ -108,6 +108,7 @@ def create_blueprint(show_annotations: bool = True,
                 y=[y0, y0, y1, y1, y0],
                 mode="lines",
                 line=dict(color=ACTIVE_BORDER, width=0.5),
+                opacity=0.25,
                 showlegend=False,
                 hoverinfo="skip",
             ))
