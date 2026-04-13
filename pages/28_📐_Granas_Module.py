@@ -302,31 +302,33 @@ with tab1:
 
 # ─── Tab 2: Blueprint ────────────────────────────────────────
 with tab2:
-    st.markdown("### 📐 Module Blueprint — Border Only")
+    st.markdown("### 📐 Module Blueprint — 4-Rhombus Diamond Tessellation")
     st.markdown("**2.1m × 3.4m** production module with CFRP skeleton tessellation. "
-                "Green borders = module perimeter. Cyan = CFRP structural elements.")
+                "Green borders = module perimeter. Cyan = CFRP structural ridges. "
+                "4 interlocking rhombi + edge triangles.")
 
     bp_col1, bp_col2 = st.columns([3, 1])
     with bp_col2:
-        show_grid = st.checkbox("Sub-cell grid", True)
-        show_cfrp = st.checkbox("CFRP skeleton", True)
+        show_verts = st.checkbox("Vertices", True)
+        show_labels = st.checkbox("Edge lengths", False)
         show_annot = st.checkbox("Annotations", True)
 
     with bp_col1:
         fig_bp = create_blueprint(
             show_annotations=show_annot,
-            show_cfrp_skeleton=show_cfrp,
-            show_subcell_grid=show_grid,
+            show_vertices=show_verts,
+            show_edge_labels=show_labels,
         )
         st.plotly_chart(fig_bp, use_container_width=True)
 
     st.markdown("### Edge Catalog")
     st.markdown("""
-    | Type | Length | Count | Role |
-    |------|--------|-------|------|
-    | **Peripheral** | 5.5 units | 6 | Heavy load-bearing, anchoring triangles |
-    | **Internal Rhombi** | 3.5 units | 8 | Stress distribution |
-    | **Central Network** | 3.0 units | 12 | Precision crack-arrest vertices |
+    | Type | Length | Role |
+    |------|--------|------|
+    | **△ Triangle edge** | 0.90 m | Corner diagonals (top/bottom) |
+    | **◇ Rhombus edge** | 0.714 m | Interior CFRP structural ridge |
+    | **Perimeter (top/bot)** | 1.05 m | Module border half-edge |
+    | **Perimeter (side)** | 1.22 / 0.97 m | Module border segments |
     """)
 
 # ─── Tab 3: Module Spec ──────────────────────────────────────
