@@ -13,61 +13,135 @@ try:
 except Exception: pass
 # --- End Banner ---
 import streamlit as st
-import numpy as np
+import math
 import plotly.graph_objects as go
 
 st.header("📐 Granas Blueprint — Master Geometric Engine")
-st.caption("21×34 Dimensional Matrix (2.1×3.4 m) | COMSOL-Validated Optomechanics | Continuous Fiber RTM")
+st.caption("2.1m × 3.4m Production Module | 4 Rhombi · Interlocking CFRP Tessellation | COMSOL-Validated")
 
 # ─── KPIs ───
 k1, k2, k3, k4, k5 = st.columns(5)
-k1.metric("📏 Module Area", "7.14 m²")
-k2.metric("🔩 Total Vertices", "14")
-k3.metric("♻️ Photon Recycling", "89%")
-k4.metric("⬇️ Deflection", "1.8 mm")
-k5.metric("💪 Rigidity Gain", "+42%")
+k1.metric("📏 Module Area", "7.14 m²",
+          help="Total module footprint: 2.1m × 3.4m = 7.14 m²")
+k2.metric("🔩 Vertices", "18",
+          help="Structural intersection nodes in the diamond tessellation grid (7 rows)")
+k3.metric("♻️ Photon Recycling", "89%",
+          help="Boundary-incident photons recycled by chamfered CFRP ridges back into absorber")
+k4.metric("⬇️ Deflection", "1.8 mm",
+          help="Max transverse deflection at center under 5,400 Pa snow load (COMSOL)")
+k5.metric("💪 Rigidity Gain", "+42%",
+          help="Rigidity increase vs standard perimeter-framed planar module")
 
 st.divider()
+
+# ═══════════════════════════════════════════════════════════════
+# MASTER GEOMETRIC BLUEPRINT — 4-Rhombus Diamond Tessellation
+# ═══════════════════════════════════════════════════════════════
+# Faithful reproduction of the hand-drawn original (Granas_Module_ref.png)
+# 7 alternating vertex rows → 4 central rhombi + edge triangles
+
+W = 2.1    # Module width (m)
+H = 3.4    # Module height (m)
+
+# X-positions
+X_L  = 0.0
+X_Q1 = W / 4       # 0.525
+X_M  = W / 2       # 1.05
+X_Q3 = 3 * W / 4   # 1.575
+X_R  = W            # 2.1
+
+# Y-positions (from 0.9m triangle edge constraint)
+TRI_EDGE = 0.9
+Y1 = math.sqrt(TRI_EDGE**2 - X_Q1**2)  # 0.731
+Y2 = (Y1 + H / 2) / 2                   # 1.216
+Y3 = H / 2                               # 1.700
+Y4 = H - Y2                              # 2.184
+Y5 = H - Y1                              # 2.669
+RHOM_EDGE = math.sqrt(X_Q1**2 + (Y2 - Y1)**2)  # ~0.714
+
+# Build vertex rows
+vertex_rows = [
+    [(X_L, 0),  (X_M, 0),  (X_R, 0)],
+    [(X_Q1, Y1), (X_Q3, Y1)],
+    [(X_L, Y2), (X_M, Y2), (X_R, Y2)],
+    [(X_Q1, Y3), (X_Q3, Y3)],
+    [(X_L, Y4), (X_M, Y4), (X_R, Y4)],
+    [(X_Q1, Y5), (X_Q3, Y5)],
+    [(X_L, H),  (X_M, H),  (X_R, H)],
+]
+
+# Build edges
+all_edges = []
+for i in range(len(vertex_rows) - 1):
+    lo, hi = vertex_rows[i], vertex_rows[i + 1]
+    if len(lo) == 3 and len(hi) == 2:
+        all_edges += [(lo[0], hi[0]), (lo[1], hi[0]),
+                      (lo[1], hi[1]), (lo[2], hi[1])]
+    elif len(lo) == 2 and len(hi) == 3:
+        all_edges += [(lo[0], hi[0]), (lo[0], hi[1]),
+                      (lo[1], hi[1]), (lo[1], hi[2])]
+
+# Perimeter
+top = vertex_rows[-1]
+bot = vertex_rows[0]
+all_edges += [(top[0], top[1]), (top[1], top[2])]
+all_edges += [(bot[0], bot[1]), (bot[1], bot[2])]
+left = [vertex_rows[i][0] for i in range(0, 7, 2)]
+right = [vertex_rows[i][-1] for i in range(0, 7, 2)]
+for j in range(len(left) - 1):
+    all_edges.append((left[j], left[j + 1]))
+    all_edges.append((right[j], right[j + 1]))
+
+# Colors
+CFRP = "#00d1ff"
+PERI = "#00c878"
+VERT = "#ffffff"
+ANNOT = "#94a3b8"
+
 c1, c2 = st.columns(2)
 with c1:
-    # Blueprint visualization
     fig = go.Figure()
-    # Module outline
-    fig.add_shape(type="rect", x0=0, y0=0, x1=21, y1=34,
-        line=dict(color="#00c878", width=3), fillcolor='rgba(0,200,120,0.05)')
-    # Peripheral edges (5.5)
-    peripheral = [(0,0,7,0), (7,0,14,0), (14,0,21,0),
-                  (0,34,7,34), (7,34,14,34), (14,34,21,34)]
-    for x0,y0,x1,y1 in peripheral:
-        fig.add_trace(go.Scatter(x=[x0,x1], y=[y0,y1], mode='lines',
-            line=dict(color='#FF6347', width=4), showlegend=False))
-    # Internal diagonal ridges (3.5)
-    internal = [(0,0,7,17), (7,17,14,0), (14,0,21,17),
-                (0,34,7,17), (7,17,14,34), (14,34,21,17)]
-    for x0,y0,x1,y1 in internal:
-        fig.add_trace(go.Scatter(x=[x0,x1], y=[y0,y1], mode='lines',
-            line=dict(color='#FFD700', width=3), showlegend=False))
-    # Central network (3.0)
-    fig.add_trace(go.Scatter(x=[7,7], y=[0,34], mode='lines',
-        line=dict(color='#00BFFF', width=2), showlegend=False))
-    fig.add_trace(go.Scatter(x=[14,14], y=[0,34], mode='lines',
-        line=dict(color='#00BFFF', width=2), showlegend=False))
-    fig.add_trace(go.Scatter(x=[0,21], y=[17,17], mode='lines',
-        line=dict(color='#00BFFF', width=2), showlegend=False))
-    # Vertices
-    vx = [0, 7, 14, 21, 0, 7, 14, 21, 7, 14, 0, 21, 7, 14]
-    vy = [0, 0, 0, 0, 34, 34, 34, 34, 17, 17, 17, 17, 17, 17]
-    fig.add_trace(go.Scatter(x=vx, y=vy, mode='markers',
-        marker=dict(size=10, color='white', line=dict(color='#00c878', width=2)),
-        showlegend=False))
-    fig.update_layout(title="21×34 Geometric Blueprint (unit scale → 2.1×3.4 m)",
-        xaxis=dict(range=[-1,22], showgrid=False, zeroline=False),
-        yaxis=dict(range=[-2,36], showgrid=False, zeroline=False, scaleanchor="x"),
-        height=450, margin=dict(t=40, b=20, l=20, r=20),
+
+    # Draw edges
+    for (x0, y0), (x1, y1) in all_edges:
+        is_peri = ((x0 == x1 == 0) or (x0 == x1 == W) or
+                   (y0 == y1 == 0) or (y0 == y1 == H))
+        fig.add_trace(go.Scatter(
+            x=[x0, x1], y=[y0, y1], mode='lines',
+            line=dict(color=PERI if is_peri else CFRP,
+                      width=4 if is_peri else 2),
+            showlegend=False, hoverinfo='skip',
+        ))
+
+    # Draw vertices
+    vx, vy = [], []
+    for row in vertex_rows:
+        for (px, py) in row:
+            vx.append(px)
+            vy.append(py)
+    fig.add_trace(go.Scatter(
+        x=vx, y=vy, mode='markers',
+        marker=dict(size=8, color=VERT, line=dict(color=PERI, width=2)),
+        showlegend=False,
+        hovertemplate='(%{x:.3f}, %{y:.3f}) m<extra></extra>',
+    ))
+
+    # Annotations
+    fig.add_annotation(x=W/2, y=-0.12, text=f"← {W} m →",
+        showarrow=False, font=dict(color=PERI, size=13, family="JetBrains Mono"))
+    fig.add_annotation(x=-0.12, y=H/2, text=f"↕ {H} m", textangle=-90,
+        showarrow=False, font=dict(color=PERI, size=13, family="JetBrains Mono"))
+    fig.add_annotation(x=W/2, y=-0.22,
+        text=f"△ edge: {TRI_EDGE:.2f}m  │  ◇ edge: {RHOM_EDGE:.3f}m  │  4 rhombi",
+        showarrow=False, font=dict(size=10, color=ANNOT))
+
+    fig.update_layout(
+        title="Master Geometric Tessellation (2.1m × 3.4m)",
+        xaxis=dict(range=[-0.2, W+0.2], showgrid=False, zeroline=False,
+                   scaleanchor="y"),
+        yaxis=dict(range=[-0.3, H+0.12], showgrid=False, zeroline=False),
+        height=500, margin=dict(t=40, b=50, l=40, r=20),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
-    # Legend annotations
-    fig.add_annotation(x=10.5, y=-1.5, text="🔴 5.5u peripheral  🟡 3.5u internal  🔵 3.0u central",
-        showarrow=False, font=dict(size=11))
     st.plotly_chart(fig, use_container_width=True)
 
 with c2:
@@ -88,6 +162,21 @@ with c2:
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
     st.plotly_chart(fig2, use_container_width=True)
 
+    # Edge catalog
+    side_seg = [Y2, Y4 - Y2, H - Y4]
+    st.markdown(f"""
+**Edge Catalog:**
+
+| Type | Length | Role |
+|------|--------|------|
+| 🔵 Triangle edge | {TRI_EDGE:.2f} m | Corner diagonal (top/bottom) |
+| 🔵 Rhombus edge | {RHOM_EDGE:.3f} m | Interior CFRP ridge |
+| 🟢 Top/Bottom | {W/2:.3f} m | Perimeter half-edge |
+| 🟢 Side | {side_seg[0]:.3f} / {side_seg[1]:.3f} m | Perimeter segments |
+
+**Vertices:** {len(vx)} structural intersections  ·  **Rhombi:** 4
+""")
+
 # ─── Manufacturing ───
 st.subheader("🏭 Manufacturing Translation")
 m1, m2 = st.columns(2)
@@ -95,18 +184,17 @@ with m1:
     st.markdown("""
 **Mold Specification:**
 - 🔩 Material: CNC-machined aluminum
-- 📐 Pattern: 21×34 unit matrix (2.1×3.4 m)
-- 🔴 5.5u: Deep channels (anchoring)
-- 🟡 3.5u: Medium channels (stress routing)
-- 🟢 3.0u: Fine channels (precision vertices)
+- 📐 Pattern: 4-rhombus diamond tessellation (2.1 × 3.4 m)
+- 🔵 Diagonal ridges: CFRP structural channels
+- 🟢 Perimeter: heavy-gauge border frame
 - 📐 Chamfer: 15° on all ridge walls
     """)
 with m2:
     st.markdown("""
 **Critical Requirement:**
 
-> ⚠️ Continuous fiber must be **UNINTERRUPTED** across all 3.0-unit central
-> vertices and loop through 5.5-unit peripheral triangles — **NO cuts at intersections**
+> ⚠️ Continuous fiber must be **UNINTERRUPTED** across all central
+> vertices and loop through peripheral triangles — **NO cuts at intersections**
 
 **Method:** Continuous multi-axis robotic resin transfer molding
 
