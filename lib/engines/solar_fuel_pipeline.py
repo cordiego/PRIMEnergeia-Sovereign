@@ -431,15 +431,163 @@ ENGINE_SPECS = {
     ),
     "HY-P100": EngineFuelSpec(
         name="HY-P100",
-        model="H₂ Gas Turbine",
+        model="H₂ Gas Turbine — Long Range",
         fuel_type="H₂",
-        rated_power_kW=100.0,
+        rated_power_kW=500.0,
         thermal_efficiency=0.42,
         fuel_lhv_kWh_kg=LHV_H2,
-        tank_capacity_kg=20.0,        # 20 kg H₂
+        tank_capacity_kg=200.0,       # 200 kg H₂ (long range)
         startup_time_s=120,
         trl=4,
-        sectors="Grid Peaking, Marine, Aviation",
+        sectors="Trans-oceanic, Intercontinental, Long-haul Aviation",
+    ),
+}
+
+
+# ═══════════════════════════════════════════════════════════════
+# Vehicle Profiles  (how each vehicle uses Granas fuel)
+# ═══════════════════════════════════════════════════════════════
+@dataclass
+class VehicleProfile:
+    """Vehicle application profile mapping an engine to a mobility use case."""
+    name: str
+    vehicle_type: str              # Truck, Ship, Aircraft, Drone, F1
+    emoji: str
+    engine: str                    # ENGINE_SPECS key
+    n_engines: int                 # Number of engines in this vehicle
+    cruise_speed_kmh: float        # Cruising speed (km/h)
+    drag_factor: float             # km per kWh at wheels (vehicle-specific)
+    tank_scale: float              # Multiplier on engine tank capacity
+    payload_kg: float              # Useful payload (kg)
+    mission: str                   # Typical mission description
+
+    def total_tank_kg(self) -> float:
+        """Total fuel capacity on vehicle (kg)."""
+        spec = ENGINE_SPECS[self.engine]
+        return spec.tank_capacity_kg * self.tank_scale * self.n_engines
+
+    def total_power_kW(self) -> float:
+        """Total propulsion power (kW)."""
+        return ENGINE_SPECS[self.engine].rated_power_kW * self.n_engines
+
+    def fuel_rate_cruise_kg_h(self, load_pct: float = 75) -> float:
+        """Fuel consumption at cruise (kg/h)."""
+        spec = ENGINE_SPECS[self.engine]
+        return spec.fuel_rate_at_load(load_pct) * self.n_engines
+
+    def range_km(self, load_pct: float = 75) -> float:
+        """Maximum range at cruise load (km)."""
+        spec = ENGINE_SPECS[self.engine]
+        fuel_kg = self.total_tank_kg()
+        rate_kg_h = self.fuel_rate_cruise_kg_h(load_pct)
+        runtime_h = fuel_kg / max(rate_kg_h, 1e-10)
+        return runtime_h * self.cruise_speed_kmh
+
+    def endurance_h(self, load_pct: float = 75) -> float:
+        """Maximum endurance at cruise (hours)."""
+        return self.total_tank_kg() / max(self.fuel_rate_cruise_kg_h(load_pct), 1e-10)
+
+    def modules_for_daily_mission(self, missions_per_day: float = 1.0) -> int:
+        """Number of Granas modules needed to fuel daily missions."""
+        spec = ENGINE_SPECS[self.engine]
+        fuel_per_mission = self.total_tank_kg() * 0.8  # 80% depth of discharge
+        daily_fuel_kg = fuel_per_mission * missions_per_day
+        # At peak production (100 modules ≈ estimates from hub)
+        # Scale linearly: each module produces ~proportional H₂/NH₃
+        # Rough: 1 module STC → ~0.02 kg H₂/h or ~0.06 kg NH₃/h  (from pipeline)
+        if spec.fuel_type == "H₂":
+            kg_per_module_h = 0.02   # approximate from PEM at 2 kW input
+        else:
+            kg_per_module_h = 0.06   # approximate NH₃ from HB
+        sun_hours = 8  # effective sun hours per day
+        daily_per_module = kg_per_module_h * sun_hours
+        return max(1, int(np.ceil(daily_fuel_kg / max(daily_per_module, 1e-10))))
+
+    def profile_summary(self) -> Dict[str, Any]:
+        """Full vehicle profile for dashboard display."""
+        spec = ENGINE_SPECS[self.engine]
+        return {
+            "vehicle": self.name,
+            "type": self.vehicle_type,
+            "emoji": self.emoji,
+            "engine": self.engine,
+            "engine_model": spec.model,
+            "n_engines": self.n_engines,
+            "total_power_kW": round(self.total_power_kW(), 1),
+            "fuel_type": spec.fuel_type,
+            "total_tank_kg": round(self.total_tank_kg(), 1),
+            "cruise_speed_kmh": self.cruise_speed_kmh,
+            "fuel_rate_cruise_kg_h": round(self.fuel_rate_cruise_kg_h(), 3),
+            "range_km": round(self.range_km(), 0),
+            "endurance_h": round(self.endurance_h(), 1),
+            "payload_kg": self.payload_kg,
+            "mission": self.mission,
+            "granas_modules_daily": self.modules_for_daily_mission(),
+            "trl": spec.trl,
+        }
+
+
+# Pre-configured vehicle fleet
+VEHICLE_FLEET = {
+    "Long-Haul Truck": VehicleProfile(
+        name="Long-Haul Truck",
+        vehicle_type="Truck",
+        emoji="🚛",
+        engine="A-ICE-G1",
+        n_engines=1,
+        cruise_speed_kmh=90,
+        drag_factor=0.8,
+        tank_scale=1.0,               # 500 kg NH₃
+        payload_kg=25_000,
+        mission="Mexico City → Monterrey (900 km) overnight freight",
+    ),
+    "Trans-oceanic Vessel": VehicleProfile(
+        name="Trans-oceanic Vessel",
+        vehicle_type="Ship",
+        emoji="🚢",
+        engine="HY-P100",
+        n_engines=8,                   # 8× 500 kW = 4 MW
+        cruise_speed_kmh=30,           # ~16 knots
+        drag_factor=1.2,
+        tank_scale=5.0,               # 8,000 kg H₂ total
+        payload_kg=50_000,
+        mission="Veracruz → Rotterdam trans-Atlantic (9,000 km)",
+    ),
+    "Regional Aircraft": VehicleProfile(
+        name="Regional Aircraft",
+        vehicle_type="Aircraft",
+        emoji="✈️",
+        engine="HY-P100",
+        n_engines=2,                   # 2× 500 kW = 1 MW
+        cruise_speed_kmh=550,
+        drag_factor=1.5,
+        tank_scale=1.5,               # 600 kg H₂ total
+        payload_kg=5_000,             # 50 pax
+        mission="CDMX → Cancún (1,500 km) zero-emission regional flight",
+    ),
+    "Surveillance Drone": VehicleProfile(
+        name="Surveillance Drone",
+        vehicle_type="Drone",
+        emoji="🛸",
+        engine="PEM-PB-50",
+        n_engines=1,
+        cruise_speed_kmh=80,
+        drag_factor=3.5,
+        tank_scale=1.0,               # 5 kg H₂
+        payload_kg=15,
+        mission="8-hour persistent ISR / agricultural monitoring",
+    ),
+    "Zero-Carbon F1": VehicleProfile(
+        name="Zero-Carbon F1",
+        vehicle_type="F1",
+        emoji="🏎️",
+        engine="A-ICE-G1",
+        n_engines=1,
+        cruise_speed_kmh=220,
+        drag_factor=0.5,
+        tank_scale=0.2,               # 100 kg NH₃ (race-weight)
+        payload_kg=80,                # Driver
+        mission="305 km Grand Prix — zero-carbon lap record",
     ),
 }
 

@@ -33,6 +33,7 @@ from solar_fuel_pipeline import (
     LHV_H2,
     LHV_NH3,
     HOURS_PER_YEAR,
+    VEHICLE_FLEET,
 )
 
 # ═══════════════════════════════════════════════════════════════
@@ -220,9 +221,10 @@ st.divider()
 # ═══════════════════════════════════════════════════════════════
 # Tabs
 # ═══════════════════════════════════════════════════════════════
-tab1, tab_dn, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab_dn, tab_vf, tab2, tab3, tab4, tab5 = st.tabs([
     "🔋 Solar → Fuel Pipeline",
     "🌗 Day/Night Cycle",
+    "🚀 Vehicle Fleet",
     "⚡ Charging Metrics",
     "🚀 Engine Fuel Readiness",
     "📊 Efficiency Waterfall",
@@ -944,6 +946,117 @@ with tab5:
         f"| {'🏠' if s['n_modules']<=5 else '🏘️' if s['n_modules']<=50 else '🏙️' if s['n_modules']<=500 else '🏭'} "
         f"{s['n_modules']:,} | {s['solar_MW']:.2f} | {s['area_ha']:.3f} | {s['h2_kg_day']:.1f} | {s['nh3_kg_day']:.1f} |"
         for s in scaling
+    ]))
+
+
+# ═══════════════════════════════════════════════════════════════
+# TAB VEHICLE FLEET: How Each Vehicle Uses Granas Fuel
+# ═══════════════════════════════════════════════════════════════
+with tab_vf:
+    st.subheader("🚀 Vehicle Fleet — Granas Fuel for Every Application")
+    st.caption(
+        "How trucks, ships, aircraft, drones, and F1 cars use solar fuel. "
+        "HY-P100 (500 kW H₂ turbine) is the long-range champion."
+    )
+
+    # Fleet overview cards
+    for vname, vehicle in VEHICLE_FLEET.items():
+        p = vehicle.profile_summary()
+        with st.container():
+            st.markdown(f"### {p['emoji']} {p['vehicle']} — {p['engine_model']}")
+            v1, v2, v3, v4, v5, v6 = st.columns(6)
+            v1.metric("Engine", f"{p['n_engines']}× {p['engine']}",
+                      help=p['engine_model'])
+            v2.metric("Power", f"{p['total_power_kW']:.0f} kW",
+                      help=f"{p['n_engines']} engines × {ENGINE_SPECS[p['engine']].rated_power_kW:.0f} kW each")
+            v3.metric("Fuel Tank", f"{p['total_tank_kg']:.0f} kg {p['fuel_type']}",
+                      help=f"Total onboard fuel capacity")
+            v4.metric("🛣️ Range", f"{p['range_km']:,.0f} km",
+                      help=f"Maximum range at 75% cruise load, {p['cruise_speed_kmh']} km/h")
+            v5.metric("⏱️ Endurance", f"{p['endurance_h']:.1f} h",
+                      help="Maximum operational time at cruise")
+            v6.metric("🔋 Granas Modules", f"{p['granas_modules_daily']:,}",
+                      help="Number of 2.1×3.4m Granas modules needed to fuel 1 daily mission")
+
+            # Fuel rate + mission
+            v7, v8, v9 = st.columns(3)
+            v7.metric("Cruise Fuel Rate", f"{p['fuel_rate_cruise_kg_h']:.2f} kg/h",
+                      help="Fuel consumption at 75% cruise load")
+            v8.metric("Payload", f"{p['payload_kg']:,.0f} kg",
+                      help="Useful cargo/passenger capacity")
+            v9.metric("TRL", f"{p['trl']}",
+                      help="Technology Readiness Level")
+
+            st.info(f"🎯 **Mission**: {p['mission']}")
+            st.markdown("---")
+
+    # Range comparison chart
+    st.subheader("🛣️ Range Comparison")
+    v_names = list(VEHICLE_FLEET.keys())
+    v_ranges = [VEHICLE_FLEET[v].range_km() for v in v_names]
+    v_emojis = [VEHICLE_FLEET[v].emoji for v in v_names]
+    v_colors = []
+    for v in v_names:
+        eng = VEHICLE_FLEET[v].engine
+        if eng == "HY-P100":
+            v_colors.append("#FFD700")    # Gold for HY long-range
+        elif eng == "A-ICE-G1":
+            v_colors.append("#7B68EE")    # Purple for NH₃
+        else:
+            v_colors.append("#00BFFF")    # Blue for PEM
+
+    fig_range = go.Figure(go.Bar(
+        x=[f"{e} {n}" for e, n in zip(v_emojis, v_names)],
+        y=v_ranges,
+        marker_color=v_colors,
+        text=[f"{r:,.0f} km" for r in v_ranges],
+        textposition="auto",
+    ))
+    fig_range.update_layout(
+        template="plotly_dark", height=420,
+        title="Maximum Range by Vehicle (km) — HY-P100 = Long Range Champion",
+        yaxis_title="Range (km)", yaxis_type="log",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(size=14),
+        yaxis=dict(gridcolor="rgba(128,128,128,0.2)"),
+    )
+    st.plotly_chart(fig_range, use_container_width=True)
+
+    # Granas modules needed chart
+    st.subheader("🔋 Granas Modules per Daily Mission")
+    v_modules = [VEHICLE_FLEET[v].modules_for_daily_mission() for v in v_names]
+
+    fig_mod = go.Figure(go.Bar(
+        x=[f"{e} {n}" for e, n in zip(v_emojis, v_names)],
+        y=v_modules,
+        marker_color=v_colors,
+        text=[f"{m:,}" for m in v_modules],
+        textposition="auto",
+    ))
+    fig_mod.update_layout(
+        template="plotly_dark", height=380,
+        title="Granas 2.1×3.4m Modules Needed to Fuel 1 Daily Mission",
+        yaxis_title="Number of Modules", yaxis_type="log",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(size=14),
+        yaxis=dict(gridcolor="rgba(128,128,128,0.2)"),
+    )
+    st.plotly_chart(fig_mod, use_container_width=True)
+
+    # Fleet summary table
+    st.subheader("📊 Fleet Summary")
+    st.markdown("""
+| Vehicle | Engine | Fuel | Power | Tank | Range | Endurance | Granas Modules | Mission |
+|---------|--------|------|-------|------|-------|-----------|:---:|---------|""" + "\n".join([
+        f"| {VEHICLE_FLEET[v].emoji} {v} | {VEHICLE_FLEET[v].n_engines}×{VEHICLE_FLEET[v].engine} | "
+        f"{ENGINE_SPECS[VEHICLE_FLEET[v].engine].fuel_type} | "
+        f"{VEHICLE_FLEET[v].total_power_kW():.0f} kW | "
+        f"{VEHICLE_FLEET[v].total_tank_kg():.0f} kg | "
+        f"**{VEHICLE_FLEET[v].range_km():,.0f} km** | "
+        f"{VEHICLE_FLEET[v].endurance_h():.1f} h | "
+        f"{VEHICLE_FLEET[v].modules_for_daily_mission():,} | "
+        f"{VEHICLE_FLEET[v].mission} |"
+        for v in v_names
     ]))
 
 
