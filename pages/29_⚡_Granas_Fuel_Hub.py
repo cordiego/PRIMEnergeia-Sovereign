@@ -34,6 +34,7 @@ from solar_fuel_pipeline import (
     LHV_NH3,
     HOURS_PER_YEAR,
     VEHICLE_FLEET,
+    PEM_TRANSPORT_FLEET,
 )
 
 # ═══════════════════════════════════════════════════════════════
@@ -221,10 +222,11 @@ st.divider()
 # ═══════════════════════════════════════════════════════════════
 # Tabs
 # ═══════════════════════════════════════════════════════════════
-tab1, tab_dn, tab_vf, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab_dn, tab_vf, tab_pem, tab2, tab3, tab4, tab5 = st.tabs([
     "🔋 Solar → Fuel Pipeline",
     "🌗 Day/Night Cycle",
     "🚀 Vehicle Fleet",
+    "🔌 PEM Transport",
     "⚡ Charging Metrics",
     "🚀 Engine Fuel Readiness",
     "📊 Efficiency Waterfall",
@@ -1157,6 +1159,114 @@ with tab_vf:
         f"{VEHICLE_FLEET[v].mission} |"
         for v in v_names
     ]))
+
+
+# ═══════════════════════════════════════════════════════════════
+# TAB PEM TRANSPORT: Fuel Cell Integration into Existing Transport
+# ═══════════════════════════════════════════════════════════════
+with tab_pem:
+    st.subheader("🔌 PEM Fuel Cell — Integration into Existing Transport")
+    st.caption(
+        "PEM-PB-50 stacks (50 kW each) integrated into 8 real-world transport "
+        "categories. 5-minute refueling. 60% efficiency. Drop-in H₂ powertrain."
+    )
+
+    # Summary KPIs
+    pem_count = len(PEM_TRANSPORT_FLEET)
+    avg_range = sum(v.range_km for v in PEM_TRANSPORT_FLEET.values()) / pem_count
+    avg_refuel = sum(v.refuel_time_min for v in PEM_TRANSPORT_FLEET.values()) / pem_count
+    total_co2 = sum(v.co2_avoided_per_fill_kg for v in PEM_TRANSPORT_FLEET.values())
+
+    pk1, pk2, pk3, pk4 = st.columns(4)
+    pk1.metric("🔌 Platforms", f"{pem_count}", help="Transport categories integrated")
+    pk2.metric("🛣️ Avg Range", f"{avg_range:.0f} km", help="Average range across all platforms")
+    pk3.metric("⛽ Avg Refuel", f"{avg_refuel:.0f} min", help="Average refueling time")
+    pk4.metric("🌍 CO₂ Avoided", f"{total_co2:.0f} kg/fill", help="Total CO₂ avoided per full fleet refuel")
+
+    st.divider()
+
+    # Vehicle cards
+    for vname, vehicle in PEM_TRANSPORT_FLEET.items():
+        p = vehicle.profile_summary()
+        complexity_color = {"Low": "🟢", "Medium": "🟡", "High": "🔴"}.get(p["retrofit_complexity"], "⚪")
+
+        with st.container():
+            st.markdown(f"### {p['emoji']} {p['name']} — {p['base_platform']}")
+
+            p1, p2, p3, p4, p5, p6 = st.columns(6)
+            p1.metric("⚡ Power", f"{p['total_power_kW']:.0f} kW",
+                      help=f"{vehicle.n_stacks}× PEM-PB-50 (50 kW each)")
+            p2.metric("⛽ H₂ Tank", f"{p['h2_tank_kg']} kg",
+                      help=f"{p['tank_pressure_bar']} bar Type IV composite")
+            p3.metric("🛣️ Range", f"{p['range_km']:,.0f} km",
+                      help=f"{p['km_per_kg_h2']:.1f} km per kg H₂")
+            p4.metric("⛽ Refuel", f"{p['refuel_time_min']:.0f} min",
+                      help="Time to refuel from empty")
+            p5.metric("η Efficiency", f"{p['stack_efficiency_pct']:.0f}%",
+                      help="PEM fuel cell stack efficiency")
+            p6.metric(f"{complexity_color} Retrofit", p["retrofit_complexity"],
+                      help="Integration complexity into existing platform")
+
+            p7, p8, p9 = st.columns(3)
+            p7.metric("🌍 CO₂ Avoided", f"{p['co2_avoided_kg']:.0f} kg/fill",
+                      help="CO₂ avoided vs diesel equivalent")
+            p8.metric("🔋 Granas Modules", f"{p['granas_modules_per_fill']}",
+                      help="Modules needed to produce 1 full tank of H₂")
+            p9.metric("🚧 Platforms", p["existing_platforms"],
+                      help="Compatible existing models")
+            st.markdown("---")
+
+    # Range comparison chart
+    st.subheader("🛣️ PEM Transport Range Comparison")
+    pem_names = list(PEM_TRANSPORT_FLEET.keys())
+    pem_ranges = [PEM_TRANSPORT_FLEET[v].range_km for v in pem_names]
+    pem_emojis = [PEM_TRANSPORT_FLEET[v].emoji for v in pem_names]
+    pem_refuels = [PEM_TRANSPORT_FLEET[v].refuel_time_min for v in pem_names]
+
+    fig_pem = make_subplots(specs=[[{"secondary_y": True}]])
+    fig_pem.add_trace(go.Bar(
+        x=[f"{e} {n}" for e, n in zip(pem_emojis, pem_names)],
+        y=pem_ranges, name="Range (km)",
+        marker_color="#00BFFF",
+        text=[f"{r:,.0f} km" for r in pem_ranges],
+        textposition="auto",
+    ), secondary_y=False)
+    fig_pem.add_trace(go.Scatter(
+        x=[f"{e} {n}" for e, n in zip(pem_emojis, pem_names)],
+        y=pem_refuels, name="Refuel (min)",
+        line=dict(color="#FFD700", width=3),
+        mode="lines+markers+text",
+        text=[f"{r:.0f} min" for r in pem_refuels],
+        textposition="top center",
+    ), secondary_y=True)
+    fig_pem.update_layout(
+        template="plotly_dark", height=450,
+        title="PEM H₂ Transport: Range vs Refuel Time",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(size=13), legend=dict(orientation="h", y=-0.2),
+    )
+    fig_pem.update_yaxes(title_text="Range (km)", secondary_y=False,
+                          gridcolor="rgba(128,128,128,0.2)")
+    fig_pem.update_yaxes(title_text="Refuel Time (min)", secondary_y=True)
+    st.plotly_chart(fig_pem, use_container_width=True)
+
+    # Efficiency comparison
+    st.subheader("🔋 Why PEM Fuel Cell Wins")
+    st.markdown("""
+| Metric | PEM Fuel Cell (H₂) | Diesel ICE | Battery EV |
+|--------|-------------------|-----------|------------|
+| **Efficiency** | **55–60%** | 35–42% | 85–90% |
+| **Refuel Time** | **3–5 min** | 3–5 min | 30–60 min |
+| **Range per fill** | **400–650 km** | 600–900 km | 250–450 km |
+| **CO₂ Emissions** | **0 g/km** | 120–250 g/km | 0 g/km (tailpipe) |
+| **Cold Weather** | **No degradation** | No effect | −30% range |
+| **Weight Penalty** | Low (H₂ is light) | N/A | High (batteries) |
+| **Fuel Source** | Granas Solar | Fossil oil | Grid mix |
+| **Noise** | **Silent** | 75–85 dB | Silent |
+
+> PEM combines the **refuel speed of diesel** with the **zero emissions of EV** —
+> without the battery weight, range anxiety, or grid dependency.
+""")
 
 
 # ═══════════════════════════════════════════════════════════════

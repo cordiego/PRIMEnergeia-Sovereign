@@ -593,6 +593,167 @@ VEHICLE_FLEET = {
 
 
 # ═══════════════════════════════════════════════════════════════
+# PEM Transport Integration (fuel cell → existing transport)
+# ═══════════════════════════════════════════════════════════════
+@dataclass
+class PEMTransportIntegration:
+    """
+    PEM fuel cell integration into existing transport platforms.
+
+    Models how PEM-PB-50 stacks (50 kW each) scale and integrate into
+    real-world vehicles, replacing ICE/battery powertrains with
+    Granas H₂ fuel cell systems.
+    """
+    name: str
+    category: str
+    emoji: str
+    base_platform: str
+    n_stacks: int                      # PEM-PB-50 stacks (50 kW each)
+    stack_efficiency: float
+    h2_tank_kg: float
+    tank_pressure_bar: int
+    curb_weight_kg: float
+    payload_kg: float
+    cruise_speed_kmh: float
+    energy_consumption_kWh_km: float   # Energy at wheels per km
+    refuel_time_min: float
+    retrofit_complexity: str
+    existing_platforms: str
+
+    @property
+    def total_power_kW(self) -> float:
+        return self.n_stacks * 50.0
+
+    @property
+    def usable_power_kW(self) -> float:
+        return self.total_power_kW * self.stack_efficiency
+
+    @property
+    def range_km(self) -> float:
+        h2_energy = self.h2_tank_kg * LHV_H2
+        useful_energy = h2_energy * self.stack_efficiency
+        return useful_energy / max(self.energy_consumption_kWh_km, 1e-10)
+
+    @property
+    def fuel_rate_kg_h(self) -> float:
+        power_cruise = self.energy_consumption_kWh_km * self.cruise_speed_kmh
+        return power_cruise / (self.stack_efficiency * LHV_H2)
+
+    @property
+    def endurance_h(self) -> float:
+        return self.h2_tank_kg / max(self.fuel_rate_kg_h, 1e-10)
+
+    @property
+    def km_per_kg_h2(self) -> float:
+        return self.range_km / max(self.h2_tank_kg, 1e-10)
+
+    @property
+    def co2_avoided_per_fill_kg(self) -> float:
+        diesel_equiv_L = self.range_km * 0.08
+        return diesel_equiv_L * 2.68
+
+    def granas_modules_per_fill(self) -> int:
+        h2_per_module_day = 0.02 * 8
+        return max(1, int(np.ceil(self.h2_tank_kg / max(h2_per_module_day, 1e-10))))
+
+    def profile_summary(self) -> Dict[str, Any]:
+        return {
+            "name": self.name, "category": self.category, "emoji": self.emoji,
+            "base_platform": self.base_platform,
+            "n_stacks": self.n_stacks,
+            "total_power_kW": round(self.total_power_kW, 0),
+            "stack_efficiency_pct": round(self.stack_efficiency * 100, 1),
+            "h2_tank_kg": self.h2_tank_kg,
+            "tank_pressure_bar": self.tank_pressure_bar,
+            "range_km": round(self.range_km, 0),
+            "endurance_h": round(self.endurance_h, 1),
+            "fuel_rate_kg_h": round(self.fuel_rate_kg_h, 3),
+            "km_per_kg_h2": round(self.km_per_kg_h2, 1),
+            "refuel_time_min": self.refuel_time_min,
+            "co2_avoided_kg": round(self.co2_avoided_per_fill_kg, 1),
+            "granas_modules_per_fill": self.granas_modules_per_fill(),
+            "retrofit_complexity": self.retrofit_complexity,
+            "existing_platforms": self.existing_platforms,
+        }
+
+
+PEM_TRANSPORT_FLEET = {
+    "H₂ Sedan": PEMTransportIntegration(
+        name="H₂ Sedan", category="Sedan", emoji="🚗",
+        base_platform="Mid-size sedan (Mirai-class)",
+        n_stacks=2, stack_efficiency=0.60, h2_tank_kg=5.6,
+        tank_pressure_bar=700, curb_weight_kg=1_950, payload_kg=400,
+        cruise_speed_kmh=110, energy_consumption_kWh_km=0.18,
+        refuel_time_min=5, retrofit_complexity="Medium",
+        existing_platforms="Toyota Mirai, Hyundai Nexo, Honda Clarity",
+    ),
+    "H₂ SUV": PEMTransportIntegration(
+        name="H₂ SUV", category="SUV", emoji="🚙",
+        base_platform="Full-size SUV / pickup",
+        n_stacks=3, stack_efficiency=0.58, h2_tank_kg=8.0,
+        tank_pressure_bar=700, curb_weight_kg=2_400, payload_kg=600,
+        cruise_speed_kmh=100, energy_consumption_kWh_km=0.24,
+        refuel_time_min=6, retrofit_complexity="Medium",
+        existing_platforms="Hyundai Nexo XL, BMW iX5 H₂, Land Rover FCEV",
+    ),
+    "City Bus": PEMTransportIntegration(
+        name="City Bus", category="Bus", emoji="🚌",
+        base_platform="12m city transit bus",
+        n_stacks=4, stack_efficiency=0.55, h2_tank_kg=35.0,
+        tank_pressure_bar=350, curb_weight_kg=13_500, payload_kg=7_000,
+        cruise_speed_kmh=40, energy_consumption_kWh_km=0.80,
+        refuel_time_min=12, retrofit_complexity="Low",
+        existing_platforms="MAN Lion's City H₂, Toyota Sora, CaetanoBus",
+    ),
+    "Delivery Van": PEMTransportIntegration(
+        name="Delivery Van", category="Van", emoji="🚐",
+        base_platform="Last-mile delivery van",
+        n_stacks=2, stack_efficiency=0.58, h2_tank_kg=6.0,
+        tank_pressure_bar=700, curb_weight_kg=3_200, payload_kg=1_500,
+        cruise_speed_kmh=60, energy_consumption_kWh_km=0.30,
+        refuel_time_min=5, retrofit_complexity="Low",
+        existing_platforms="Mercedes Sprinter FCEV, Stellantis, Renault Master H₂",
+    ),
+    "Warehouse Forklift": PEMTransportIntegration(
+        name="Warehouse Forklift", category="Forklift", emoji="🏗️",
+        base_platform="3-ton counterbalance forklift",
+        n_stacks=1, stack_efficiency=0.55, h2_tank_kg=1.5,
+        tank_pressure_bar=350, curb_weight_kg=4_500, payload_kg=3_000,
+        cruise_speed_kmh=15, energy_consumption_kWh_km=0.50,
+        refuel_time_min=3, retrofit_complexity="Low",
+        existing_platforms="Toyota Material Handling, Plug Power, Linde H₂",
+    ),
+    "Commuter Train": PEMTransportIntegration(
+        name="Commuter Train", category="Train", emoji="🚆",
+        base_platform="2-car regional DMU replacement",
+        n_stacks=8, stack_efficiency=0.55, h2_tank_kg=80.0,
+        tank_pressure_bar=350, curb_weight_kg=75_000, payload_kg=15_000,
+        cruise_speed_kmh=80, energy_consumption_kWh_km=2.50,
+        refuel_time_min=20, retrofit_complexity="High",
+        existing_platforms="Alstom Coradia iLint, Siemens Mireo Plus H",
+    ),
+    "Harbor Ferry": PEMTransportIntegration(
+        name="Harbor Ferry", category="Ferry", emoji="⛴️",
+        base_platform="50-pax harbor/river ferry",
+        n_stacks=6, stack_efficiency=0.55, h2_tank_kg=50.0,
+        tank_pressure_bar=350, curb_weight_kg=40_000, payload_kg=5_000,
+        cruise_speed_kmh=20, energy_consumption_kWh_km=3.00,
+        refuel_time_min=15, retrofit_complexity="Medium",
+        existing_platforms="Norled MF Hydra, CMB Hydrocat, FPS Waal",
+    ),
+    "Airport Shuttle": PEMTransportIntegration(
+        name="Airport Shuttle", category="Shuttle", emoji="🚎",
+        base_platform="Autonomous PRT / shuttle",
+        n_stacks=1, stack_efficiency=0.58, h2_tank_kg=3.0,
+        tank_pressure_bar=350, curb_weight_kg=3_000, payload_kg=1_200,
+        cruise_speed_kmh=30, energy_consumption_kWh_km=0.25,
+        refuel_time_min=3, retrofit_complexity="Low",
+        existing_platforms="Toyota e-Palette H₂, Navya, EasyMile",
+    ),
+}
+
+
+# ═══════════════════════════════════════════════════════════════
 # Granas Charging Hub  (multi-module solar field → fuel)
 # ═══════════════════════════════════════════════════════════════
 @dataclass
