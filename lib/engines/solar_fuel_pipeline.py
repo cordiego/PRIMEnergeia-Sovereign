@@ -1,0 +1,794 @@
+"""
+Granas Solar Fuel Pipeline — Sun → H₂ → NH₃ → Engine
+=======================================================
+Complete physics-based pipeline modeling Granas perovskite/TOPCon
+solar modules producing electricity → PEM electrolysis (H₂O → H₂)
+→ optional Haber-Bosch (H₂ + N₂ → NH₃) → fuel dispatch to engines.
+
+Pipeline:
+  ☀️ Solar Irradiance
+  → 🔋 Granas 2.1×3.4m Modules (50S×2P, ~2,092 W STC each)
+  → ⚡ DC Bus (inverter/rectifier losses)
+  → 💧 PEM Electrolyzer Stack (H₂O → H₂ + ½O₂)
+  → ⚗️ Haber-Bosch Reactor (3H₂ + N₂ → 2NH₃) [optional]
+  → 🚀 Engine Fuel Tanks:
+       A-ICE-G1  (NH₃, 335 kW)
+       PEM-PB-50 (H₂,  50  kW)
+       HY-P100   (H₂, 100  kW)
+
+Author: Diego Córdoba Urrutia — PRIMEnergeia S.A.S.
+"""
+
+import numpy as np
+from dataclasses import dataclass, field
+from typing import Dict, List, Any, Optional, Tuple
+
+# ─────────────────────────────────────────────────────────────
+# Physical Constants
+# ─────────────────────────────────────────────────────────────
+F = 96_485.0          # Faraday constant (C/mol)
+R_GAS = 8.314        # Universal gas constant (J/mol·K)
+MW_H2 = 2.016e-3     # Molar mass H₂ (kg/mol)
+MW_NH3 = 17.031e-3   # Molar mass NH₃ (kg/mol)
+MW_H2O = 18.015e-3   # Molar mass H₂O (kg/mol)
+MW_N2 = 28.014e-3    # Molar mass N₂ (kg/mol)
+LHV_H2 = 33.33       # Lower heating value H₂ (kWh/kg)
+HHV_H2 = 39.4        # Higher heating value H₂ (kWh/kg)
+LHV_NH3 = 5.17       # Lower heating value NH₃ (kWh/kg)
+HHV_NH3 = 6.25       # Higher heating value NH₃ (kWh/kg)
+STOICH_H2O = 9.0     # kg H₂O per kg H₂ produced
+HOURS_PER_YEAR = 8760
+
+
+# ═══════════════════════════════════════════════════════════════
+# Granas Module Structure Feed
+# ═══════════════════════════════════════════════════════════════
+@dataclass
+class GranasStructureFeed:
+    """
+    Granas 2.1m × 3.4m module structure feeding into the fuel pipeline.
+
+    Exposes the physical architecture: diamond vertex tessellation,
+    CFRP skeleton, 50S×2P electrical configuration, and per-module
+    power characteristics that determine total charging capacity.
+    """
+    # ── Blueprint Geometry ────────────────────────────────────
+    module_width_m: float = 2.1
+    module_height_m: float = 3.4
+    active_fraction: float = 0.874       # 87.4% active (CFRP skeleton ~12.6%)
+    n_subcells: int = 100                # 10×10 grid
+    n_series: int = 50
+    n_parallel: int = 2
+    subcell_width_cm: float = 21.0
+    subcell_height_cm: float = 34.0
+
+    # ── Cell Parameters (tandem perovskite/TOPCon) ────────────
+    cell_voc_mV: float = 1132.0          # Voc per cell (mV)
+    cell_jsc_mA_cm2: float = 37.0        # Jsc per cell (mA/cm²)
+    fill_factor: float = 0.80
+    tandem_pce_pct: float = 34.65        # Combined tandem PCE (%)
+    perovskite_pce_pct: float = 20.78
+    topcon_pce_pct: float = 13.80
+
+    # ── Operating Conditions ──────────────────────────────────
+    irradiance_W_m2: float = 1000.0      # STC
+    capacity_factor: float = 0.22        # Mexico average
+
+    # ── Physical Properties ───────────────────────────────────
+    weight_per_m2_kg: float = 5.0        # CFRP + cell stack
+    junction_temp_C: float = 42.0        # Green cooling
+
+    @property
+    def total_area_m2(self) -> float:
+        return self.module_width_m * self.module_height_m  # 7.14 m²
+
+    @property
+    def active_area_m2(self) -> float:
+        return self.total_area_m2 * self.active_fraction  # 6.24 m²
+
+    @property
+    def active_area_cm2(self) -> float:
+        return self.active_area_m2 * 10_000
+
+    @property
+    def subcell_active_cm2(self) -> float:
+        return self.subcell_width_cm * self.subcell_height_cm * self.active_fraction
+
+    @property
+    def module_voc_V(self) -> float:
+        """Module open-circuit voltage (50 cells series)."""
+        return self.n_series * self.cell_voc_mV / 1000.0
+
+    @property
+    def cell_isc_A(self) -> float:
+        """Cell short-circuit current."""
+        return self.cell_jsc_mA_cm2 * self.subcell_active_cm2 / 1000.0
+
+    @property
+    def module_isc_A(self) -> float:
+        """Module short-circuit current (2 parallel strings)."""
+        return self.n_parallel * self.cell_isc_A
+
+    @property
+    def peak_power_W(self) -> float:
+        """Module peak power at STC (W)."""
+        return (self.tandem_pce_pct / 100.0) * self.irradiance_W_m2 * self.active_area_m2
+
+    @property
+    def annual_energy_kWh(self) -> float:
+        """Annual energy production per module (kWh)."""
+        return self.peak_power_W * self.capacity_factor * HOURS_PER_YEAR / 1000.0
+
+    @property
+    def weight_kg(self) -> float:
+        return self.weight_per_m2_kg * self.total_area_m2
+
+    def structure_summary(self) -> Dict[str, Any]:
+        """Full structure summary for dashboard display."""
+        return {
+            "module_dimensions": f"{self.module_width_m} × {self.module_height_m} m",
+            "total_area_m2": round(self.total_area_m2, 2),
+            "active_area_m2": round(self.active_area_m2, 2),
+            "active_fraction_pct": round(self.active_fraction * 100, 1),
+            "n_subcells": self.n_subcells,
+            "tessellation": "10×10 grid, 21×34 cm sub-cells",
+            "config": f"{self.n_series}S × {self.n_parallel}P",
+            "cell_voc_mV": round(self.cell_voc_mV, 1),
+            "module_voc_V": round(self.module_voc_V, 2),
+            "cell_jsc_mA_cm2": round(self.cell_jsc_mA_cm2, 1),
+            "cell_isc_A": round(self.cell_isc_A, 2),
+            "module_isc_A": round(self.module_isc_A, 2),
+            "fill_factor": self.fill_factor,
+            "tandem_pce_pct": round(self.tandem_pce_pct, 2),
+            "perovskite_pce_pct": round(self.perovskite_pce_pct, 2),
+            "topcon_pce_pct": round(self.topcon_pce_pct, 2),
+            "peak_power_W": round(self.peak_power_W, 1),
+            "annual_energy_kWh": round(self.annual_energy_kWh, 1),
+            "junction_temp_C": self.junction_temp_C,
+            "weight_kg": round(self.weight_kg, 1),
+        }
+
+
+# ═══════════════════════════════════════════════════════════════
+# PEM Solar Electrolyzer
+# ═══════════════════════════════════════════════════════════════
+@dataclass
+class SolarElectrolyzer:
+    """
+    PEM electrolysis stack driven by Granas solar input.
+
+    Reaction: 2H₂O(l) → 2H₂(g) + O₂(g)
+    E° = 1.229 V | ΔG° = +237.2 kJ/mol
+
+    Stack: Nafion 212 membrane, IrO₂ anode, Pt/C cathode.
+    """
+    n_cells: int = 80                    # Cells in stack
+    active_area_cm2: float = 500.0       # Active area per cell (cm²)
+    temperature_C: float = 80            # Operating temperature (°C)
+    pressure_bar: float = 30             # H₂ outlet pressure (bar)
+    membrane_thickness_um: float = 50    # Nafion 212 (μm)
+    membrane_conductivity: float = 0.10  # S/cm at 80°C
+    contact_resistance: float = 0.02     # Ω·cm²
+    bop_efficiency: float = 0.92         # Balance of plant efficiency
+
+    @property
+    def T_K(self) -> float:
+        return self.temperature_C + 273.15
+
+    def reversible_voltage(self) -> float:
+        """Nernst reversible voltage (V)."""
+        E0 = 1.229
+        delta_s = -163.0  # J/(mol·K)
+        e_rev = (E0
+                 - (delta_s / (2 * F)) * (self.T_K - 298.15)
+                 + (R_GAS * self.T_K / (2 * F)) * np.log(self.pressure_bar))
+        return e_rev
+
+    def thermoneutral_voltage(self) -> float:
+        """Thermoneutral voltage (V)."""
+        delta_h = 286e3 - 10.0 * (self.T_K - 298.15)
+        return delta_h / (2 * F)
+
+    def cell_voltage(self, current_density_A_cm2: float) -> float:
+        """Total cell voltage at given current density."""
+        j = current_density_A_cm2
+        e_rev = self.reversible_voltage()
+
+        # Activation overpotential (Tafel kinetics)
+        eta_act_a = 0.060 * np.log10(max(j, 1e-10) / 1e-7)   # IrO₂ OER
+        eta_act_c = 0.030 * np.log10(max(j, 1e-10) / 1e-3)   # Pt/C HER
+        eta_act = max(0, eta_act_a) + max(0, eta_act_c)
+
+        # Ohmic overpotential
+        r_mem = (self.membrane_thickness_um * 1e-4) / self.membrane_conductivity
+        eta_ohm = j * (r_mem + self.contact_resistance)
+
+        # Mass transport
+        j_lim = 4.0  # A/cm²
+        if j < j_lim * 0.99:
+            eta_mt = (R_GAS * self.T_K / (2 * F)) * np.log(j_lim / max(j_lim - j, 0.04))
+        else:
+            eta_mt = 0.5
+
+        return e_rev + eta_act + eta_ohm + eta_mt
+
+    def cell_efficiency(self, current_density_A_cm2: float) -> float:
+        """Cell-level voltage efficiency (%)."""
+        v_cell = self.cell_voltage(current_density_A_cm2)
+        e_tn = self.thermoneutral_voltage()
+        return min(100, e_tn / v_cell * 100) if v_cell > 0 else 0
+
+    def system_efficiency(self, current_density_A_cm2: float) -> float:
+        """System-level efficiency including BoP (%)."""
+        return self.cell_efficiency(current_density_A_cm2) * self.bop_efficiency
+
+    def h2_production(self, power_kW: float) -> Dict[str, float]:
+        """
+        Calculate H₂ production from available electrical power.
+
+        Returns dict with all production metrics.
+        """
+        # Find operating current density from available power
+        # P = V_cell × I_total = V_cell × j × A_cell × n_cells
+        # Iterate to find j matching available power
+        j_opt = self._find_current_density(power_kW)
+        v_cell = self.cell_voltage(j_opt)
+        I_total = j_opt * self.active_area_cm2 * self.n_cells  # Amperes
+        actual_power_kW = v_cell * I_total / 1000
+
+        # Faraday's law
+        mol_h2_s = I_total / (2 * F)
+        h2_kg_h = mol_h2_s * MW_H2 * 3600
+        h2_kg_day = h2_kg_h * 24
+        h2o_kg_h = h2_kg_h * STOICH_H2O
+        kwh_per_kg_h2 = actual_power_kW / max(h2_kg_h, 1e-10)
+
+        cell_eff = self.cell_efficiency(j_opt)
+        sys_eff = self.system_efficiency(j_opt)
+
+        return {
+            "current_density_A_cm2": round(j_opt, 3),
+            "cell_voltage_V": round(v_cell, 4),
+            "stack_current_A": round(I_total, 1),
+            "power_consumed_kW": round(actual_power_kW, 2),
+            "h2_kg_h": round(h2_kg_h, 4),
+            "h2_kg_day": round(h2_kg_day, 2),
+            "h2o_consumption_kg_h": round(h2o_kg_h, 2),
+            "kwh_per_kg_h2": round(kwh_per_kg_h2, 2),
+            "cell_efficiency_pct": round(cell_eff, 2),
+            "system_efficiency_pct": round(sys_eff, 2),
+            "o2_kg_h": round(h2_kg_h * 8, 3),    # O₂ co-product
+            "n_cells": self.n_cells,
+            "stack_temp_C": self.temperature_C,
+            "h2_pressure_bar": self.pressure_bar,
+        }
+
+    def _find_current_density(self, power_kW: float) -> float:
+        """Find current density that consumes given power (bisection)."""
+        j_low, j_high = 0.01, 3.8
+        target_W = power_kW * 1000
+
+        for _ in range(50):
+            j_mid = (j_low + j_high) / 2
+            v = self.cell_voltage(j_mid)
+            p = v * j_mid * self.active_area_cm2 * self.n_cells
+            if p < target_W:
+                j_low = j_mid
+            else:
+                j_high = j_mid
+
+        return (j_low + j_high) / 2
+
+    def polarization_curve(self, n_points: int = 60) -> List[Dict[str, float]]:
+        """Generate polarization curve data for plotting."""
+        j_arr = np.linspace(0.05, 3.5, n_points)
+        results = []
+        for j in j_arr:
+            v = self.cell_voltage(j)
+            eff = self.cell_efficiency(j)
+            mol_h2 = (j * self.active_area_cm2 * self.n_cells) / (2 * F)
+            h2_kg_h = mol_h2 * MW_H2 * 3600
+            power_kW = v * j * self.active_area_cm2 * self.n_cells / 1000
+            results.append({
+                "j_A_cm2": round(float(j), 3),
+                "v_cell_V": round(float(v), 4),
+                "efficiency_pct": round(float(eff), 2),
+                "h2_kg_h": round(float(h2_kg_h), 4),
+                "power_kW": round(float(power_kW), 2),
+            })
+        return results
+
+
+# ═══════════════════════════════════════════════════════════════
+# Haber-Bosch Reactor  (H₂ + N₂ → NH₃)
+# ═══════════════════════════════════════════════════════════════
+@dataclass
+class HaberBoschReactor:
+    """
+    Green Haber-Bosch NH₃ synthesis from solar H₂.
+
+    Reaction: 3H₂ + N₂ → 2NH₃
+    ΔH = -92.4 kJ/mol
+
+    Uses electrocatalytic NRR approach (Mo-N₄ single-site catalyst)
+    at ambient temperature/moderate pressure for decentralized production.
+    """
+    conversion_efficiency: float = 0.85   # H₂ → NH₃ conversion (%)
+    energy_per_kg_nh3_kWh: float = 0.50   # Electrical energy for NRR (kWh/kg NH₃)
+    pressure_bar: float = 50              # Operating pressure (bar)
+    temperature_C: float = 25             # Ambient NRR (vs 450°C classical HB)
+    catalyst: str = "Mo-N₄/PG-MoSA-BC"   # Single-atom catalyst
+    co2_emission_kg_per_t_nh3: float = 0  # Zero-carbon
+
+    def nh3_from_h2(self, h2_kg_h: float) -> Dict[str, float]:
+        """
+        Calculate NH₃ production from available H₂ flow.
+
+        Stoichiometry: 3H₂ + N₂ → 2NH₃
+        Mass ratio: 6.048 kg H₂ → 34.06 kg NH₃
+        Effective: 1 kg H₂ → 5.63 kg NH₃ (at 100% conversion)
+        """
+        # Stoichiometric mass ratio
+        h2_per_nh3 = (3 * MW_H2) / (2 * MW_NH3)  # 0.1777 kg H₂ / kg NH₃
+        nh3_stoich = h2_kg_h / h2_per_nh3     # Theoretical maximum
+        nh3_actual = nh3_stoich * self.conversion_efficiency
+
+        # N₂ requirement
+        n2_per_nh3 = MW_N2 / (2 * MW_NH3)     # 0.822 kg N₂ / kg NH₃
+        n2_kg_h = nh3_actual * n2_per_nh3
+
+        # H₂ consumed (rest remains as H₂ product)
+        h2_consumed = nh3_actual * h2_per_nh3
+        h2_remaining = max(0, h2_kg_h - h2_consumed)
+
+        # Electrical power for NRR
+        power_kW = nh3_actual * self.energy_per_kg_nh3_kWh
+
+        # Energy content
+        nh3_energy_kWh_h = nh3_actual * LHV_NH3
+
+        return {
+            "h2_input_kg_h": round(h2_kg_h, 4),
+            "h2_consumed_kg_h": round(h2_consumed, 4),
+            "h2_remaining_kg_h": round(h2_remaining, 4),
+            "n2_consumed_kg_h": round(n2_kg_h, 3),
+            "nh3_produced_kg_h": round(nh3_actual, 4),
+            "nh3_produced_kg_day": round(nh3_actual * 24, 2),
+            "nh3_energy_kWh_h": round(nh3_energy_kWh_h, 3),
+            "nrr_power_kW": round(power_kW, 3),
+            "conversion_efficiency_pct": round(self.conversion_efficiency * 100, 1),
+            "process_temp_C": self.temperature_C,
+            "process_pressure_bar": self.pressure_bar,
+            "co2_kg_per_t_nh3": self.co2_emission_kg_per_t_nh3,
+            "catalyst": self.catalyst,
+        }
+
+
+# ═══════════════════════════════════════════════════════════════
+# Engine Fuel Specs  (consumption models for each engine)
+# ═══════════════════════════════════════════════════════════════
+@dataclass
+class EngineFuelSpec:
+    """Fuel consumption model for a single engine."""
+    name: str
+    model: str
+    fuel_type: str               # "H₂" or "NH₃"
+    rated_power_kW: float
+    thermal_efficiency: float    # BTE or stack efficiency
+    fuel_lhv_kWh_kg: float       # LHV of fuel (kWh/kg)
+    tank_capacity_kg: float      # Onboard fuel tank (kg)
+    startup_time_s: float
+    trl: int
+    sectors: str
+
+    @property
+    def fuel_rate_kg_h(self) -> float:
+        """Fuel consumption at rated power (kg/h)."""
+        return self.rated_power_kW / (self.thermal_efficiency * self.fuel_lhv_kWh_kg)
+
+    def fuel_rate_at_load(self, load_pct: float) -> float:
+        """Fuel consumption at partial load (kg/h)."""
+        load = max(0.05, min(1.0, load_pct / 100.0))
+        # Part-load penalty: efficiency drops ~15% at 20% load
+        load_eff = self.thermal_efficiency * (0.85 + 0.15 * load)
+        return (self.rated_power_kW * load) / (load_eff * self.fuel_lhv_kWh_kg)
+
+    def runtime_h(self, fuel_available_kg: float, load_pct: float = 100) -> float:
+        """Hours of operation from given fuel quantity."""
+        rate = self.fuel_rate_at_load(load_pct)
+        return fuel_available_kg / max(rate, 1e-10)
+
+    def fill_time_h(self, charging_rate_kg_h: float) -> float:
+        """Time to fill tank from empty (hours)."""
+        return self.tank_capacity_kg / max(charging_rate_kg_h, 1e-10)
+
+
+# Pre-configured engine specs
+ENGINE_SPECS = {
+    "A-ICE-G1": EngineFuelSpec(
+        name="A-ICE-G1",
+        model="Ammonia ICE",
+        fuel_type="NH₃",
+        rated_power_kW=335.0,
+        thermal_efficiency=0.42,
+        fuel_lhv_kWh_kg=LHV_NH3,
+        tank_capacity_kg=500.0,       # 500 kg NH₃ tank
+        startup_time_s=30,
+        trl=5,
+        sectors="Trucks, Marine, Rail, F1",
+    ),
+    "PEM-PB-50": EngineFuelSpec(
+        name="PEM-PB-50",
+        model="PEM Fuel Cell",
+        fuel_type="H₂",
+        rated_power_kW=50.0,
+        thermal_efficiency=0.60,
+        fuel_lhv_kWh_kg=LHV_H2,
+        tank_capacity_kg=5.0,         # 5 kg H₂ at 700 bar
+        startup_time_s=5,
+        trl=6,
+        sectors="Light Vehicles, UAV, Drones",
+    ),
+    "HY-P100": EngineFuelSpec(
+        name="HY-P100",
+        model="H₂ Gas Turbine",
+        fuel_type="H₂",
+        rated_power_kW=100.0,
+        thermal_efficiency=0.42,
+        fuel_lhv_kWh_kg=LHV_H2,
+        tank_capacity_kg=20.0,        # 20 kg H₂
+        startup_time_s=120,
+        trl=4,
+        sectors="Grid Peaking, Marine, Aviation",
+    ),
+}
+
+
+# ═══════════════════════════════════════════════════════════════
+# Granas Charging Hub  (multi-module solar field → fuel)
+# ═══════════════════════════════════════════════════════════════
+@dataclass
+class GranasChargingHub:
+    """
+    A field of Granas modules powering a hydrogen/ammonia production facility.
+
+    Wires together:
+      Granas Structure → Solar DC → Electrolyzer → H₂ → Haber-Bosch → NH₃ → Engines
+    """
+    n_modules: int = 100                  # Number of Granas 2.1×3.4m modules
+    module: GranasStructureFeed = field(default_factory=GranasStructureFeed)
+    electrolyzer: SolarElectrolyzer = field(default_factory=SolarElectrolyzer)
+    reactor: HaberBoschReactor = field(default_factory=HaberBoschReactor)
+    mode: str = "H₂ + NH₃"              # "H₂ Only", "H₂ + NH₃", "Full Fleet"
+
+    # ── Power conversion efficiencies ─────────────────────────
+    inverter_efficiency: float = 0.975    # DC-AC inverter
+    rectifier_efficiency: float = 0.98    # AC-DC rectifier
+    dc_dc_efficiency: float = 0.985       # DC-DC converter to electrolyzer
+    compression_efficiency: float = 0.92  # H₂ compression to storage pressure
+
+    # ── Storage ───────────────────────────────────────────────
+    h2_tank_capacity_kg: float = 500.0    # H₂ storage (kg, 350 bar)
+    nh3_tank_capacity_kg: float = 5000.0  # NH₃ storage (kg, 10 bar)
+    h2_tank_level_kg: float = 0.0         # Current H₂ buffer (kg)
+    nh3_tank_level_kg: float = 0.0        # Current NH₃ buffer (kg)
+
+    # ── Solar fraction to electrolysis ────────────────────────
+    solar_to_h2_fraction: float = 0.80    # % of solar power → electrolysis (rest → grid)
+
+    def total_solar_capacity_kW(self) -> float:
+        """Total peak solar capacity (kW)."""
+        return self.n_modules * self.module.peak_power_W / 1000.0
+
+    def total_solar_area_m2(self) -> float:
+        """Total solar field area (m²)."""
+        return self.n_modules * self.module.total_area_m2
+
+    def total_solar_area_ha(self) -> float:
+        """Total solar field area (hectares)."""
+        return self.total_solar_area_m2() / 10_000
+
+    def annual_energy_MWh(self) -> float:
+        """Total annual solar energy (MWh)."""
+        return self.n_modules * self.module.annual_energy_kWh / 1000.0
+
+    def wire_efficiency(self) -> float:
+        """Combined power conversion efficiency (solar DC → electrolyzer DC)."""
+        return self.inverter_efficiency * self.rectifier_efficiency * self.dc_dc_efficiency
+
+    def effective_electrolyzer_power_kW(self) -> float:
+        """Power available at electrolyzer after conversion losses (kW)."""
+        solar_kW = self.total_solar_capacity_kW()
+        return solar_kW * self.solar_to_h2_fraction * self.wire_efficiency()
+
+    def run_pipeline(self, irradiance_factor: float = 1.0) -> Dict[str, Any]:
+        """
+        Execute the full solar-to-fuel pipeline at a given irradiance factor.
+
+        Parameters
+        ----------
+        irradiance_factor : float
+            Fraction of peak irradiance (0–1). 1.0 = STC (1000 W/m²).
+
+        Returns
+        -------
+        Dict with complete pipeline metrics.
+        """
+        # ── Stage 1: Granas Solar Field ──────────────────────
+        solar_kW = self.total_solar_capacity_kW() * irradiance_factor
+        solar_annual_MWh = self.annual_energy_MWh() * irradiance_factor
+
+        # ── Stage 2: Power Conversion Losses ─────────────────
+        wire_eff = self.wire_efficiency()
+        electrolyzer_kW = solar_kW * self.solar_to_h2_fraction * wire_eff
+        grid_export_kW = solar_kW * (1 - self.solar_to_h2_fraction)
+        conversion_loss_kW = solar_kW * self.solar_to_h2_fraction * (1 - wire_eff)
+
+        # ── Stage 3: PEM Electrolysis (H₂O → H₂) ────────────
+        if electrolyzer_kW > 0.1:
+            h2_data = self.electrolyzer.h2_production(electrolyzer_kW)
+        else:
+            h2_data = {
+                "current_density_A_cm2": 0, "cell_voltage_V": 0,
+                "stack_current_A": 0, "power_consumed_kW": 0,
+                "h2_kg_h": 0, "h2_kg_day": 0, "h2o_consumption_kg_h": 0,
+                "kwh_per_kg_h2": 0, "cell_efficiency_pct": 0,
+                "system_efficiency_pct": 0, "o2_kg_h": 0,
+                "n_cells": self.electrolyzer.n_cells,
+                "stack_temp_C": self.electrolyzer.temperature_C,
+                "h2_pressure_bar": self.electrolyzer.pressure_bar,
+            }
+
+        h2_kg_h = h2_data["h2_kg_h"]
+        h2_after_compression = h2_kg_h  # mass conserved, energy cost tracked
+
+        # ── Stage 4: Haber-Bosch (H₂ → NH₃) [optional] ──────
+        if self.mode in ("H₂ + NH₃", "Full Fleet"):
+            # Split H₂: send fraction to HB, keep rest as H₂ fuel
+            h2_to_hb_fraction = 0.50 if self.mode == "Full Fleet" else 0.60
+            h2_to_hb = h2_kg_h * h2_to_hb_fraction
+            h2_direct = h2_kg_h * (1 - h2_to_hb_fraction)
+            nh3_data = self.reactor.nh3_from_h2(h2_to_hb)
+            # Any H₂ not converted returns to H₂ pool
+            h2_direct += nh3_data["h2_remaining_kg_h"]
+        else:
+            h2_direct = h2_kg_h
+            h2_to_hb = 0
+            nh3_data = {
+                "h2_input_kg_h": 0, "h2_consumed_kg_h": 0,
+                "h2_remaining_kg_h": 0, "n2_consumed_kg_h": 0,
+                "nh3_produced_kg_h": 0, "nh3_produced_kg_day": 0,
+                "nh3_energy_kWh_h": 0, "nrr_power_kW": 0,
+                "conversion_efficiency_pct": 0, "process_temp_C": 0,
+                "process_pressure_bar": 0, "co2_kg_per_t_nh3": 0,
+                "catalyst": "N/A",
+            }
+
+        nh3_kg_h = nh3_data["nh3_produced_kg_h"]
+
+        # ── Stage 5: Engine Fuel Dispatch ─────────────────────
+        engine_readiness = {}
+        for name, spec in ENGINE_SPECS.items():
+            fuel_available = nh3_kg_h if spec.fuel_type == "NH₃" else h2_direct
+            rate = spec.fuel_rate_kg_h
+            fill_time = spec.fill_time_h(fuel_available)
+            runtime_day = fuel_available * 24 / max(rate, 1e-10) if fuel_available > 0 else 0
+            fuel_cost_h = fuel_available * (3.50 if spec.fuel_type == "H₂" else 0.80) if fuel_available > 0 else 0
+
+            engine_readiness[name] = {
+                "engine": name,
+                "model": spec.model,
+                "fuel_type": spec.fuel_type,
+                "rated_power_kW": spec.rated_power_kW,
+                "fuel_rate_rated_kg_h": round(rate, 3),
+                "fuel_available_kg_h": round(fuel_available, 4),
+                "tank_capacity_kg": spec.tank_capacity_kg,
+                "fill_time_h": round(fill_time, 2),
+                "runtime_from_1day_charge_h": round(runtime_day, 2),
+                "trl": spec.trl,
+                "sectors": spec.sectors,
+            }
+
+        # ── Overall Efficiencies ──────────────────────────────
+        solar_to_wire_eff = wire_eff * 100
+        wire_to_h2_eff = h2_data["system_efficiency_pct"]
+        overall_h2_eff = solar_to_wire_eff * wire_to_h2_eff / 100 if wire_to_h2_eff > 0 else 0
+
+        if nh3_kg_h > 0 and h2_kg_h > 0:
+            hb_eff = (nh3_kg_h * LHV_NH3) / (h2_to_hb * LHV_H2) * 100
+        else:
+            hb_eff = 0
+
+        h2_energy_kWh_h = h2_direct * LHV_H2
+        nh3_energy_kWh_h = nh3_kg_h * LHV_NH3
+        total_fuel_energy = h2_energy_kWh_h + nh3_energy_kWh_h
+        overall_solar_to_fuel = (total_fuel_energy / max(solar_kW, 1e-10)) * 100
+
+        return {
+            # ── Granas Structure Feed ─────────────────────────
+            "granas_structure": self.module.structure_summary(),
+            "n_modules": self.n_modules,
+            "field_area_m2": round(self.total_solar_area_m2(), 1),
+            "field_area_ha": round(self.total_solar_area_ha(), 3),
+
+            # ── Solar ─────────────────────────────────────────
+            "solar_peak_kW": round(solar_kW, 2),
+            "solar_annual_MWh": round(solar_annual_MWh, 2),
+            "irradiance_factor": irradiance_factor,
+
+            # ── Power Conversion ──────────────────────────────
+            "wire_efficiency_pct": round(solar_to_wire_eff, 2),
+            "electrolyzer_input_kW": round(electrolyzer_kW, 2),
+            "grid_export_kW": round(grid_export_kW, 2),
+            "conversion_loss_kW": round(conversion_loss_kW, 2),
+
+            # ── Electrolysis ──────────────────────────────────
+            "electrolysis": h2_data,
+
+            # ── Haber-Bosch ───────────────────────────────────
+            "haber_bosch": nh3_data,
+
+            # ── Fuel Totals ───────────────────────────────────
+            "h2_output_kg_h": round(h2_direct, 4),
+            "h2_output_kg_day": round(h2_direct * 24, 2),
+            "nh3_output_kg_h": round(nh3_kg_h, 4),
+            "nh3_output_kg_day": round(nh3_kg_h * 24, 2),
+            "h2_energy_kWh_h": round(h2_energy_kWh_h, 2),
+            "nh3_energy_kWh_h": round(nh3_energy_kWh_h, 2),
+
+            # ── Efficiencies ──────────────────────────────────
+            "solar_to_wire_eff_pct": round(solar_to_wire_eff, 2),
+            "wire_to_h2_eff_pct": round(wire_to_h2_eff, 2),
+            "overall_h2_eff_pct": round(overall_h2_eff, 2),
+            "hb_conversion_eff_pct": round(hb_eff, 2),
+            "overall_solar_to_fuel_pct": round(overall_solar_to_fuel, 2),
+
+            # ── Engine Readiness ──────────────────────────────
+            "engines": engine_readiness,
+
+            # ── Storage ───────────────────────────────────────
+            "h2_tank_capacity_kg": self.h2_tank_capacity_kg,
+            "nh3_tank_capacity_kg": self.nh3_tank_capacity_kg,
+            "h2_fill_time_h": round(self.h2_tank_capacity_kg / max(h2_direct, 1e-10), 2),
+            "nh3_fill_time_h": round(self.nh3_tank_capacity_kg / max(nh3_kg_h, 1e-10), 2),
+
+            # ── Environmental ─────────────────────────────────
+            "co2_per_kg_h2": 0.0,
+            "co2_per_kg_nh3": 0.0,
+            "co2_avoided_vs_smr_kg_h": round(h2_direct * 9.3, 2),
+            "co2_avoided_vs_hb_kg_h": round(nh3_kg_h * 1.6, 3),
+
+            # ── Mode ──────────────────────────────────────────
+            "mode": self.mode,
+        }
+
+    def hourly_profile(self, n_hours: int = 24) -> List[Dict[str, float]]:
+        """
+        Generate 24-hour charging profile with solar irradiance curve.
+
+        Models a clear-sky day with sunrise at 6:00, sunset at 18:00.
+        """
+        profile = []
+        for h in range(n_hours):
+            if 6 <= h <= 18:
+                # Solar bell curve
+                irr = max(0, np.sin((h - 6) * np.pi / 12))
+            else:
+                irr = 0.0
+
+            result = self.run_pipeline(irradiance_factor=irr)
+            profile.append({
+                "hour": h,
+                "irradiance_factor": round(irr, 3),
+                "solar_kW": result["solar_peak_kW"],
+                "electrolyzer_kW": result["electrolyzer_input_kW"],
+                "h2_kg_h": result["h2_output_kg_h"],
+                "nh3_kg_h": result["nh3_output_kg_h"],
+                "grid_export_kW": result["grid_export_kW"],
+            })
+        return profile
+
+    def scaling_analysis(self, module_counts: List[int] = None) -> List[Dict[str, Any]]:
+        """
+        Parametric sweep: N modules → fuel production rates.
+        """
+        if module_counts is None:
+            module_counts = [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 10000]
+
+        results = []
+        original_n = self.n_modules
+        for n in module_counts:
+            self.n_modules = n
+            r = self.run_pipeline(irradiance_factor=1.0)
+            results.append({
+                "n_modules": n,
+                "solar_kW": r["solar_peak_kW"],
+                "solar_MW": round(r["solar_peak_kW"] / 1000, 2),
+                "h2_kg_h": r["h2_output_kg_h"],
+                "h2_kg_day": r["h2_output_kg_day"],
+                "nh3_kg_h": r["nh3_output_kg_h"],
+                "nh3_kg_day": r["nh3_output_kg_day"],
+                "area_ha": r["field_area_ha"],
+                "aice_runtime_h_day": r["engines"]["A-ICE-G1"]["runtime_from_1day_charge_h"],
+                "pem_runtime_h_day": r["engines"]["PEM-PB-50"]["runtime_from_1day_charge_h"],
+                "hyp_runtime_h_day": r["engines"]["HY-P100"]["runtime_from_1day_charge_h"],
+            })
+        self.n_modules = original_n
+        return results
+
+
+# ═══════════════════════════════════════════════════════════════
+# Charging Metrics (all metrics exposure)
+# ═══════════════════════════════════════════════════════════════
+@dataclass
+class ChargingMetrics:
+    """
+    Comprehensive charging hub metrics extracted from pipeline results.
+
+    Provides all metrics in a flat, dashboard-friendly format.
+    """
+
+    @staticmethod
+    def extract(pipeline_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract all charging metrics from a pipeline run."""
+        r = pipeline_result
+        e = r["electrolysis"]
+        hb = r["haber_bosch"]
+
+        return {
+            # ── Capacity ──────────────────────────────────────
+            "solar_capacity_kW": r["solar_peak_kW"],
+            "solar_capacity_MW": round(r["solar_peak_kW"] / 1000, 3),
+            "n_granas_modules": r["n_modules"],
+            "field_area_m2": r["field_area_m2"],
+            "field_area_ha": r["field_area_ha"],
+            "annual_solar_MWh": r["solar_annual_MWh"],
+
+            # ── Electrolyzer ──────────────────────────────────
+            "electrolyzer_input_kW": r["electrolyzer_input_kW"],
+            "electrolyzer_cells": e["n_cells"],
+            "current_density_A_cm2": e["current_density_A_cm2"],
+            "cell_voltage_V": e["cell_voltage_V"],
+            "stack_temp_C": e["stack_temp_C"],
+            "h2_pressure_bar": e["h2_pressure_bar"],
+
+            # ── Production Rates ──────────────────────────────
+            "h2_rate_kg_h": r["h2_output_kg_h"],
+            "h2_rate_kg_day": r["h2_output_kg_day"],
+            "nh3_rate_kg_h": r["nh3_output_kg_h"],
+            "nh3_rate_kg_day": r["nh3_output_kg_day"],
+            "h2o_consumption_kg_h": e["h2o_consumption_kg_h"],
+            "o2_coproduct_kg_h": e["o2_kg_h"],
+
+            # ── Energy Metrics ────────────────────────────────
+            "kwh_per_kg_h2": e["kwh_per_kg_h2"],
+            "h2_energy_content_kWh_h": r["h2_energy_kWh_h"],
+            "nh3_energy_content_kWh_h": r["nh3_energy_kWh_h"],
+            "total_fuel_energy_kWh_h": round(r["h2_energy_kWh_h"] + r["nh3_energy_kWh_h"], 2),
+            "grid_export_kW": r["grid_export_kW"],
+            "conversion_loss_kW": r["conversion_loss_kW"],
+
+            # ── Efficiency Chain ──────────────────────────────
+            "solar_to_wire_eff_pct": r["solar_to_wire_eff_pct"],
+            "wire_to_h2_eff_pct": r["wire_to_h2_eff_pct"],
+            "overall_h2_eff_pct": r["overall_h2_eff_pct"],
+            "hb_conversion_eff_pct": r["hb_conversion_eff_pct"],
+            "overall_solar_to_fuel_pct": r["overall_solar_to_fuel_pct"],
+            "cell_efficiency_pct": e["cell_efficiency_pct"],
+            "system_efficiency_pct": e["system_efficiency_pct"],
+
+            # ── Storage ───────────────────────────────────────
+            "h2_tank_capacity_kg": r["h2_tank_capacity_kg"],
+            "nh3_tank_capacity_kg": r["nh3_tank_capacity_kg"],
+            "h2_fill_time_h": r["h2_fill_time_h"],
+            "nh3_fill_time_h": r["nh3_fill_time_h"],
+
+            # ── Environmental ─────────────────────────────────
+            "co2_per_kg_h2": 0.0,
+            "co2_per_kg_nh3": 0.0,
+            "co2_avoided_vs_smr_kg_h": r["co2_avoided_vs_smr_kg_h"],
+            "co2_avoided_vs_hb_kg_h": r["co2_avoided_vs_hb_kg_h"],
+
+            # ── Engine Readiness ──────────────────────────────
+            "engines": r["engines"],
+        }
