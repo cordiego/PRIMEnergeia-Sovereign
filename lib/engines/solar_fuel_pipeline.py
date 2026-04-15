@@ -716,6 +716,159 @@ class GranasChargingHub:
         self.n_modules = original_n
         return results
 
+    def day_night_cycle(
+        self,
+        engine_load_pct: float = 75.0,
+        engines_active: Dict[str, int] = None,
+        h2_tank_start_pct: float = 0.0,
+        nh3_tank_start_pct: float = 0.0,
+    ) -> List[Dict[str, Any]]:
+        """
+        Simulate a full 24-hour day/night cycle.
+
+        DAY  (06:00–18:00): Granas solar → electrolyzer → H₂/NH₃ fills tanks
+        NIGHT (18:00–06:00): Engines draw from tanks → mobility (km, kWh)
+
+        Parameters
+        ----------
+        engine_load_pct : float
+            Engine load during night operation (%).
+        engines_active : dict
+            How many of each engine are active at night.
+            Default: {"A-ICE-G1": 1, "PEM-PB-50": 1, "HY-P100": 1}
+        h2_tank_start_pct : float
+            H₂ tank starting level (% of capacity).
+        nh3_tank_start_pct : float
+            NH₃ tank starting level (% of capacity).
+
+        Returns
+        -------
+        List of hourly state dicts with tank levels, production,
+        consumption, mobility, and engine status.
+        """
+        if engines_active is None:
+            engines_active = {"A-ICE-G1": 1, "PEM-PB-50": 1, "HY-P100": 1}
+
+        # Mobility assumptions (km/kWh delivered to wheels)
+        MOBILITY_KM_PER_KWH = {
+            "A-ICE-G1": 0.8,    # Heavy truck: ~0.8 km/kWh
+            "PEM-PB-50": 3.5,   # Light vehicle/drone: ~3.5 km/kWh
+            "HY-P100": 1.2,     # Marine/gen: ~1.2 km/kWh
+        }
+
+        # Initialize tank levels (kg)
+        h2_level = self.h2_tank_capacity_kg * h2_tank_start_pct / 100.0
+        nh3_level = self.nh3_tank_capacity_kg * nh3_tank_start_pct / 100.0
+
+        cycle = []
+        cumulative_km = {name: 0.0 for name in ENGINE_SPECS}
+        cumulative_kWh = {name: 0.0 for name in ENGINE_SPECS}
+        cumulative_fuel = {name: 0.0 for name in ENGINE_SPECS}
+
+        for h in range(24):
+            is_day = 6 <= h < 18
+            if is_day:
+                # ── DAYTIME: Solar charges tanks ──────────────
+                irr = max(0, np.sin((h - 6) * np.pi / 12))
+                r = self.run_pipeline(irradiance_factor=irr)
+                h2_produced = r["h2_output_kg_h"]
+                nh3_produced = r["nh3_output_kg_h"]
+                solar_kW = r["solar_peak_kW"]
+
+                # Fill tanks (capped at capacity)
+                h2_level = min(self.h2_tank_capacity_kg, h2_level + h2_produced)
+                nh3_level = min(self.nh3_tank_capacity_kg, nh3_level + nh3_produced)
+
+                engine_state = {}
+                for name in ENGINE_SPECS:
+                    engine_state[name] = {
+                        "status": "⏸️ Standby",
+                        "fuel_consumed_kg": 0.0,
+                        "power_delivered_kW": 0.0,
+                        "km_this_hour": 0.0,
+                    }
+            else:
+                # ── NIGHTTIME: Engines consume fuel ──────────
+                irr = 0.0
+                solar_kW = 0.0
+                h2_produced = 0.0
+                nh3_produced = 0.0
+
+                engine_state = {}
+                for name, spec in ENGINE_SPECS.items():
+                    n_active = engines_active.get(name, 0)
+                    if n_active == 0:
+                        engine_state[name] = {
+                            "status": "⏸️ Standby",
+                            "fuel_consumed_kg": 0.0,
+                            "power_delivered_kW": 0.0,
+                            "km_this_hour": 0.0,
+                        }
+                        continue
+
+                    fuel_rate = spec.fuel_rate_at_load(engine_load_pct) * n_active
+                    power_out = spec.rated_power_kW * (engine_load_pct / 100) * n_active
+
+                    # Check fuel availability
+                    if spec.fuel_type == "NH₃":
+                        available = nh3_level
+                        actual_fuel = min(fuel_rate, available)
+                        nh3_level = max(0, nh3_level - actual_fuel)
+                    else:
+                        available = h2_level
+                        actual_fuel = min(fuel_rate, available)
+                        h2_level = max(0, h2_level - actual_fuel)
+
+                    # Actual power (proportional to fuel delivered)
+                    delivery_ratio = actual_fuel / max(fuel_rate, 1e-10)
+                    actual_power = power_out * delivery_ratio
+
+                    # Mobility: km driven this hour
+                    km_kwh = MOBILITY_KM_PER_KWH.get(name, 1.0)
+                    km_h = actual_power * km_kwh
+
+                    # Empty tank?
+                    if actual_fuel < 0.001:
+                        status = "🔴 Empty Tank"
+                    elif delivery_ratio < 0.5:
+                        status = "🟡 Low Fuel"
+                    else:
+                        status = f"🟢 Running ({n_active}×)"
+
+                    cumulative_km[name] += km_h
+                    cumulative_kWh[name] += actual_power
+                    cumulative_fuel[name] += actual_fuel
+
+                    engine_state[name] = {
+                        "status": status,
+                        "fuel_consumed_kg": round(actual_fuel, 4),
+                        "power_delivered_kW": round(actual_power, 2),
+                        "km_this_hour": round(km_h, 2),
+                    }
+
+            h2_soc = (h2_level / self.h2_tank_capacity_kg) * 100
+            nh3_soc = (nh3_level / self.nh3_tank_capacity_kg) * 100
+
+            cycle.append({
+                "hour": h,
+                "phase": "☀️ DAY — Charging" if is_day else "🌙 NIGHT — Mobility",
+                "is_day": is_day,
+                "irradiance_factor": round(irr, 3),
+                "solar_kW": round(solar_kW, 2),
+                "h2_produced_kg": round(h2_produced, 4),
+                "nh3_produced_kg": round(nh3_produced, 4),
+                "h2_tank_kg": round(h2_level, 2),
+                "h2_tank_soc_pct": round(h2_soc, 1),
+                "nh3_tank_kg": round(nh3_level, 2),
+                "nh3_tank_soc_pct": round(nh3_soc, 1),
+                "engines": engine_state,
+                "cumulative_km": {k: round(v, 1) for k, v in cumulative_km.items()},
+                "cumulative_kWh": {k: round(v, 1) for k, v in cumulative_kWh.items()},
+                "cumulative_fuel_kg": {k: round(v, 3) for k, v in cumulative_fuel.items()},
+            })
+
+        return cycle
+
 
 # ═══════════════════════════════════════════════════════════════
 # Charging Metrics (all metrics exposure)

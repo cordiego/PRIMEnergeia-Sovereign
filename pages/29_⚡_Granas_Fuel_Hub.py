@@ -220,8 +220,9 @@ st.divider()
 # ═══════════════════════════════════════════════════════════════
 # Tabs
 # ═══════════════════════════════════════════════════════════════
-tab1, tab2, tab3, tab4, tab5 = st.tabs([
+tab1, tab_dn, tab2, tab3, tab4, tab5 = st.tabs([
     "🔋 Solar → Fuel Pipeline",
+    "🌗 Day/Night Cycle",
     "⚡ Charging Metrics",
     "🚀 Engine Fuel Readiness",
     "📊 Efficiency Waterfall",
@@ -359,6 +360,186 @@ with tab1:
     d3.metric("⚗️ NH₃ / Day", f"{total_nh3_day:.1f} kg")
     d4.metric("💡 Equiv. Homes", f"{total_solar_kwh * 365 / 10000:.0f}",
               help="Based on 10,000 kWh/yr per household")
+
+
+# ═══════════════════════════════════════════════════════════════
+# TAB DAY/NIGHT: Solar Charging → Tank Buffer → Nighttime Mobility
+# ═══════════════════════════════════════════════════════════════
+with tab_dn:
+    st.subheader("🌗 Day/Night Ecosystem — Solar Charges, Engines Move")
+    st.caption(
+        "☀️ DAY (06–18h): Granas panels produce fuel, tanks fill  ·  "
+        "🌙 NIGHT (18–06h): Engines consume stored fuel for mobility"
+    )
+
+    # Controls for day/night cycle
+    dn_c1, dn_c2, dn_c3, dn_c4 = st.columns(4)
+    with dn_c1:
+        dn_load = st.slider("Night Engine Load (%)", 25, 100, 75, 5,
+                             key="dn_load",
+                             help="Engine load during nighttime operation")
+    with dn_c2:
+        n_aice = st.number_input("A-ICE-G1 (NH₃)", 0, 10, 1, key="n_aice",
+                                  help="Number of ammonia engines active at night")
+    with dn_c3:
+        n_pem = st.number_input("PEM-PB-50 (H₂)", 0, 10, 1, key="n_pem",
+                                 help="Number of fuel cells active at night")
+    with dn_c4:
+        n_hyp = st.number_input("HY-P100 (H₂)", 0, 10, 1, key="n_hyp",
+                                 help="Number of H₂ turbines active at night")
+
+    # Run cycle simulation
+    cycle = hub.day_night_cycle(
+        engine_load_pct=dn_load,
+        engines_active={"A-ICE-G1": n_aice, "PEM-PB-50": n_pem, "HY-P100": n_hyp},
+    )
+
+    # ── KPI summary from cycle ────────────────────────────────
+    final = cycle[-1]
+    peak_h2_soc = max(c["h2_tank_soc_pct"] for c in cycle)
+    peak_nh3_soc = max(c["nh3_tank_soc_pct"] for c in cycle)
+    total_km = sum(final["cumulative_km"].values())
+    total_kWh_delivered = sum(final["cumulative_kWh"].values())
+
+    dk1, dk2, dk3, dk4, dk5, dk6 = st.columns(6)
+    dk1.metric("☀️ Day Hours", "12 h", help="Solar charging window: 06:00–18:00")
+    dk2.metric("🌙 Night Hours", "12 h", help="Engine mobility window: 18:00–06:00")
+    dk3.metric("⛽ Peak H₂ SOC", f"{peak_h2_soc:.1f}%", help="Maximum H₂ tank level reached during day")
+    dk4.metric("⛽ Peak NH₃ SOC", f"{peak_nh3_soc:.1f}%", help="Maximum NH₃ tank level reached during day")
+    dk5.metric("🛣️ Total km", f"{total_km:.0f}", help="Combined distance across all engines (night)")
+    dk6.metric("⚡ Energy Delivered", f"{total_kWh_delivered:.0f} kWh",
+              help="Total mechanical/electrical energy delivered by engines")
+
+    st.divider()
+
+    # ── Tank SOC + Solar/Engine Power chart ────────────────────
+    hours = [c["hour"] for c in cycle]
+    h2_soc = [c["h2_tank_soc_pct"] for c in cycle]
+    nh3_soc = [c["nh3_tank_soc_pct"] for c in cycle]
+    solar_arr = [c["solar_kW"] for c in cycle]
+
+    # Engine power consumed per hour
+    eng_power = []
+    for c in cycle:
+        total_p = sum(e["power_delivered_kW"] for e in c["engines"].values())
+        eng_power.append(total_p)
+
+    fig_dn = make_subplots(specs=[[{"secondary_y": True}]])
+
+    # Day/night background shading
+    fig_dn.add_vrect(x0=0, x1=6, fillcolor="rgba(30,30,80,0.3)",
+                     line_width=0, annotation_text="🌙 Night", annotation_position="top left")
+    fig_dn.add_vrect(x0=6, x1=18, fillcolor="rgba(255,215,0,0.08)",
+                     line_width=0, annotation_text="☀️ Day", annotation_position="top left")
+    fig_dn.add_vrect(x0=18, x1=23, fillcolor="rgba(30,30,80,0.3)",
+                     line_width=0, annotation_text="🌙 Night", annotation_position="top left")
+
+    # Tank SOC (primary y)
+    fig_dn.add_trace(go.Scatter(
+        x=hours, y=h2_soc, name="H₂ Tank SOC (%)",
+        line=dict(color="#00BFFF", width=3),
+        fill="tozeroy", fillcolor="rgba(0,191,255,0.1)",
+    ), secondary_y=False)
+    fig_dn.add_trace(go.Scatter(
+        x=hours, y=nh3_soc, name="NH₃ Tank SOC (%)",
+        line=dict(color="#7B68EE", width=3),
+        fill="tozeroy", fillcolor="rgba(123,104,238,0.1)",
+    ), secondary_y=False)
+
+    # Solar production + engine consumption (secondary y)
+    fig_dn.add_trace(go.Scatter(
+        x=hours, y=solar_arr, name="☀️ Solar (kW)",
+        line=dict(color="#FFD700", width=2, dash="dot"),
+    ), secondary_y=True)
+    fig_dn.add_trace(go.Bar(
+        x=hours, y=[-p for p in eng_power], name="🚀 Engine Draw (kW)",
+        marker_color="rgba(255,99,71,0.6)",
+    ), secondary_y=True)
+
+    fig_dn.update_layout(
+        template="plotly_dark", height=500,
+        title="24-Hour Day/Night Cycle — Tank SOC & Power Flows",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(size=13),
+        legend=dict(orientation="h", y=-0.18),
+        barmode="relative",
+    )
+    fig_dn.update_xaxes(title_text="Hour of Day", dtick=2,
+                         gridcolor="rgba(128,128,128,0.2)")
+    fig_dn.update_yaxes(title_text="Tank SOC (%)", range=[0, 105],
+                         secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
+    fig_dn.update_yaxes(title_text="Power (kW)", secondary_y=True)
+    st.plotly_chart(fig_dn, use_container_width=True)
+
+    # ── Cumulative mobility chart ─────────────────────────────
+    st.subheader("🛣️ Nighttime Mobility — Cumulative Distance")
+
+    fig_km = go.Figure()
+    for eng_name, color in [("A-ICE-G1", "#00c878"), ("PEM-PB-50", "#00BFFF"), ("HY-P100", "#FFD700")]:
+        km_arr = [c["cumulative_km"][eng_name] for c in cycle]
+        fig_km.add_trace(go.Scatter(
+            x=hours, y=km_arr, name=eng_name,
+            line=dict(color=color, width=3),
+        ))
+    fig_km.add_vrect(x0=6, x1=18, fillcolor="rgba(255,215,0,0.05)", line_width=0)
+    fig_km.add_vrect(x0=0, x1=6, fillcolor="rgba(30,30,80,0.15)", line_width=0)
+    fig_km.add_vrect(x0=18, x1=23, fillcolor="rgba(30,30,80,0.15)", line_width=0)
+    fig_km.update_layout(
+        template="plotly_dark", height=380,
+        title="Cumulative Distance by Engine (km)",
+        xaxis_title="Hour of Day", yaxis_title="Cumulative km",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        font=dict(size=13),
+        yaxis=dict(gridcolor="rgba(128,128,128,0.2)"),
+    )
+    fig_km.update_xaxes(dtick=2)
+    st.plotly_chart(fig_km, use_container_width=True)
+
+    # ── Per-engine night results ──────────────────────────────
+    st.subheader("🚀 Night Operation Summary")
+    for eng_name in ["A-ICE-G1", "PEM-PB-50", "HY-P100"]:
+        spec = ENGINE_SPECS[eng_name]
+        km = final["cumulative_km"][eng_name]
+        kwh = final["cumulative_kWh"][eng_name]
+        fuel_used = final["cumulative_fuel_kg"][eng_name]
+
+        # Find last status
+        last_status = "⏸️ Standby"
+        for c in reversed(cycle):
+            if not c["is_day"]:
+                last_status = c["engines"][eng_name]["status"]
+                break
+
+        r1, r2, r3, r4, r5 = st.columns(5)
+        fuel_emoji = "⚗️" if spec.fuel_type == "NH₃" else "💧"
+        r1.metric(f"{fuel_emoji} {eng_name}", last_status)
+        r2.metric("Fuel Used", f"{fuel_used:.2f} kg {spec.fuel_type}")
+        r3.metric("Energy", f"{kwh:.0f} kWh")
+        r4.metric("Distance", f"{km:.0f} km")
+        r5.metric("Efficiency", f"{km / max(fuel_used, 0.01):.1f} km/kg")
+
+    # Ecosystem diagram
+    st.markdown("---")
+    st.markdown(f"""
+### 🔄 The Granas Ecosystem
+```
+      ☀️ DAYTIME (06:00 – 18:00)                    🌙 NIGHTTIME (18:00 – 06:00)
+┌───────────────────────────────────┐      ┌────────────────────────────────────────┐
+│                                   │      │                                        │
+│  🔋 Granas Modules ({n_modules:,}×)        │      │  🚀 ENGINES consume stored fuel:       │
+│      ↓ {result['solar_peak_kW']:.0f} kW solar             │      │                                        │
+│  💧 PEM Electrolyzer              │      │  A-ICE-G1: {final['cumulative_fuel_kg']['A-ICE-G1']:.1f} kg NH₃ → {final['cumulative_km']['A-ICE-G1']:.0f} km     │
+│      ↓ H₂ + O₂                   │      │  PEM-PB-50: {final['cumulative_fuel_kg']['PEM-PB-50']:.1f} kg H₂ → {final['cumulative_km']['PEM-PB-50']:.0f} km    │
+│  ⚗️ Haber-Bosch → NH₃            │      │  HY-P100: {final['cumulative_fuel_kg']['HY-P100']:.1f} kg H₂ → {final['cumulative_km']['HY-P100']:.0f} km      │
+│      ↓                            │      │                                        │
+│  ⛽ TANKS FILL                    │  →   │  ⛽ TANKS DRAIN                         │
+│  H₂: 0% → {peak_h2_soc:.0f}%  (peak)          │      │  H₂: {peak_h2_soc:.0f}% → {final['h2_tank_soc_pct']:.0f}%                        │
+│  NH₃: 0% → {peak_nh3_soc:.0f}%  (peak)         │      │  NH₃: {peak_nh3_soc:.0f}% → {final['nh3_tank_soc_pct']:.0f}%                       │
+│                                   │      │                                        │
+│  Zero emissions, zero noise       │      │  Zero-carbon mobility: {total_km:.0f} km total   │
+└───────────────────────────────────┘      └────────────────────────────────────────┘
+```
+""")
 
 
 # ═══════════════════════════════════════════════════════════════
