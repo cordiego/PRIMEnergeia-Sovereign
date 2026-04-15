@@ -19,23 +19,24 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 # ─── Import pipeline engine ──────────────────────────────────
-_lib_engines = _os.path.join(_root, "lib", "engines")
-if _lib_engines not in _sys.path:
-    _sys.path.insert(0, _lib_engines)
+# Use importlib to load directly (avoids __init__.py package conflict)
+import importlib.util as _ilu
+_pipeline_path = _os.path.join(_root, "lib", "engines", "solar_fuel_pipeline.py")
+_spec = _ilu.spec_from_file_location("solar_fuel_pipeline", _pipeline_path)
+_sfp = _ilu.module_from_spec(_spec)
+_spec.loader.exec_module(_sfp)
 
-from solar_fuel_pipeline import (
-    GranasChargingHub,
-    GranasStructureFeed,
-    SolarElectrolyzer,
-    HaberBoschReactor,
-    ChargingMetrics,
-    ENGINE_SPECS,
-    LHV_H2,
-    LHV_NH3,
-    HOURS_PER_YEAR,
-    VEHICLE_FLEET,
-    PEM_TRANSPORT_FLEET,
-)
+GranasChargingHub = _sfp.GranasChargingHub
+GranasStructureFeed = _sfp.GranasStructureFeed
+SolarElectrolyzer = _sfp.SolarElectrolyzer
+HaberBoschReactor = _sfp.HaberBoschReactor
+ChargingMetrics = _sfp.ChargingMetrics
+ENGINE_SPECS = _sfp.ENGINE_SPECS
+LHV_H2 = _sfp.LHV_H2
+LHV_NH3 = _sfp.LHV_NH3
+HOURS_PER_YEAR = _sfp.HOURS_PER_YEAR
+VEHICLE_FLEET = _sfp.VEHICLE_FLEET
+PEM_TRANSPORT_FLEET = _sfp.PEM_TRANSPORT_FLEET
 
 # ═══════════════════════════════════════════════════════════════
 # Page Config & Styling
