@@ -678,6 +678,7 @@ class PEMTransportIntegration:
 
 
 PEM_TRANSPORT_FLEET = {
+    # ── LIGHT VEHICLES ─────────────────────────────────────────
     "H₂ Sedan": PEMTransportIntegration(
         name="H₂ Sedan", category="Sedan", emoji="🚗",
         base_platform="Mid-size sedan (Mirai-class)",
@@ -696,15 +697,7 @@ PEM_TRANSPORT_FLEET = {
         refuel_time_min=6, retrofit_complexity="Medium",
         existing_platforms="Hyundai Nexo XL, BMW iX5 H₂, Land Rover FCEV",
     ),
-    "City Bus": PEMTransportIntegration(
-        name="City Bus", category="Bus", emoji="🚌",
-        base_platform="12m city transit bus",
-        n_stacks=4, stack_efficiency=0.55, h2_tank_kg=35.0,
-        tank_pressure_bar=350, curb_weight_kg=13_500, payload_kg=7_000,
-        cruise_speed_kmh=40, energy_consumption_kWh_km=0.80,
-        refuel_time_min=12, retrofit_complexity="Low",
-        existing_platforms="MAN Lion's City H₂, Toyota Sora, CaetanoBus",
-    ),
+    # ── COMMERCIAL VEHICLES ────────────────────────────────────
     "Delivery Van": PEMTransportIntegration(
         name="Delivery Van", category="Van", emoji="🚐",
         base_platform="Last-mile delivery van",
@@ -714,32 +707,24 @@ PEM_TRANSPORT_FLEET = {
         refuel_time_min=5, retrofit_complexity="Low",
         existing_platforms="Mercedes Sprinter FCEV, Stellantis, Renault Master H₂",
     ),
-    "Warehouse Forklift": PEMTransportIntegration(
-        name="Warehouse Forklift", category="Forklift", emoji="🏗️",
-        base_platform="3-ton counterbalance forklift",
-        n_stacks=1, stack_efficiency=0.55, h2_tank_kg=1.5,
-        tank_pressure_bar=350, curb_weight_kg=4_500, payload_kg=3_000,
-        cruise_speed_kmh=15, energy_consumption_kWh_km=0.50,
-        refuel_time_min=3, retrofit_complexity="Low",
-        existing_platforms="Toyota Material Handling, Plug Power, Linde H₂",
-    ),
-    "Commuter Train": PEMTransportIntegration(
-        name="Commuter Train", category="Train", emoji="🚆",
-        base_platform="2-car regional DMU replacement",
+    "Long-Haul Truck": PEMTransportIntegration(
+        name="Long-Haul Truck", category="Truck", emoji="🚛",
+        base_platform="Class 8 semi-tractor (40-ton GCW)",
         n_stacks=8, stack_efficiency=0.55, h2_tank_kg=80.0,
-        tank_pressure_bar=350, curb_weight_kg=75_000, payload_kg=15_000,
-        cruise_speed_kmh=80, energy_consumption_kWh_km=2.50,
-        refuel_time_min=20, retrofit_complexity="High",
-        existing_platforms="Alstom Coradia iLint, Siemens Mireo Plus H",
-    ),
-    "Harbor Ferry": PEMTransportIntegration(
-        name="Harbor Ferry", category="Ferry", emoji="⛴️",
-        base_platform="50-pax harbor/river ferry",
-        n_stacks=6, stack_efficiency=0.55, h2_tank_kg=50.0,
-        tank_pressure_bar=350, curb_weight_kg=40_000, payload_kg=5_000,
-        cruise_speed_kmh=20, energy_consumption_kWh_km=3.00,
+        tank_pressure_bar=700, curb_weight_kg=9_000, payload_kg=25_000,
+        cruise_speed_kmh=90, energy_consumption_kWh_km=1.20,
         refuel_time_min=15, retrofit_complexity="Medium",
-        existing_platforms="Norled MF Hydra, CMB Hydrocat, FPS Waal",
+        existing_platforms="Hyundai XCIENT, Nikola Tre FCEV, Hyzon HyMax",
+    ),
+    # ── PUBLIC TRANSIT ─────────────────────────────────────────
+    "City Bus": PEMTransportIntegration(
+        name="City Bus", category="Bus", emoji="🚌",
+        base_platform="12m city transit bus",
+        n_stacks=4, stack_efficiency=0.55, h2_tank_kg=35.0,
+        tank_pressure_bar=350, curb_weight_kg=13_500, payload_kg=7_000,
+        cruise_speed_kmh=40, energy_consumption_kWh_km=0.80,
+        refuel_time_min=12, retrofit_complexity="Low",
+        existing_platforms="MAN Lion's City H₂, Toyota Sora, CaetanoBus",
     ),
     "Airport Shuttle": PEMTransportIntegration(
         name="Airport Shuttle", category="Shuttle", emoji="🚎",
@@ -750,7 +735,102 @@ PEM_TRANSPORT_FLEET = {
         refuel_time_min=3, retrofit_complexity="Low",
         existing_platforms="Toyota e-Palette H₂, Navya, EasyMile",
     ),
+    "Commuter Train": PEMTransportIntegration(
+        name="Commuter Train", category="Train", emoji="🚆",
+        base_platform="2-car regional DMU replacement",
+        n_stacks=8, stack_efficiency=0.55, h2_tank_kg=80.0,
+        tank_pressure_bar=350, curb_weight_kg=75_000, payload_kg=15_000,
+        cruise_speed_kmh=80, energy_consumption_kWh_km=2.50,
+        refuel_time_min=20, retrofit_complexity="High",
+        existing_platforms="Alstom Coradia iLint, Siemens Mireo Plus H",
+    ),
+    # ── MARINE ─────────────────────────────────────────────────
+    "Harbor Ferry": PEMTransportIntegration(
+        name="Harbor Ferry", category="Ferry", emoji="⛴️",
+        base_platform="50-pax harbor/river ferry",
+        n_stacks=6, stack_efficiency=0.55, h2_tank_kg=50.0,
+        tank_pressure_bar=350, curb_weight_kg=40_000, payload_kg=5_000,
+        cruise_speed_kmh=20, energy_consumption_kWh_km=3.00,
+        refuel_time_min=15, retrofit_complexity="Medium",
+        existing_platforms="Norled MF Hydra, CMB Hydrocat, FPS Waal",
+    ),
+    "Cargo Ship": PEMTransportIntegration(
+        name="Cargo Ship", category="Ship", emoji="🚢",
+        base_platform="Coastal / short-sea cargo vessel",
+        n_stacks=60, stack_efficiency=0.52, h2_tank_kg=2_000.0,
+        tank_pressure_bar=350, curb_weight_kg=500_000, payload_kg=50_000,
+        cruise_speed_kmh=28, energy_consumption_kWh_km=15.0,
+        refuel_time_min=120, retrofit_complexity="High",
+        existing_platforms="Energy Observer 2, CMB.TECH Hydroville, DFDS H₂",
+    ),
+    # ── AVIATION ───────────────────────────────────────────────
+    "Regional Aircraft": PEMTransportIntegration(
+        name="Regional Aircraft", category="Aircraft", emoji="✈️",
+        base_platform="19-seat commuter / regional turboprop replacement",
+        n_stacks=20, stack_efficiency=0.55, h2_tank_kg=400.0,
+        tank_pressure_bar=700, curb_weight_kg=8_000, payload_kg=2_000,
+        cruise_speed_kmh=450, energy_consumption_kWh_km=4.50,
+        refuel_time_min=25, retrofit_complexity="High",
+        existing_platforms="ZeroAvia ZA600, H2FLY, Universal Hydrogen Dash-8",
+    ),
+    "Surveillance Drone": PEMTransportIntegration(
+        name="Surveillance Drone", category="Drone", emoji="🛸",
+        base_platform="Long-endurance fixed-wing UAV",
+        n_stacks=1, stack_efficiency=0.60, h2_tank_kg=5.0,
+        tank_pressure_bar=350, curb_weight_kg=25, payload_kg=15,
+        cruise_speed_kmh=80, energy_consumption_kWh_km=0.08,
+        refuel_time_min=3, retrofit_complexity="Low",
+        existing_platforms="HES Hycopter, Intelligent Energy FCPM, DMI H₂",
+    ),
+    "Cargo Drone": PEMTransportIntegration(
+        name="Cargo Drone", category="Drone", emoji="📦",
+        base_platform="Heavy-lift delivery / logistics drone",
+        n_stacks=2, stack_efficiency=0.58, h2_tank_kg=8.0,
+        tank_pressure_bar=700, curb_weight_kg=80, payload_kg=50,
+        cruise_speed_kmh=100, energy_consumption_kWh_km=0.15,
+        refuel_time_min=5, retrofit_complexity="Medium",
+        existing_platforms="Wingcopter H₂, Joby eVTOL FCEV, Pipistrel H₂",
+    ),
+    # ── INDUSTRIAL ─────────────────────────────────────────────
+    "Warehouse Forklift": PEMTransportIntegration(
+        name="Warehouse Forklift", category="Forklift", emoji="🏗️",
+        base_platform="3-ton counterbalance forklift",
+        n_stacks=1, stack_efficiency=0.55, h2_tank_kg=1.5,
+        tank_pressure_bar=350, curb_weight_kg=4_500, payload_kg=3_000,
+        cruise_speed_kmh=15, energy_consumption_kWh_km=0.50,
+        refuel_time_min=3, retrofit_complexity="Low",
+        existing_platforms="Toyota Material Handling, Plug Power, Linde H₂",
+    ),
+    "Mining Haul Truck": PEMTransportIntegration(
+        name="Mining Haul Truck", category="Mining", emoji="⛏️",
+        base_platform="100-ton off-highway mining haul truck",
+        n_stacks=20, stack_efficiency=0.52, h2_tank_kg=200.0,
+        tank_pressure_bar=350, curb_weight_kg=85_000, payload_kg=100_000,
+        cruise_speed_kmh=40, energy_consumption_kWh_km=5.0,
+        refuel_time_min=20, retrofit_complexity="High",
+        existing_platforms="Anglo American nuGen, ENGIE/First Mode, Komatsu H₂",
+    ),
+    # ── SPECIALTY ──────────────────────────────────────────────
+    "H₂ Racing Car": PEMTransportIntegration(
+        name="H₂ Racing Car", category="Racing", emoji="🏎️",
+        base_platform="Open-wheel H₂ race car (F1-class)",
+        n_stacks=6, stack_efficiency=0.58, h2_tank_kg=4.0,
+        tank_pressure_bar=700, curb_weight_kg=800, payload_kg=80,
+        cruise_speed_kmh=220, energy_consumption_kWh_km=0.35,
+        refuel_time_min=2, retrofit_complexity="High",
+        existing_platforms="GreenGT H₂, Forze IX, MissionH24 LMPH2G",
+    ),
+    "H₂ Ambulance": PEMTransportIntegration(
+        name="H₂ Ambulance", category="Emergency", emoji="🚑",
+        base_platform="Type III ambulance / emergency response",
+        n_stacks=3, stack_efficiency=0.58, h2_tank_kg=8.0,
+        tank_pressure_bar=700, curb_weight_kg=5_000, payload_kg=1_500,
+        cruise_speed_kmh=120, energy_consumption_kWh_km=0.35,
+        refuel_time_min=5, retrofit_complexity="Medium",
+        existing_platforms="HHCS H₂ Ambulance, ULEMCo, Arcola Energy",
+    ),
 }
+
 
 
 # ═══════════════════════════════════════════════════════════════
