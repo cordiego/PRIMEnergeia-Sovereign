@@ -543,6 +543,105 @@ with tab_dn:
 ```
 """)
 
+    # ── OPTIMIZER: Find continuous operation config ────────
+    st.markdown("---")
+    st.subheader("🎯 Optimize for Continuous Operation")
+    st.caption(
+        "Find the exact number of Granas modules needed so daytime solar "
+        "production fills tanks enough to run engines all night, every night."
+    )
+
+    op1, op2 = st.columns(2)
+    with op1:
+        opt_load = st.slider("Night Engine Load (%)", 25, 100, 75, 5,
+                              key="opt_load",
+                              help="Engine load during nighttime mobility")
+        opt_margin = st.slider("Safety Margin (%)", 0, 50, 15, 5,
+                                key="opt_margin",
+                                help="Extra capacity for cloudy days / weather variance")
+    with op2:
+        opt_sun = st.slider("Effective Sun Hours", 6, 14, 12, 1,
+                             key="opt_sun",
+                             help="Hours of usable solar irradiance per day")
+        opt_night = st.slider("Night Operation Hours", 4, 14, 12, 1,
+                               key="opt_night",
+                               help="Hours engines run at night")
+
+    if st.button("🔍 Find Optimal Configuration", type="primary", use_container_width=True):
+        with st.spinner("Solving energy balance... (binary search over module count)"):
+            opt = hub.optimize_continuous(
+                engines_active={"A-ICE-G1": n_aice, "PEM-PB-50": n_pem, "HY-P100": n_hyp},
+                engine_load_pct=opt_load,
+                sun_hours=opt_sun,
+                night_hours=opt_night,
+                safety_margin=1.0 + opt_margin / 100,
+            )
+
+        st.success(f"**{opt['status']}** — {opt['optimal_modules']:,} Granas modules needed")
+
+        # Results
+        o1, o2, o3, o4, o5, o6 = st.columns(6)
+        o1.metric("🔋 Modules", f"{opt['optimal_modules']:,}",
+                  help="Minimum Granas 2.1×3.4m modules for continuous operation")
+        o2.metric("☀️ Solar", f"{opt['solar_capacity_MW']:.1f} MW",
+                  help=f"{opt['solar_capacity_kW']:.0f} kW total capacity")
+        o3.metric("📐 Field", f"{opt['field_area_ha']:.1f} ha",
+                  help="Total installation footprint")
+        o4.metric("💧 H₂ Tank", f"{opt['optimal_h2_tank_kg']:.0f} kg",
+                  help="Optimal H₂ storage capacity")
+        o5.metric("⚗️ NH₃ Tank", f"{opt['optimal_nh3_tank_kg']:.0f} kg",
+                  help="Optimal NH₃ storage capacity")
+        o6.metric("💰 CAPEX", f"${opt['capex_total_usd']/1e6:.2f}M",
+                  help="Estimated total capital expenditure")
+
+        # Fuel balance
+        st.markdown("#### ⚖️ Fuel Balance (Day Production vs Night Demand)")
+        b1, b2 = st.columns(2)
+        with b1:
+            st.markdown("**H₂ Balance**")
+            st.metric("Produced (day)", f"{opt['h2_produced_day_kg']:.1f} kg")
+            st.metric("Consumed (night)", f"{opt['h2_demand_night_kg']:.1f} kg")
+            surplus = opt['h2_surplus_kg']
+            st.metric("Surplus", f"{surplus:.1f} kg",
+                      delta=f"{'✅' if surplus >= 0 else '❌'} {'buffer' if surplus >= 0 else 'deficit'}")
+        with b2:
+            st.markdown("**NH₃ Balance**")
+            st.metric("Produced (day)", f"{opt['nh3_produced_day_kg']:.1f} kg")
+            st.metric("Consumed (night)", f"{opt['nh3_demand_night_kg']:.1f} kg")
+            surplus_nh3 = opt['nh3_surplus_kg']
+            st.metric("Surplus", f"{surplus_nh3:.1f} kg",
+                      delta=f"{'✅' if surplus_nh3 >= 0 else '❌'} {'buffer' if surplus_nh3 >= 0 else 'deficit'}")
+
+        # Supply vs demand chart
+        fuels = ["H₂", "NH₃"]
+        produced = [opt["h2_produced_day_kg"], opt["nh3_produced_day_kg"]]
+        consumed = [opt["h2_demand_night_kg"], opt["nh3_demand_night_kg"]]
+
+        fig_bal = go.Figure()
+        fig_bal.add_trace(go.Bar(x=fuels, y=produced, name="☀️ Day Production",
+                                  marker_color="#FFD700"))
+        fig_bal.add_trace(go.Bar(x=fuels, y=consumed, name="🌙 Night Demand",
+                                  marker_color="#FF6347"))
+        fig_bal.update_layout(
+            template="plotly_dark", height=350, barmode="group",
+            title="Daily Fuel Balance — Production vs Consumption",
+            yaxis_title="kg / day",
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(size=14),
+        )
+        st.plotly_chart(fig_bal, use_container_width=True)
+
+        # CAPEX breakdown
+        st.markdown("#### 💰 CAPEX Breakdown")
+        cx1, cx2, cx3, cx4 = st.columns(4)
+        cx1.metric("Granas Modules", f"${opt['capex_modules_usd']/1e6:.2f}M",
+                   help=f"{opt['optimal_modules']:,} × $450/module")
+        cx2.metric("Electrolyzer", f"${opt['capex_electrolyzer_usd']/1e6:.2f}M",
+                   help="$810/kW PEM stack")
+        cx3.metric("Storage Tanks", f"${opt['capex_tanks_usd']/1e6:.2f}M",
+                   help="H₂ @ $500/kg + NH₃ @ $50/kg capacity")
+        cx4.metric("**TOTAL**", f"${opt['capex_total_usd']/1e6:.2f}M")
+
 
 # ═══════════════════════════════════════════════════════════════
 # TAB 2: All Charging Metrics

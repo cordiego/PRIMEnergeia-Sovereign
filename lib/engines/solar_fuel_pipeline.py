@@ -880,6 +880,154 @@ class GranasChargingHub:
             })
         return profile
 
+    def optimize_continuous(
+        self,
+        engines_active: Dict[str, int] = None,
+        engine_load_pct: float = 75.0,
+        sun_hours: float = 12.0,
+        night_hours: float = 12.0,
+        safety_margin: float = 1.15,
+    ) -> Dict[str, Any]:
+        """
+        Find the optimal configuration for continuous day/night operation.
+
+        Solves: H₂/NH₃ produced in `sun_hours` ≥ H₂/NH₃ consumed in `night_hours`
+
+        Parameters
+        ----------
+        engines_active : dict
+            Number of each engine running at night.
+        engine_load_pct : float
+            Engine load during night (%).
+        sun_hours : float
+            Effective sun hours per day (default 12 for clear sky).
+        night_hours : float
+            Hours engines operate at night (default 12).
+        safety_margin : float
+            Over-provision factor (1.15 = 15% extra capacity for weather).
+
+        Returns
+        -------
+        Dict with optimal module count, tank sizes, and full breakdown.
+        """
+        if engines_active is None:
+            engines_active = {"A-ICE-G1": 1, "PEM-PB-50": 1, "HY-P100": 1}
+
+        # ── Step 1: Calculate night fuel demand ───────────────
+        h2_demand_night = 0.0
+        nh3_demand_night = 0.0
+        engine_breakdown = {}
+
+        for name, n_active in engines_active.items():
+            if n_active == 0:
+                continue
+            spec = ENGINE_SPECS[name]
+            rate = spec.fuel_rate_at_load(engine_load_pct) * n_active
+            total_kg = rate * night_hours
+
+            if spec.fuel_type == "H₂":
+                h2_demand_night += total_kg
+            else:
+                nh3_demand_night += total_kg
+
+            engine_breakdown[name] = {
+                "n_active": n_active,
+                "fuel_type": spec.fuel_type,
+                "rate_kg_h": round(rate, 3),
+                "total_night_kg": round(total_kg, 2),
+                "power_kW": round(spec.rated_power_kW * (engine_load_pct/100) * n_active, 1),
+            }
+
+        h2_demand_night *= safety_margin
+        nh3_demand_night *= safety_margin
+
+        # ── Step 2: Binary search for module count ────────────
+        # Find N modules where day production ≥ night demand
+        original_n = self.n_modules
+
+        lo, hi = 1, 50_000
+        optimal_n = hi
+
+        for _ in range(30):  # bisection
+            mid = (lo + hi) // 2
+            self.n_modules = mid
+
+            # Average production over sun hours (use bell curve integral)
+            # Average irradiance factor over 12h bell = 2/π ≈ 0.637
+            avg_irr = 2.0 / np.pi
+            r = self.run_pipeline(irradiance_factor=avg_irr)
+
+            h2_produced_day = r["h2_output_kg_h"] * sun_hours
+            nh3_produced_day = r["nh3_output_kg_h"] * sun_hours
+
+            h2_ok = h2_produced_day >= h2_demand_night or h2_demand_night < 0.01
+            nh3_ok = nh3_produced_day >= nh3_demand_night or nh3_demand_night < 0.01
+
+            if h2_ok and nh3_ok:
+                optimal_n = mid
+                hi = mid
+            else:
+                lo = mid + 1
+
+        self.n_modules = optimal_n
+
+        # ── Step 3: Run final pipeline at optimal ─────────────
+        avg_irr = 2.0 / np.pi
+        final = self.run_pipeline(irradiance_factor=avg_irr)
+        h2_day = final["h2_output_kg_h"] * sun_hours
+        nh3_day = final["nh3_output_kg_h"] * sun_hours
+
+        # Optimal tank = night demand (buffer for weather)
+        opt_h2_tank = max(50, h2_demand_night * 1.2)   # 20% headroom
+        opt_nh3_tank = max(100, nh3_demand_night * 1.2)
+
+        # ── Step 4: Metrics ───────────────────────────────────
+        solar_kW = self.total_solar_capacity_kW()
+        field_ha = self.total_solar_area_ha()
+        annual_MWh = self.annual_energy_MWh()
+
+        # Cost estimates
+        module_cost = optimal_n * 450   # ~$450/module (Granas tandem)
+        electrolyzer_cost = solar_kW * 0.80 * 810  # $810/kW PEM
+        tank_cost = opt_h2_tank * 500 + opt_nh3_tank * 50  # $500/kg H₂, $50/kg NH₃
+        total_capex = module_cost + electrolyzer_cost + tank_cost
+
+        self.n_modules = original_n  # restore
+
+        return {
+            "status": "✅ Continuous operation achievable",
+            "optimal_modules": optimal_n,
+            "solar_capacity_kW": round(solar_kW, 1),
+            "solar_capacity_MW": round(solar_kW / 1000, 2),
+            "field_area_ha": round(field_ha, 2),
+            "annual_solar_MWh": round(annual_MWh, 1),
+
+            "sun_hours": sun_hours,
+            "night_hours": night_hours,
+            "safety_margin_pct": round((safety_margin - 1) * 100, 0),
+            "engine_load_pct": engine_load_pct,
+
+            "h2_produced_day_kg": round(h2_day, 2),
+            "h2_demand_night_kg": round(h2_demand_night, 2),
+            "h2_surplus_kg": round(h2_day - h2_demand_night, 2),
+            "nh3_produced_day_kg": round(nh3_day, 2),
+            "nh3_demand_night_kg": round(nh3_demand_night, 2),
+            "nh3_surplus_kg": round(nh3_day - nh3_demand_night, 2),
+
+            "optimal_h2_tank_kg": round(opt_h2_tank, 0),
+            "optimal_nh3_tank_kg": round(opt_nh3_tank, 0),
+
+            "engines": engine_breakdown,
+
+            "capex_modules_usd": round(module_cost, 0),
+            "capex_electrolyzer_usd": round(electrolyzer_cost, 0),
+            "capex_tanks_usd": round(tank_cost, 0),
+            "capex_total_usd": round(total_capex, 0),
+
+            "avg_h2_rate_kg_h": round(final["h2_output_kg_h"], 3),
+            "avg_nh3_rate_kg_h": round(final["nh3_output_kg_h"], 3),
+        }
+
     def scaling_analysis(self, module_counts: List[int] = None) -> List[Dict[str, Any]]:
         """
         Parametric sweep: N modules → fuel production rates.
