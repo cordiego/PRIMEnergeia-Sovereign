@@ -649,6 +649,47 @@ class GranasChargingHub:
         solar_kW = self.total_solar_capacity_kW()
         return solar_kW * self.solar_to_h2_fraction * self.wire_efficiency()
 
+    def _autoscale_electrolyzer(self, power_kW: float) -> None:
+        """
+        Auto-scale electrolyzer stack to absorb available power.
+
+        Sizes n_cells and active_area_cm2 so the stack can absorb
+        the full power input at optimal current density (~2.0 A/cm²).
+        This matches the industrial-scale approach in the PRIMEnergeia
+        H₂ page (page 8), which operates at MW-scale electrolysis.
+
+        Rule: P = V_cell × j × A_cell × n_cells
+              → A_cell × n_cells = P / (V_cell × j)
+
+        At j=2.0 A/cm², V_cell ≈ 1.85V:
+          Stack Area = P_W / (1.85 × 2.0) = P_W / 3.7 cm²
+
+        We distribute this across cells of 1,000 cm² each (industrial grade).
+        """
+        TARGET_J = 2.0         # Optimal current density (A/cm²)
+        CELL_AREA = 1000.0     # Industrial PEM cell area (cm²)
+        V_APPROX = 1.85        # Approximate cell voltage at 2 A/cm²
+
+        power_W = power_kW * 1000
+        if power_W < 100:
+            return  # Too small to bother
+
+        # Total stack area needed
+        total_area_cm2 = power_W / (V_APPROX * TARGET_J)
+
+        # Number of cells (min 10, max 500 per stack)
+        n_cells = max(10, min(500, int(total_area_cm2 / CELL_AREA)))
+
+        # Adjust cell area to exactly match
+        if n_cells > 0:
+            actual_cell_area = total_area_cm2 / n_cells
+            actual_cell_area = max(200, min(5000, actual_cell_area))  # Clamp
+        else:
+            actual_cell_area = CELL_AREA
+
+        self.electrolyzer.n_cells = n_cells
+        self.electrolyzer.active_area_cm2 = actual_cell_area
+
     def run_pipeline(self, irradiance_factor: float = 1.0) -> Dict[str, Any]:
         """
         Execute the full solar-to-fuel pipeline at a given irradiance factor.
@@ -673,7 +714,10 @@ class GranasChargingHub:
         conversion_loss_kW = solar_kW * self.solar_to_h2_fraction * (1 - wire_eff)
 
         # ── Stage 3: PEM Electrolysis (H₂O → H₂) ────────────
+        # Auto-scale electrolyzer stack to match available power
+        # (page 8 operates at MW scale — stack must grow with hub)
         if electrolyzer_kW > 0.1:
+            self._autoscale_electrolyzer(electrolyzer_kW)
             h2_data = self.electrolyzer.h2_production(electrolyzer_kW)
         else:
             h2_data = {
