@@ -66,9 +66,9 @@ class GranasStructureFeed:
     cell_voc_mV: float = 1132.0          # Voc per cell (mV)
     cell_jsc_mA_cm2: float = 37.0        # Jsc per cell (mA/cm²)
     fill_factor: float = 0.80
-    tandem_pce_pct: float = 34.65        # Combined tandem PCE (%)
-    perovskite_pce_pct: float = 20.78
-    topcon_pce_pct: float = 13.80
+    tandem_pce_pct: float = 47.20        # Combined tandem PCE (%)
+    perovskite_pce_pct: float = 29.50
+    topcon_pce_pct: float = 19.50
 
     # ── Operating Conditions ──────────────────────────────────
     irradiance_W_m2: float = 1000.0      # STC
@@ -76,7 +76,7 @@ class GranasStructureFeed:
 
     # ── Physical Properties ───────────────────────────────────
     weight_per_m2_kg: float = 5.0        # CFRP + cell stack
-    junction_temp_C: float = 42.0        # Green cooling
+    junction_temp_C: float = 34.0        # Green cooling
 
     @property
     def total_area_m2(self) -> float:
