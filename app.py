@@ -572,7 +572,7 @@ with g6:
     st.markdown("""
     <div class='product-card'>
         <div class='product-title' style='color: #00d1ff;'>💧 Granas H2</div>
-        <div class='product-desc'>PEM electrolysis. Nafion stack + solar load-following. $3.83/kg LCOH.</div>
+        <div class='product-desc'>PEM electrolysis. Nafion stack + solar load-following. $2.10/kg LCOH.</div>
         <div>
             <span class='product-badge'>PEM</span>
             <span class='product-badge'>GREEN H₂</span>

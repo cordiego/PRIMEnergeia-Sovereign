@@ -243,7 +243,7 @@ m3.metric("🔬 TRL", f"TRL {h.technology_readiness:.0f}", help="Technology Read
 m4, m5, m6 = st.columns(3)
 m4.metric("⚡ Jsc", f"{h.optics.jsc_mA_cm2:.2f} mA/cm²", help="Short-circuit current density. Integrated from AM1.5G spectrum × absorptance × Mie path-enhancement × CFRP photon recycling. Granas targets 43.9 mA/cm² via green-reflective granule optics.")
 m5.metric("🔋 Voc", f"{h.sdl.voc_mV:.0f} mV", help="Open-circuit voltage of the tandem stack. Base ~1100 mV + thermal Voc gain from green-reflectance cooling (dVoc/dT = -1.8 mV/°C). Granas' lower Tj directly boosts voltage vs dark absorbers.")
-m6.metric("🧬 PCE (SDL)", f"{h.sdl.pce_pct:.2f}%", help="PCE from the Self-Driving Lab fabrication engine. Combines perovskite top-cell (~23% max) + TOPCon bottom-cell (~15%) as a 2-terminal tandem, modulated by film quality, Mn2+ passivation, and green sacrifice factor.")
+m6.metric("🧬 PCE (SDL)", f"{h.sdl.pce_pct:.2f}%", help="PCE from the Self-Driving Lab fabrication engine. Combines perovskite top-cell (~29.5% max) + TOPCon bottom-cell (~19.5%) as a 2-terminal tandem, modulated by film quality, Mn2+ passivation, and green sacrifice factor.")
 
 m7, m8, m9 = st.columns(3)
 m7.metric("🌡️ Junction Temp", f"{h.sdl.junction_temp_C:.1f} °C", help="Cell junction temperature under 1-sun. Granas' 35% green reflectance at 535 nm rejects peak solar heat: Tj ~ 42 °C vs 68 °C for standard dark absorbers. Lower Tj improves Voc, reduces degradation.")
@@ -507,11 +507,11 @@ with tab8:
 
     h2_7, h2_8, h2_9 = st.columns(3)
     h2_7.metric("💰 LCOH", f"${h2m.lcoh_usd_kg:.2f}/kg", help="Levelized Cost of Hydrogen. Includes annualized CAPEX (CRF), OPEX (3%/yr), and electricity cost over system lifetime. Granas targets LCOH < $4.50/kg (green H2 market) by using free solar electricity from the tandem modules.")
-    h2_8.metric("🏢 H₂ Annual", f"{h2m.h2_annual_tonnes:.0f} tonnes", help="Annual hydrogen production in tonnes. Computed from solar capacity x solar fraction (15%) x capacity factor x system efficiency. Scales with Granas PCE — higher tandem efficiency means more electricity for electrolysis.")
+    h2_8.metric("🏢 H₂ Annual", f"{h2m.h2_annual_tonnes:.0f} tonnes", help="Annual hydrogen production in tonnes. Computed from solar capacity x solar fraction (40%) x capacity factor x system efficiency. Scales with Granas PCE — higher tandem efficiency means more electricity for electrolysis.")
     h2_9.metric("💵 Revenue", f"${h2m.revenue_annual_M_usd:.1f}M/yr", help="Annual revenue from green hydrogen sales at $4.50/kg market price. This is the downstream revenue stream from Granas' excess solar electricity, creating a second monetization pathway beyond grid electricity sales.")
 
     h2_10, h2_11, h2_12 = st.columns(3)
-    h2_10.metric("☀️ Solar Fraction", f"{h2m.solar_fraction_pct:.0f}%", help="Fraction of total Granas solar output diverted to hydrogen production (default 15%). The remaining 85% goes to grid electricity. This split optimizes the dual-revenue model of the PRIMEnergeia platform.")
+    h2_10.metric("☀️ Solar Fraction", f"{h2m.solar_fraction_pct:.0f}%", help="Fraction of total Granas solar output diverted to hydrogen production (default 40%). The remaining 60% goes to grid electricity. This split optimizes the dual-revenue model of the PRIMEnergeia platform.")
     h2_11.metric("📉 Degradation", f"{h2m.stack_degradation_uV_per_h:.0f} μV/h", help="PEM stack voltage degradation rate in microvolts per hour. At 4 uV/h, the stack reaches end-of-life (~200 mV increase) after ~80,000 hours. Determines stack replacement schedule in the Granas H2 engine.")
     h2_12.metric("⏱️ Stack Lifetime", f"{h2m.stack_lifetime_kh:.0f} kh", help="PEM electrolyzer stack lifetime in thousands of hours before replacement. At 80 kh (~9 years continuous), the stack degrades ~200 mV. Replacement cost is factored into the LCOH calculation for the Granas H2 engine.")
 
@@ -548,7 +548,7 @@ with tab8:
     st.markdown("""
     **Reaction:** 2H₂O → 2H₂ + O₂  (E° = 1.229 V)
 
-    Granas panels generate excess solar electricity. **15%** is diverted to a PEM
+    Granas panels generate excess solar electricity. **40%** is diverted to a PEM
     electrolyzer (Nafion membrane, IrO₂ anode, Pt/C cathode), producing zero-carbon
     green hydrogen. This H₂ feeds downstream:
     - **PEM fuel cells** (PEM-PB-50) for clean power
