@@ -589,6 +589,18 @@ VEHICLE_FLEET = {
         payload_kg=80,                # Driver
         mission="305 km Grand Prix — zero-carbon lap record",
     ),
+    "Supersonic Jet": VehicleProfile(
+        name="Supersonic Jet",
+        vehicle_type="Aircraft",
+        emoji="🚀",
+        engine="HY-P100",
+        n_engines=12,                  # 12 × 500 kW = 6.0 MW
+        cruise_speed_kmh=2100,         # Mach 1.7
+        drag_factor=2.0,
+        tank_scale=1.5,                # 3,600 kg Liquid H₂ total
+        payload_kg=8_000,              # ~80 pax
+        mission="CDMX → Paris zero-carbon Mach 1.7 flight",
+    ),
 }
 
 
