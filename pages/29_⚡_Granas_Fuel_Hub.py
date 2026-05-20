@@ -164,7 +164,7 @@ with st.expander("🔋 Granas Module Structure → Fuel Pipeline", expanded=True
                   delta=f"Perovskite {gs['perovskite_pce_pct']}% + TOPCon {gs['topcon_pce_pct']}%",
                   help="Combined two-junction power conversion efficiency")
         st.metric("Junction Temp", f"{gs['junction_temp_C']}°C",
-                  help="35% green reflectance cooling: Tj = 42°C vs 68°C control")
+                  help="52% green reflectance cooling: Tj = 34°C vs 68°C control")
 
     with struct_cols[2]:
         st.markdown("#### 🏭 Charging Hub Field")
@@ -871,7 +871,7 @@ with tab4:
     stages = ["Solar Input", "PV Conversion", "DC Bus", "Electrolyzer", "Compression", "H₂ Fuel"]
     pv_eff = module.tandem_pce_pct / 100
     wire_eff = hub.wire_efficiency()
-    elec_eff = result["electrolysis"]["system_efficiency_pct"] / 100 if result["electrolysis"]["system_efficiency_pct"] > 0 else 0.70
+    elec_eff = result["electrolysis"]["system_efficiency_pct"] / 100 if result["electrolysis"]["system_efficiency_pct"] > 0 else 0.82
     comp_eff = hub.compression_efficiency
 
     # Waterfall values (start at irradiance, multiply through)
