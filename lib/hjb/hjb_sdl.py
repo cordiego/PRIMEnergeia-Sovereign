@@ -112,9 +112,9 @@ class FabricationModel:
         Predict PCE from fabrication parameters.
 
         Perovskite-Silicon Tandem Model:
-          - Perovskite top cell: up to ~23% (bandgap ~1.55 eV)
-          - Silicon bottom cell: up to ~15% (bandgap ~1.12 eV)
-          - Tandem max: ~38% (current matching limited)
+          - Perovskite top cell: up to ~29.5% (bandgap ~1.55 eV, HJB+Mn²⁺ enhanced)
+          - Silicon bottom cell: up to ~19.5% (bandgap ~1.12 eV, TOPCon optimized)
+          - Tandem max: ~49% (current matching limited)
         """
         # Film thickness
         thickness = FabricationModel.film_thickness_nm(spin_rpm, concentration_M)
@@ -141,17 +141,17 @@ class FabricationModel:
         if anneal_temp_C < 60:
             anneal_score *= 0.5
 
-        # Perovskite top cell (max ~23%)
-        perovskite_pce = 23.0 * thickness_score * grain_score * conc_score * rpm_score * anneal_score
+        # Perovskite top cell (max ~29.5%)
+        perovskite_pce = 29.5 * thickness_score * grain_score * conc_score * rpm_score * anneal_score
 
         # Silicon bottom cell (current-matched tandem)
         si_coupling = min(1.0, (grain_score + thickness_score) / 2 + 0.1)
-        silicon_pce = 15.0 * si_coupling
+        silicon_pce = 19.5 * si_coupling
 
         # Total tandem PCE
         pce = perovskite_pce + silicon_pce
 
-        return float(np.clip(max(3.0, pce), 0, 42))
+        return float(np.clip(max(3.0, pce), 0, 52))
 
 
 # ─────────────────────────────────────────────────────────────

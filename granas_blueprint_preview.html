@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Granas Blueprint Preview</title>
+<style>
+  body { margin: 0; background: #020608; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 100vh; font-family: Inter, sans-serif; }
+  h3 { color: #00ff64; margin-bottom: 4px; }
+  p.sub { color: #94a3b8; font-size: 12px; margin-top: 0; }
+  svg { filter: drop-shadow(0 0 20px rgba(0,209,255,0.15)); }
+</style>
+</head>
+<body>
+
+<h3>📐 Granas Blueprint — 2.1m × 3.4m</h3>
+<p class="sub">4 Rhombi · △ edge: 0.90m · ◇ edge: 0.714m · 18 vertices</p>
+
+<!--
+  Coordinate system: 1 unit = 100px, so W=2.1→210, H=3.4→340
+  Y-axis: SVG y increases downward, so we flip: svg_y = 340 - real_y
+
+  Vertex y-positions (meters → SVG px):
+    y0 = 0      → svg 340
+    y1 = 0.731  → svg 340 - 73.1 = 266.9
+    y2 = 1.216  → svg 340 - 121.6 = 218.4
+    y3 = 1.700  → svg 340 - 170.0 = 170.0  (center)
+    y4 = 2.184  → svg 340 - 218.4 = 121.6
+    y5 = 2.669  → svg 340 - 266.9 = 73.1
+    y6 = 3.400  → svg 340 - 340 = 0
+
+  X-positions: 0, 52.5, 105, 157.5, 210
+-->
+
+<svg viewBox="-30 -25 270 405" width="540" height="810" xmlns="http://www.w3.org/2000/svg">
+  <rect x="-30" y="-25" width="270" height="405" fill="#020608"/>
+
+  <!-- ═══ PERIMETER (green, thick) ═══ -->
+  <!-- Bottom edge (y=340) -->
+  <line x1="0" y1="340" x2="105" y2="340" stroke="#00ff64" stroke-width="3"/>
+  <line x1="105" y1="340" x2="210" y2="340" stroke="#00ff64" stroke-width="3"/>
+  <!-- Top edge (y=0) -->
+  <line x1="0" y1="0" x2="105" y2="0" stroke="#00ff64" stroke-width="3"/>
+  <line x1="105" y1="0" x2="210" y2="0" stroke="#00ff64" stroke-width="3"/>
+  <!-- Left edge -->
+  <line x1="0" y1="340" x2="0" y2="218.4" stroke="#00ff64" stroke-width="3"/>
+  <line x1="0" y1="218.4" x2="0" y2="121.6" stroke="#00ff64" stroke-width="3"/>
+  <line x1="0" y1="121.6" x2="0" y2="0" stroke="#00ff64" stroke-width="3"/>
+  <!-- Right edge -->
+  <line x1="210" y1="340" x2="210" y2="218.4" stroke="#00ff64" stroke-width="3"/>
+  <line x1="210" y1="218.4" x2="210" y2="121.6" stroke="#00ff64" stroke-width="3"/>
+  <line x1="210" y1="121.6" x2="210" y2="0" stroke="#00ff64" stroke-width="3"/>
+
+  <!-- ═══ DIAGONAL CFRP EDGES (cyan) ═══ -->
+  <!-- Row 0 (y=340) → Row 1 (y=266.9) -->
+  <line x1="0" y1="340" x2="52.5" y2="266.9" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="105" y1="340" x2="52.5" y2="266.9" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="105" y1="340" x2="157.5" y2="266.9" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="210" y1="340" x2="157.5" y2="266.9" stroke="#00d1ff" stroke-width="1.5"/>
+
+  <!-- Row 1 (y=266.9) → Row 2 (y=218.4) -->
+  <line x1="52.5" y1="266.9" x2="0" y2="218.4" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="52.5" y1="266.9" x2="105" y2="218.4" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="157.5" y1="266.9" x2="105" y2="218.4" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="157.5" y1="266.9" x2="210" y2="218.4" stroke="#00d1ff" stroke-width="1.5"/>
+
+  <!-- Row 2 (y=218.4) → Row 3 (y=170) -->
+  <line x1="0" y1="218.4" x2="52.5" y2="170" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="105" y1="218.4" x2="52.5" y2="170" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="105" y1="218.4" x2="157.5" y2="170" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="210" y1="218.4" x2="157.5" y2="170" stroke="#00d1ff" stroke-width="1.5"/>
+
+  <!-- Row 3 (y=170) → Row 4 (y=121.6) -->
+  <line x1="52.5" y1="170" x2="0" y2="121.6" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="52.5" y1="170" x2="105" y2="121.6" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="157.5" y1="170" x2="105" y2="121.6" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="157.5" y1="170" x2="210" y2="121.6" stroke="#00d1ff" stroke-width="1.5"/>
+
+  <!-- Row 4 (y=121.6) → Row 5 (y=73.1) -->
+  <line x1="0" y1="121.6" x2="52.5" y2="73.1" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="105" y1="121.6" x2="52.5" y2="73.1" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="105" y1="121.6" x2="157.5" y2="73.1" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="210" y1="121.6" x2="157.5" y2="73.1" stroke="#00d1ff" stroke-width="1.5"/>
+
+  <!-- Row 5 (y=73.1) → Row 6 (y=0) -->
+  <line x1="52.5" y1="73.1" x2="0" y2="0" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="52.5" y1="73.1" x2="105" y2="0" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="157.5" y1="73.1" x2="105" y2="0" stroke="#00d1ff" stroke-width="1.5"/>
+  <line x1="157.5" y1="73.1" x2="210" y2="0" stroke="#00d1ff" stroke-width="1.5"/>
+
+  <!-- ═══ VERTICES ═══ -->
+  <!-- Row 0 (bottom): y=340 -->
+  <circle cx="0" cy="340" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <circle cx="105" cy="340" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <circle cx="210" cy="340" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <!-- Row 1: y=266.9 -->
+  <circle cx="52.5" cy="266.9" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <circle cx="157.5" cy="266.9" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <!-- Row 2: y=218.4 -->
+  <circle cx="0" cy="218.4" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <circle cx="105" cy="218.4" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <circle cx="210" cy="218.4" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <!-- Row 3 (center): y=170 -->
+  <circle cx="52.5" cy="170" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <circle cx="157.5" cy="170" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <!-- Row 4: y=121.6 -->
+  <circle cx="0" cy="121.6" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <circle cx="105" cy="121.6" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <circle cx="210" cy="121.6" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <!-- Row 5: y=73.1 -->
+  <circle cx="52.5" cy="73.1" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <circle cx="157.5" cy="73.1" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <!-- Row 6 (top): y=0 -->
+  <circle cx="0" cy="0" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <circle cx="105" cy="0" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+  <circle cx="210" cy="0" r="4" fill="white" stroke="#00ff64" stroke-width="1.5"/>
+
+  <!-- ═══ ANNOTATIONS ═══ -->
+  <!-- Width -->
+  <text x="105" y="360" text-anchor="middle" fill="#00ff64" font-size="12" font-family="monospace">← 2.1 m →</text>
+  <!-- Height -->
+  <text x="-18" y="175" text-anchor="middle" fill="#00ff64" font-size="12" font-family="monospace" transform="rotate(-90, -18, 175)">↕ 3.4 m</text>
+  <!-- Edge info -->
+  <text x="105" y="378" text-anchor="middle" fill="#94a3b8" font-size="9" font-family="monospace">△ edge: 0.90m │ ◇ edge: 0.714m │ 18 vertices │ 4 rhombi</text>
+</svg>
+
+</body>
+</html>

@@ -37,7 +37,7 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
-from adapters.base_adapter import PlantAdapter, GridState, ControlSetpoint
+from adapters.industrial_scada import BaseAdapter as PlantAdapter, GridMeasurement as GridState, ControlCommand as ControlSetpoint, ProtocolType, create_adapter, SafetyInterlockAdapter, WatchdogAdapter, ISOMarket
 
 logger = logging.getLogger("prime.runtime")
 
@@ -100,9 +100,9 @@ class HJBFrequencyController:
         """
         t_start = time.time()
 
-        f = state.frequency_hz
+        f = state.freq_hz
         p_actual = state.active_power_mw
-        lmp = state.lmp_price if state.lmp_price > 0 else 45.0
+        lmp = getattr(state, "lmp_price", 45.0)
 
         # --- HJB Value Function ---
         # Quadratic cost: V(f) = ½ × κ × (f - f_nom)²
@@ -151,15 +151,18 @@ class HJBFrequencyController:
         self.solve_count += 1
         self.last_frequency = f
 
-        return ControlSetpoint(
-            active_power_mw=round(optimal_mw, 2),
-            reactive_power_mvar=round(state.reactive_power_mvar, 2),
-            mode=mode,
-            mode_label=mode_label,
-            inertia_injection_pu=round(u_inertia, 4),
-            solver_time_ms=round(solver_ms, 3),
-            confidence=min(1.0, 1.0 - abs(delta_f) / 0.5),
+        delta_mw = round(optimal_mw - p_actual, 2)
+        cmd = ControlSetpoint(
+            delta_power_mw=delta_mw,
+            timestamp=time.time(),
+            source="HJB",
+            operator_id="auto",
         )
+        # Attach metadata for telemetry compat
+        cmd.active_power_mw = round(optimal_mw, 2)
+        cmd.mode_label = mode_label
+        cmd.solver_time_ms = round(solver_ms, 3)
+        return cmd
 
     @property
     def stats(self) -> dict:
@@ -257,10 +260,10 @@ class ControlLoop:
         now = time.time()
 
         # Compact line every tick
-        delta_f = state.frequency_hz - self.solver.f_nom
+        delta_f = state.freq_hz - self.solver.f_nom
         sys.stdout.write(
             f"\r\033[K[⚡] "
-            f"f={state.frequency_hz:.4f} Hz "
+            f"f={state.freq_hz:.4f} Hz "
             f"(Δ{delta_f:+.4f}) | "
             f"P={state.active_power_mw:.1f}→{setpoint.active_power_mw:.1f} MW | "
             f"Mode={setpoint.mode_label:10s} | "
@@ -274,7 +277,7 @@ class ControlLoop:
             self._last_log_time = now
             logger.info(
                 f"Tick {self._tick} | "
-                f"f={state.frequency_hz:.4f} Hz | "
+                f"f={state.freq_hz:.4f} Hz | "
                 f"P={state.active_power_mw:.1f} MW | "
                 f"Setpoint={setpoint.active_power_mw:.1f} MW | "
                 f"Rescued=${self.solver.total_rescued_usd:,.2f} | "
@@ -285,15 +288,15 @@ class ControlLoop:
         """Write current state to grid_state.json for dashboard consumption."""
         try:
             payload = {
-                "f": state.frequency_hz,
-                "v": state.voltage_a_kv,
-                "status": "NOMINAL" if state.is_nominal(self.solver.f_nom) else "ALERT",
+                "f": state.freq_hz,
+                "v": getattr(state, "voltage_pu", 0.0),
+                "status": "NOMINAL" if abs(state.freq_hz - self.solver.f_nom) < 0.05 else "ALERT",
                 "timestamp": time.time(),
-                "setpoint_mw": setpoint.active_power_mw,
-                "mode": setpoint.mode_label,
+                "setpoint_mw": getattr(setpoint, "active_power_mw", 0.0),
+                "mode": getattr(setpoint, "mode_label", "HOLD"),
                 "rescued_usd": round(self.solver.total_rescued_usd, 2),
-                "adapter": self.adapter.name,
-                "quality": state.quality,
+                "adapter": getattr(self.adapter, "name", "scada"),
+                "quality": "GOOD" if getattr(state, "quality_ok", True) else "BAD",
             }
             with open(self.state_file, "w") as f:
                 json.dump(payload, f)

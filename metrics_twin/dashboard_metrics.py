@@ -263,7 +263,7 @@ tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10, tab11, tab12 = st.t
 with tab1:
     categories = ["PCE", "Jsc", "Stability", "Thermal", "Grain", "Film"]
     values = [
-        min(h.sdl.pce_pct / 38.0 * 100, 100),
+        min(h.sdl.pce_pct / 52.0 * 100, 100),
         min(h.optics.jsc_mA_cm2 / 44.0 * 100, 100),
         min(h.sdl.t80_hours / 262800 * 100, 100),  # 30-year target
         max(0, (1.0 - (h.sdl.junction_temp_C - 25)/50)) * 100,

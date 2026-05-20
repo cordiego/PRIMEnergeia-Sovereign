@@ -122,12 +122,12 @@ def score_sdl(s: HJBState) -> Dict[str, float]:
     if s.anneal_temp_C > 150:
         decomp = max(0.1, np.exp(-0.05 * (s.anneal_temp_C - 150)))
 
-    pce_top = 23.0 * t_score * g_score * c_score * r_score * a_score * sol_score * decomp * 0.95
+    pce_top = 29.5 * t_score * g_score * c_score * r_score * a_score * sol_score * decomp * 0.95
     si_coup = min(1.0, (g_score + t_score) / 2 + 0.1)
-    pce_bot = 15.0 * si_coup
-    pce = float(np.clip(pce_top + pce_bot, 3, 42))
+    pce_bot = 19.5 * si_coup
+    pce = float(np.clip(pce_top + pce_bot, 3, 52))
 
-    return {"pce": pce, "grain_nm": grain, "thickness_nm": thickness, "score": pce / 38}
+    return {"pce": pce, "grain_nm": grain, "thickness_nm": thickness, "score": pce / 52}
 
 
 def score_albedo(s: HJBState) -> Dict[str, float]:

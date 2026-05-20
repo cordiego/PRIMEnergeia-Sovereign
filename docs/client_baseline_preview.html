@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRIMEnergeia — Baseline Savings Report & Service Proposal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ink: #0f172a;
+            --ink-secondary: #475569;
+            --ink-muted: #94a3b8;
+            --surface: #ffffff;
+            --surface-alt: #f8fafc;
+            --surface-card: #ffffff;
+            --border: #e2e8f0;
+            --border-light: #f1f5f9;
+            --accent: #0ea5e9;
+            --accent-deep: #0369a1;
+            --accent-glow: rgba(14, 165, 233, 0.08);
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.06);
+            --warn: #f59e0b;
+            --warn-bg: rgba(245, 158, 11, 0.06);
+            --danger: #ef4444;
+            --gold: #d97706;
+            --gold-bg: rgba(217, 119, 6, 0.06);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--ink);
+            background: #e2e8f0;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .document {
+            max-width: 850px;
+            margin: 40px auto;
+            background: var(--surface);
+            box-shadow: 0 25px 80px rgba(0,0,0,0.12), 0 4px 16px rgba(0,0,0,0.06);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        @media print {
+            body { background: white; }
+            .document { margin: 0; box-shadow: none; border-radius: 0; max-width: 100%; }
+            .page-break { page-break-before: always; }
+            .watermark { display: none; }
+        }
+
+        /* ─── HEADER ─── */
+        .doc-header {
+            background: linear-gradient(135deg, #0c4a6e 0%, #0369a1 40%, #0ea5e9 100%);
+            padding: 52px 60px 48px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .doc-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+
+        .doc-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #0ea5e9, #8b5cf6);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 28px;
+        }
+
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .brand-text {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            opacity: 0.95;
+        }
+
+        .doc-title {
+            font-size: 30px;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .doc-subtitle {
+            font-size: 16px;
+            font-weight: 400;
+            opacity: 0.85;
+            margin-bottom: 28px;
+        }
+
+        .header-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px 32px;
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .header-meta span {
+            display: flex;
+            gap: 8px;
+        }
+
+        .header-meta .label {
+            font-weight: 600;
+            opacity: 0.7;
+            min-width: 95px;
+        }
+
+        /* ─── WATERMARK ─── */
+        .watermark {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 4px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(217, 119, 6, 0.3);
+        }
+
+        /* ─── CONTENT ─── */
+        .doc-body {
+            padding: 48px 60px 60px;
+        }
+
+        /* ─── EXECUTIVE SUMMARY ─── */
+        .exec-summary {
+            background: linear-gradient(135deg, var(--accent-glow), rgba(16, 185, 129, 0.04));
+            border: 1px solid rgba(14, 165, 233, 0.15);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 24px 28px;
+            margin-bottom: 40px;
+        }
+
+        .exec-summary .summary-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--accent-deep);
+            margin-bottom: 8px;
+        }
+
+        .exec-summary p {
+            font-size: 15px;
+            line-height: 1.65;
+            color: var(--ink);
+        }
+
+        .exec-summary strong {
+            color: var(--accent-deep);
+        }
+
+        /* ─── SECTIONS ─── */
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            color: white;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-right: 12px;
+            vertical-align: middle;
+        }
+
+        h2 {
+            font-size: 19px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-light);
+            letter-spacing: -0.3px;
+        }
+
+        h3 {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--ink);
+            margin-bottom: 12px;
+            margin-top: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        p {
+            font-size: 14px;
+            color: var(--ink-secondary);
+            margin-bottom: 14px;
+            line-height: 1.7;
+        }
+
+        /* ─── TABLES ─── */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        thead th {
+            background: var(--surface-alt);
+            color: var(--ink-secondary);
+            font-weight: 600;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 10px 14px;
+            text-align: left;
+            border-bottom: 2px solid var(--border);
+        }
+
+        tbody td {
+            padding: 10px 14px;
+            border-bottom: 1px solid var(--border-light);
+            color: var(--ink);
+        }
+
+        tbody tr:hover { background: var(--surface-alt); }
+
+        .value-highlight {
+            font-weight: 700;
+            color: var(--accent-deep);
+        }
+
+        .value-success {
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .value-large {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--accent-deep);
+        }
+
+        /* ─── HERO METRIC ─── */
+        .hero-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin: 24px 0;
+        }
+
+        .hero-card {
+            text-align: center;
+            padding: 24px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+
+        .hero-card:hover { transform: translateY(-2px); }
+
+        .hero-card.primary {
+            background: linear-gradient(135deg, #0c4a6e, #0369a1);
+            border: none;
+            color: white;
+        }
+
+        .hero-card.primary .hero-label { color: rgba(255,255,255,0.7); }
+        .hero-card.primary .hero-value { color: white; }
+
+        .hero-card.success {
+            background: var(--success-bg);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .hero-card.gold {
+            background: var(--gold-bg);
+            border-color: rgba(217, 119, 6, 0.2);
+        }
+
+        .hero-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--ink-muted);
+            margin-bottom: 6px;
+        }
+
+        .hero-value {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--ink);
+        }
+
+        .hero-sub {
+            font-size: 11px;
+            color: var(--ink-muted);
+            margin-top: 4px;
+        }
+
+        .hero-card.success .hero-value { color: var(--success); }
+        .hero-card.gold .hero-value { color: var(--gold); }
+
+        /* ─── FORMULA ─── */
+        .formula-block {
+            background: #0f172a;
+            color: #e2e8f0;
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 16px 0 20px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            overflow-x: auto;
+            position: relative;
+        }
+
+        .formula-block::before {
+            content: 'HJB OPTIMAL CONTROL';
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #475569;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .formula-block .comment { color: #64748b; }
+        .formula-block .fn { color: #38bdf8; }
+        .formula-block .op { color: #f472b6; }
+        .formula-block .var { color: #a78bfa; }
+        .formula-block .num { color: #34d399; }
+
+        /* ─── BAR CHART ─── */
+        .bar-chart {
+            margin: 16px 0 20px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            gap: 12px;
+        }
+
+        .bar-label {
+            width: 100px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--ink-secondary);
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 28px;
+            background: var(--surface-alt);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            padding-left: 10px;
+            font-size: 11px;
+            font-weight: 700;
+            color: white;
+            transition: width 1s ease;
+        }
+
+        .bar-fill.blue { background: linear-gradient(90deg, #0369a1, #0ea5e9); }
+        .bar-fill.green { background: linear-gradient(90deg, #059669, #10b981); }
+        .bar-fill.amber { background: linear-gradient(90deg, #d97706, #f59e0b); }
+        .bar-fill.rose { background: linear-gradient(90deg, #be123c, #f43f5e); }
+
+        .bar-pct {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ink-muted);
+            width: 40px;
+            flex-shrink: 0;
+        }
+
+        /* ─── FEE STRUCTURE ─── */
+        .fee-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .fee-card {
+            padding: 24px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .fee-card.deploy {
+            background: linear-gradient(135deg, #0c4a6e, #0369a1);
+            border: none;
+            color: white;
+        }
+
+        .fee-card.royalty {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.04), rgba(16, 185, 129, 0.08));
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .fee-type {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 8px;
+        }
+
+        .fee-card.deploy .fee-type { color: rgba(255,255,255,0.7); }
+        .fee-card.royalty .fee-type { color: var(--success); }
+
+        .fee-amount {
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 6px;
+        }
+
+        .fee-card.deploy .fee-amount { color: white; }
+        .fee-card.royalty .fee-amount { color: var(--success); }
+
+        .fee-desc {
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .fee-card.deploy .fee-desc { color: rgba(255,255,255,0.75); }
+        .fee-card.royalty .fee-desc { color: var(--ink-secondary); }
+
+        /* ─── TIMELINE ─── */
+        .timeline {
+            position: relative;
+            margin: 20px 0;
+            padding-left: 28px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 4px;
+            bottom: 4px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--accent), var(--success));
+            border-radius: 1px;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .timeline-item:last-child { padding-bottom: 0; }
+
+        .timeline-dot {
+            position: absolute;
+            left: -22px;
+            top: 3px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+
+        .timeline-item:last-child .timeline-dot {
+            background: var(--success);
+            box-shadow: 0 0 0 2px var(--success);
+        }
+
+        .timeline-week {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-deep);
+            margin-bottom: 3px;
+        }
+
+        .timeline-desc {
+            font-size: 13px;
+            color: var(--ink-secondary);
+            font-weight: 500;
+        }
+
+        .timeline-detail {
+            font-size: 12px;
+            color: var(--ink-muted);
+            margin-top: 2px;
+        }
+
+        /* ─── DISCLAIMER ─── */
+        .disclaimer {
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin-top: 32px;
+        }
+
+        .disclaimer h4 {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--ink-muted);
+            margin-bottom: 10px;
+        }
+
+        .disclaimer ol {
+            font-size: 12px;
+            color: var(--ink-muted);
+            line-height: 1.8;
+            padding-left: 16px;
+        }
+
+        /* ─── FOOTER ─── */
+        .doc-footer {
+            background: var(--surface-alt);
+            border-top: 1px solid var(--border);
+            padding: 28px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-brand {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        .footer-info {
+            font-size: 12px;
+            color: var(--ink-muted);
+            text-align: right;
+        }
+
+        .footer-info a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* ─── CHECK ITEMS ─── */
+        .check-list {
+            list-style: none;
+            margin: 12px 0;
+        }
+
+        .check-list li {
+            font-size: 13px;
+            color: var(--ink-secondary);
+            padding: 6px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .check-list .icon {
+            color: var(--success);
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ─── DIVIDER ─── */
+        .divider {
+            height: 1px;
+            background: var(--border);
+            margin: 36px 0;
+        }
+
+        /* ─── COMPARISON TABLE ─── */
+        .comparison-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0;
+            margin: 16px 0;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .comp-cell {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .comp-cell:first-child {
+            background: var(--surface-alt);
+        }
+
+        .comp-cell:nth-child(2) {
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+
+        .comp-cell:last-child {
+            background: var(--success-bg);
+        }
+
+        .comp-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--ink-muted);
+            margin-bottom: 6px;
+        }
+
+        .comp-value {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .comp-cell:last-child .comp-value { color: var(--success); }
+
+        .comp-note {
+            font-size: 11px;
+            color: var(--ink-muted);
+            margin-top: 4px;
+        }
+
+        /* ─── CONFIDENTIAL STRIP ─── */
+        .conf-strip {
+            background: #fef3c7;
+            border-bottom: 1px solid #fde68a;
+            padding: 8px 60px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #92400e;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        /* ─── WHAT INCLUDED ─── */
+        .included-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .included-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+            color: var(--ink-secondary);
+            padding: 10px 14px;
+            background: var(--surface-alt);
+            border-radius: 6px;
+        }
+
+        .included-item .icon {
+            color: var(--accent);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        /* ─── KPI BADGES ─── */
+        .kpi-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+
+        .kpi-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            background: var(--surface-alt);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--ink-secondary);
+        }
+
+        .kpi-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+    </style>
+</head>
+<body>
+
+<div class="watermark">PREVIEW</div>
+
+<div class="document">
+    <!-- CONFIDENTIAL STRIP -->
+    <div class="conf-strip">⚠ Confidential — Prepared for [Client Name] under NDA</div>
+
+    <!-- HEADER -->
+    <header class="doc-header">
+        <div class="header-brand">
+            <div class="brand-icon">⚡</div>
+            <span class="brand-text">PRIMEnergeia</span>
+        </div>
+        <h1 class="doc-title">Baseline Savings Report<br>& Service Proposal</h1>
+        <p class="doc-subtitle">HJB-Optimal Dispatch Analysis — Preliminary Results</p>
+        <div class="header-meta">
+            <span><span class="label">Document:</span> PRE-DEPLOY-003</span>
+            <span><span class="label">Plant:</span> [Plant Name]</span>
+            <span><span class="label">Date:</span> April 2026</span>
+            <span><span class="label">ISO Node:</span> VZA-400 (SEN)</span>
+            <span><span class="label">Prepared by:</span> Diego Córdoba, CEO</span>
+            <span><span class="label">Market:</span> CENACE (Mexico)</span>
+        </div>
+    </header>
+
+    <!-- BODY -->
+    <div class="doc-body">
+
+        <!-- EXECUTIVE SUMMARY -->
+        <div class="exec-summary">
+            <div class="summary-label">Executive Summary</div>
+            <p>Analysis of <strong>90 days</strong> of historical dispatch data at your facility reveals <strong>$231,243 USD in projected recoverable capital per year</strong> through HJB-optimal dispatch control. <strong>No hardware modifications required</strong> — software-only deployment via a single Ethernet connection to your existing SCADA system.</p>
+        </div>
+
+        <!-- HERO METRICS -->
+        <div class="hero-metrics">
+            <div class="hero-card primary">
+                <div class="hero-label">Projected Recoverable Capital</div>
+                <div class="hero-value">$231,243</div>
+                <div class="hero-sub" style="color: rgba(255,255,255,0.6);">USD / year</div>
+            </div>
+            <div class="hero-card success">
+                <div class="hero-label">Your Net Savings (75%)</div>
+                <div class="hero-value">$173,432</div>
+                <div class="hero-sub">after PRIMEnergeia fee</div>
+            </div>
+            <div class="hero-card gold">
+                <div class="hero-label">Frequency Stability</div>
+                <div class="hero-value">99.96%</div>
+                <div class="hero-sub">asset protection index</div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 1: DATA ANALYZED -->
+        <div class="section">
+            <h2><span class="section-number">1</span>Data Analyzed</h2>
+            <table>
+                <thead>
+                    <tr><th>Parameter</th><th>Value</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Data Period</td><td class="value-highlight">Jan 1, 2026 — Mar 31, 2026</td></tr>
+                    <tr><td>Total Intervals</td><td>8,640 (15-min resolution)</td></tr>
+                    <tr><td>Plant Rated Capacity</td><td>100 MW</td></tr>
+                    <tr><td>ISO Market</td><td>SEN (CENACE, Mexico)</td></tr>
+                    <tr><td>Node ID</td><td class="value-highlight">VZA-400</td></tr>
+                    <tr><td>Data Quality Score</td><td class="value-success">98.7%</td></tr>
+                    <tr><td>Instability Events Detected</td><td>6</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SECTION 2: METHODOLOGY -->
+        <div class="section">
+            <h2><span class="section-number">2</span>How We Calculate Recoverable Capital</h2>
+            <p>For each settlement interval, we compute the difference between what your plant <em>could</em> have injected (HJB-optimal) and what it <em>actually</em> injected, valued at the real-time locational marginal price:</p>
+
+            <div class="formula-block">
+                <span class="comment">// Recovery formula per interval</span><br>
+                <span class="var">Δ Capital</span><sub>i</sub> <span class="op">=</span> (<span class="fn">Optimal_MW</span><sub>i</sub> <span class="op">−</span> <span class="fn">Actual_MW</span><sub>i</sub>) <span class="op">×</span> <span class="var">LMP</span><sub>i</sub> <span class="op">×</span> <span class="var">Δt</span><br><br>
+                <span class="comment">// HJB value function (mathematically provable optimal)</span><br>
+                <span class="var">V</span><sub>t</sub> <span class="op">+</span> <span class="fn">min</span><sub>u</sub> { <span class="var">L</span>(<span class="var">x</span>, <span class="var">u</span>) <span class="op">+</span> <span class="fn">∇V</span> <span class="op">·</span> <span class="fn">f</span>(<span class="var">x</span>, <span class="var">u</span>) } <span class="op">=</span> <span class="num">0</span><br><br>
+                <span class="comment">// Subject to Swing Equation constraint</span><br>
+                <span class="fn">df</span>/<span class="fn">dt</span> <span class="op">=</span> (<span class="var">Pm</span> <span class="op">−</span> <span class="var">Pe</span> <span class="op">−</span> <span class="var">D</span>·<span class="var">Δf</span>) / <span class="num">2H</span>
+            </div>
+
+            <h3>What We Do NOT Include</h3>
+            <ul class="check-list">
+                <li><span class="icon">✕</span> Intervals where Optimal_MW < Actual_MW (we only count upside)</li>
+                <li><span class="icon">✕</span> Curtailment events (flagged and excluded)</li>
+                <li><span class="icon">✕</span> Revenue from ancillary services</li>
+                <li><span class="icon">✕</span> Speculative price forecasts — we use actual historical prices only</li>
+            </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 3: RESULTS -->
+        <div class="section">
+            <h2><span class="section-number">3</span>Preliminary Results</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Metric</th><th>Value</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Avg. Dispatch Gap (Optimal − Actual)</td><td class="value-highlight">2.4 MW</td></tr>
+                    <tr><td>Avg. LMP During Gap Intervals</td><td>$47.20 / MWh</td></tr>
+                    <tr><td>Total Capital Recovered (90-day period)</td><td class="value-highlight">$57,811</td></tr>
+                    <tr><td><strong>Projected Annual Recovery</strong></td><td class="value-large">$231,243</td></tr>
+                    <tr><td>95% Confidence Interval</td><td>$187,000 — $284,000</td></tr>
+                    <tr><td>Peak Single-Day Recovery</td><td class="value-success">$4,218 (Feb 14, 2026)</td></tr>
+                    <tr><td>Intervals with Recoverable Capital</td><td>68% of total</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Monthly Breakdown</h3>
+            <table>
+                <thead>
+                    <tr><th>Month</th><th>Avg. Gap (MW)</th><th>Avg. LMP ($/MWh)</th><th style="text-align: right">Capital Recovered</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>January 2026</td><td>2.1</td><td>$44.30</td><td style="text-align: right">$17,842</td></tr>
+                    <tr><td>February 2026</td><td>2.6</td><td>$49.10</td><td style="text-align: right">$21,307</td></tr>
+                    <tr><td>March 2026</td><td>2.5</td><td>$48.20</td><td style="text-align: right">$18,662</td></tr>
+                    <tr style="font-weight: 700; background: var(--surface-alt);">
+                        <td><strong>Total</strong></td>
+                        <td><strong>2.4</strong></td>
+                        <td><strong>$47.20</strong></td>
+                        <td style="text-align: right"><strong>$57,811</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Dispatch Gap Distribution</h3>
+            <div class="bar-chart">
+                <div class="bar-row">
+                    <span class="bar-label">0.0–0.5 MW</span>
+                    <div class="bar-track"><div class="bar-fill blue" style="width: 42%;">Within noise</div></div>
+                    <span class="bar-pct">42%</span>
+                </div>
+                <div class="bar-row">
+                    <span class="bar-label">0.5–1.0 MW</span>
+                    <div class="bar-track"><div class="bar-fill green" style="width: 28%;">Recoverable</div></div>
+                    <span class="bar-pct">28%</span>
+                </div>
+                <div class="bar-row">
+                    <span class="bar-label">1.0–2.0 MW</span>
+                    <div class="bar-track"><div class="bar-fill amber" style="width: 16%;">High value</div></div>
+                    <span class="bar-pct">16%</span>
+                </div>
+                <div class="bar-row">
+                    <span class="bar-label">2.0–5.0 MW</span>
+                    <div class="bar-track"><div class="bar-fill rose" style="width: 10%;">Peak</div></div>
+                    <span class="bar-pct">10%</span>
+                </div>
+                <div class="bar-row">
+                    <span class="bar-label">5.0+ MW</span>
+                    <div class="bar-track"><div class="bar-fill rose" style="width: 4%;"></div></div>
+                    <span class="bar-pct">4%</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 4: FINANCIAL COMPARISON -->
+        <div class="section">
+            <h2><span class="section-number">4</span>Financial Impact — With vs. Without</h2>
+
+            <div class="comparison-row">
+                <div class="comp-cell">
+                    <div class="comp-label">Current Annual Revenue</div>
+                    <div class="comp-value">$4.12M</div>
+                    <div class="comp-note">existing dispatch</div>
+                </div>
+                <div class="comp-cell">
+                    <div class="comp-label">+ PRIMEnergeia</div>
+                    <div class="comp-value">$4.35M</div>
+                    <div class="comp-note">optimized dispatch</div>
+                </div>
+                <div class="comp-cell">
+                    <div class="comp-label">Net Gain to You</div>
+                    <div class="comp-value">+$173K</div>
+                    <div class="comp-note">after our 25% fee</div>
+                </div>
+            </div>
+
+            <div class="kpi-row">
+                <div class="kpi-badge"><span class="dot"></span> Zero hardware changes</div>
+                <div class="kpi-badge"><span class="dot"></span> 1 Ethernet cable install</div>
+                <div class="kpi-badge"><span class="dot"></span> Operator override always wins</div>
+                <div class="kpi-badge"><span class="dot"></span> < 0.5 ms control latency</div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 5: FEE STRUCTURE -->
+        <div class="section">
+            <h2><span class="section-number">5</span>Service Fees</h2>
+            <p>Our incentives are fully aligned with yours — we only earn when we deliver measurable value.</p>
+
+            <div class="fee-grid">
+                <div class="fee-card deploy">
+                    <div class="fee-type">One-Time Deployment Fee</div>
+                    <div class="fee-amount">$50,000</div>
+                    <div class="fee-desc">
+                        Site assessment, tag mapping, edge server configuration, 4-week deployment cycle, and operations training included.
+                    </div>
+                </div>
+                <div class="fee-card royalty">
+                    <div class="fee-type">Monthly Performance Royalty</div>
+                    <div class="fee-amount">25%</div>
+                    <div class="fee-desc">
+                        25% of capital recovered. If we don't recover capital, you don't pay. $0 minimum — fully performance-based.
+                    </div>
+                </div>
+            </div>
+
+            <h3>What's Included</h3>
+            <div class="included-grid">
+                <div class="included-item"><span class="icon">⚙</span> Dedicated edge server deployment</div>
+                <div class="included-item"><span class="icon">🔗</span> SCADA protocol adapter config</div>
+                <div class="included-item"><span class="icon">📊</span> 24/7 real-time dashboard access</div>
+                <div class="included-item"><span class="icon">📋</span> Monthly performance reports</div>
+                <div class="included-item"><span class="icon">🛡️</span> AES-256 + TLS 1.3 encryption</div>
+                <div class="included-item"><span class="icon">📞</span> P1 incident response: 4 hours</div>
+                <div class="included-item"><span class="icon">🎓</span> Full operations team training</div>
+                <div class="included-item"><span class="icon">✈️</span> 2 on-site visits / year included</div>
+            </div>
+
+            <h3>Billing Transparency</h3>
+            <ul class="check-list">
+                <li><span class="icon" style="color: var(--accent);">✓</span> Both parties see the same data & calculations on the dashboard</li>
+                <li><span class="icon" style="color: var(--accent);">✓</span> Disputed intervals excluded from that month's invoice</li>
+                <li><span class="icon" style="color: var(--accent);">✓</span> Invoices issued by the 5th business day of each month</li>
+                <li><span class="icon" style="color: var(--accent);">✓</span> 60-day termination for convenience — no exit fees</li>
+            </ul>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 6: DEPLOYMENT TIMELINE -->
+        <div class="section">
+            <h2><span class="section-number">6</span>Proposed Deployment Timeline</h2>
+
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-week">Days 1–5 · Discovery</div>
+                    <div class="timeline-desc">Site assessment + baseline report delivery</div>
+                    <div class="timeline-detail">You're here → we just completed this step</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-week">Days 6–7 · Deployment</div>
+                    <div class="timeline-desc">Edge server install + protocol adapter configuration</div>
+                    <div class="timeline-detail">Single Ethernet cable to your SCADA network</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-week">Days 8–10 · Shadow Mode</div>
+                    <div class="timeline-desc">Read-only observation — zero writes to your system</div>
+                    <div class="timeline-detail">3 days of shadow reports proving optimizer accuracy</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-week">Day 11 · Review</div>
+                    <div class="timeline-desc">Shadow results review with your operations team</div>
+                    <div class="timeline-detail">Go/no-go decision before any control writes</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot"></div>
+                    <div class="timeline-week">Days 12–15 · Bounded Validation</div>
+                    <div class="timeline-desc">Controlled deployment within ±5% permissive band</div>
+                    <div class="timeline-detail">Operator override always takes priority</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-dot" style="background: var(--success); box-shadow: 0 0 0 2px var(--success);"></div>
+                    <div class="timeline-week" style="color: var(--success);">Days 16–20 · Go Live ✓</div>
+                    <div class="timeline-desc">Full deployment + dashboard handover</div>
+                    <div class="timeline-detail">Capital recovery begins — monthly royalty billing starts</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- SECTION 7: DEPLOYMENT RECOMMENDATION -->
+        <div class="section">
+            <h2><span class="section-number">7</span>Deployment Recommendation</h2>
+            <table>
+                <thead>
+                    <tr><th>Criteria</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Projected annual recovery > $150K</td><td class="value-success">✅ $231,243</td></tr>
+                    <tr><td>Data quality sufficient</td><td class="value-success">✅ 98.7%</td></tr>
+                    <tr><td>SCADA protocol supported</td><td class="value-success">✅ OPC UA / Modbus TCP</td></tr>
+                    <tr><td>ROI on deployment fee (< 4 months)</td><td class="value-success">✅ 2.6 months</td></tr>
+                    <tr style="background: var(--success-bg); font-weight: 700;">
+                        <td><strong>Deployment Recommendation</strong></td>
+                        <td class="value-success"><strong>✅ PROCEED TO SHADOW MODE</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- DISCLAIMERS -->
+        <div class="disclaimer">
+            <h4>Important Disclaimers</h4>
+            <ol>
+                <li><strong>All projections are based on historical data.</strong> Actual results will vary based on market conditions, plant availability, and operational constraints.</li>
+                <li><strong>No proprietary deployment data was used.</strong> This analysis uses publicly available CENACE data for the VZA-400 node. No proprietary work was performed at this node.</li>
+                <li><strong>Past performance does not guarantee future results.</strong> The projected annual recovery is a statistical estimate based on 90 days of observed dispatch patterns.</li>
+                <li><strong>PRIMEnergeia does not guarantee specific financial outcomes.</strong> Our service agreement includes performance metrics measured against an agreed baseline, not absolute dollar targets.</li>
+            </ol>
+        </div>
+
+        <!-- SIGNATURE BLOCK -->
+        <div style="margin-top: 40px; padding-top: 24px; border-top: 2px solid var(--border);">
+            <p style="margin-bottom: 4px; font-weight: 600; color: var(--ink);"><strong>Ready to proceed?</strong> We can begin Shadow Mode within 3 business days of your approval.</p>
+            <p style="margin-top: 20px; margin-bottom: 2px; font-weight: 600; color: var(--ink);">Diego Córdoba Urrutia</p>
+            <p style="margin-bottom: 2px; color: var(--ink-muted); font-size: 13px;">CEO, PRIMEnergeia S.A.S.</p>
+            <p style="color: var(--accent); font-size: 13px;">diego@primenergeia.com</p>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="doc-footer">
+        <div class="footer-brand">PRIMEnergeia S.A.S. ⚡</div>
+        <div class="footer-info">
+            Mathematically Provable Optimal Dispatch<br>
+            <a href="https://primenergeia-sovereign.streamlit.app">primenergeia-sovereign.streamlit.app</a>
+        </div>
+    </footer>
+</div>
+
+</body>
+</html>

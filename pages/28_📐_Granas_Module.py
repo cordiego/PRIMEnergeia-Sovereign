@@ -125,7 +125,7 @@ with st.sidebar:
     st.markdown("### ⚙️ Module Parameters")
     st.markdown("---")
 
-    pce_adjust = st.slider("Tandem PCE (%)", 20.0, 42.0, _default_pce, 0.1,
+    pce_adjust = st.slider("Tandem PCE (%)", 20.0, 52.0, _default_pce, 0.1,
                             help="Total tandem PCE (perovskite + TOPCon)")
     capacity_factor = st.slider("Capacity Factor", 0.10, 0.35, 0.22, 0.01,
                                  help="Solar capacity factor (Mexico avg: 0.22)")

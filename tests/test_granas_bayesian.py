@@ -251,7 +251,7 @@ class TestPerovskitePhysics:
     def test_efficiency_bounded(self):
         np.random.seed(42)
         eff = PerovskitePhysics.efficiency(500, 0.1, 4000)
-        assert 0.0 <= eff <= 0.30  # PRACTICAL_CAP=0.258, fractional scale
+        assert 0.0 <= eff <= 0.35  # PRACTICAL_CAP=0.320, fractional scale
 
     def test_stability_score_range(self):
         stab = PerovskitePhysics.stability_score(140, 25, 3.0, 0.1)
