@@ -324,8 +324,8 @@ class SDLMetrics:
     t80_hours: float
 
     @staticmethod
-    def from_recipe(rpm: float, temp: float, conc: float,
-                    additive: float = 2.5, solvent_ratio: float = 0.7) -> "SDLMetrics":
+    def from_recipe(rpm: float = 3874.0, temp: float = 141.7, conc: float = 1.5,
+                    additive: float = 2.48, solvent_ratio: float = 1.0) -> "SDLMetrics":
         """Generate SDL metrics with full Granas physics."""
         comp = GranasComposition()
         thermal = ThermalModel()
@@ -767,7 +767,7 @@ if __name__ == "__main__":
     print(f" Lattice strain: {comp.lattice_strain:.4f}")
     print(f" Green peak: {comp.green_reflection_peak_nm:.0f} nm")
 
-    sdl = SDLMetrics.from_recipe(4000, 120, 1.2, 3.0, 0.7)
+    sdl = SDLMetrics.from_recipe(3874.0, 141.7, 1.5, 2.48, 1.0)
     optics = OpticsMetrics.from_params(300, 0.5, 500, comp)
     sibo = SIBOMetrics.generate_campaign(20)
     h = HolisticGranas(optics=optics, sdl=sdl, sibo=sibo).compute()

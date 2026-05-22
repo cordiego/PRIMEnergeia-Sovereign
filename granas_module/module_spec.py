@@ -156,7 +156,7 @@ class GranasProductionModule:
     n_parallel: int = N_PARALLEL
 
     # ── Cell-Level Parameters ────────────────────────────────
-    cell_voc_base_mV: float = 1247.0   # Base tandem Voc (mV) after Ni:Mn doping
+    cell_voc_base_mV: float = 1299.5   # Base tandem Voc (mV) after Ni:Mn doping
 
     # ── Operating Conditions ─────────────────────────────────
     irradiance_W_m2: float = 1000.0    # STC
@@ -207,9 +207,9 @@ class GranasProductionModule:
         return SUBCELL_ACTIVE_AREA_CM2
 
     # ── PCE from Recipe (mirrors granas_metrics.py SDLMetrics) ─
-    def _compute_pce_from_recipe(self, rpm: float = 4000, temp: float = 120,
-                                  conc: float = 1.2, additive: float = 3.0,
-                                  sol_ratio: float = 0.7) -> None:
+    def _compute_pce_from_recipe(self, rpm: float = 3874.0, temp: float = 141.7,
+                                  conc: float = 1.5, additive: float = 2.48,
+                                  sol_ratio: float = 1.0) -> None:
         """
         Compute tandem PCE using the same recipe-based quality factors
         as granas_metrics.py SDLMetrics.from_recipe().
@@ -283,7 +283,7 @@ class GranasProductionModule:
         # ── Tandem PCE ───────────────────────────────────────
         # Perovskite top cell: optimized via SIBO with Ni:Mn doping
         green_sacrifice = 0.95  # ~5% Jsc loss from green reflection
-        self.perovskite_pce_pct = 30.5 * 0.95 * 0.95 * green_sacrifice
+        self.perovskite_pce_pct = 30.317 * green_sacrifice
         # TOPCon bottom cell: enhanced NIR collection
         self.topcon_pce_pct = 22.9 * 0.92
         # Total tandem
