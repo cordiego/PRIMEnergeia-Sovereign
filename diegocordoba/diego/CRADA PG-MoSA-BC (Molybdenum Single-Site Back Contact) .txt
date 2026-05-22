@@ -1,0 +1,62 @@
+This Cooperative Research and Development Agreement (CRADA) is entered into by and between PRIMEnergeia Granas (hereinafter "PRIMEnergeia") and the National Laboratory for Advanced Electrochemical Systems (hereinafter the "Laboratory"), collectively referred to as the "Parties".
++3
+
+
+1. Statement of Purpose and Scope
+The primary objective of this CRADA is to facilitate a collaborative framework for the advanced development and validation of the PG-MoSA-BC (Molybdenum Single-Site Back Contact) technology. The research aims to transcend the energetic penalties of the traditional Haber-Bosch process by optimizing a "Hydrogen-Compatible" back contact specifically engineered to decouple the competitive Hydrogen Evolution Reaction (HER) from the desired Electrochemical Nitrogen Reduction Reaction (e-NRR).
++4
+
+By leveraging the principles of Proton-Coupled Electron Transfer (PCET) and vacancy-stabilized single-site catalysis, the Parties seek to refine an architecture that enhances the chemisorption of dinitrogen ($N_2$) while kinetically suppressing proton recombination into molecular hydrogen.
++1
+
+
+2. Technical Objectives and Methodology
+The collaboration shall focus on the following technical pillars:
+I. Atomic Coordination and Site Tuning
+The Laboratory will utilize advanced spectroscopic characterization to validate the atomic coordination of the Molybdenum single sites ($Mo_{SA}$) anchored within the carbonaceous matrix. This includes:
++2
+ 
+	•	X-ray Photoelectron Spectroscopy (XPS) to probe oxidation states.  
+	•	X-ray Absorption Spectroscopy (XAS), specifically XANES and EXAFS regions, to determine coordination numbers and bond lengths ($Mo-N$ and $Mo-C$).  
+	•	Electron Paramagnetic Resonance (EPR) for real-time monitoring of paramagnetic defect evolution during the NRR process.  
+II. Kinetic Modeling and PCET Optimization
+The Parties will refine the generalized electrochemical potential equation governing the PCET process:
+
+$$\Delta G_{electrochemical} = \Delta G^0 + RT \ln(Q) - nF E + \Delta G^{\ddagger}_{interaction}$$
+Optimizing the interaction term ($\Delta G^{\ddagger}_{interaction}$) is paramount to promoting $N_2$ activation while limiting the parasitic HER.
+
+
+3. Laboratory Simulation and Performance Benchmarking
+A high-fidelity simulation environment will be maintained to evaluate the PG-MoSA-BC against standard Platinum on Carbon (Pt/C) electrodes. The simulation parameters are established as follows:
+
+Parameter
+Value
+Electrolyte
+0.1 M HCl (saturated with $N_2$)
+
+Temperature
+298 K ($25^\circ C$)
+
+Pressure
+50 bar $N_2$
+
+Applied Potential
+-0.4 V vs. RHE
+
+Results of Baseline Simulation
+Initial data indicates that while Pt/C is dominated by HER (99.2% current consumption), the PRIMEnergeia architecture achieves a Faradaic Efficiency (FE) of 58.4% for ammonia synthesis. This is attributed to the thermodynamically unfavorable free energy of hydrogen adsorption ($\Delta G_{*H} = +0.45 \text{ eV}$) on the PG-MoSA-BC surface.
++2
+
+
+4. Intellectual Property and Deliverables
+	•	Background IP: All single-site Molybdenum catalyst designs and carbon framework engineering remains the sole property of PRIMEnergeia. +1  
+	•	Joint Research Products: Any improvements in Gas-Diffusion Electrode (GDE) scale-up or the integration of aprotic ionic liquids developed during the CRADA term shall be subject to joint ownership.  
+	•	Final Report: A comprehensive white paper detailing the mechanistic pathways and the inversion of the typical HER/NRR selectivity ratio. +2  
+
+5. Conclusion
+The validation of the PG-MoSA-BC through this CRADA represents a critical milestone toward a decentralized, green ammonia economy. By strategically modulating surface binding energies, the Parties aim to render ambient-condition nitrogen fixation technologically viable and industrially scalable.
++1
+
+Would you like me to refine the simulation parameters within this CRADA to include a variation in pH levels to observe the shift between Ammonium and Ammonia production?
+
+

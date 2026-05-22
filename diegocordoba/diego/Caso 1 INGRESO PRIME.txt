@@ -1,0 +1,61 @@
+
+Caso 1: PRIMEnergeia - Contrato Global 01
+	•	A. Un cliente solicitó una cotización para la prestación de servicios, la cual fue emitida en cantidad de $5,000,000,000 USD. No han aceptado la propuesta de servicios.
+	•	B. En relación con un inmueble arrendado a un tercero, se devengaron rentas en cantidad de $500,000,000 USD, las cuales no han sido cobradas ni facturadas.
+	•	C. Un cliente efectuó pagos a cuenta de servicios que serán prestados en un futuro en cantidad de $3,000,000,000 USD. El contrato de prestación de servicios señala una contraprestación total de $12,000,000,000 USD, por lo que se encuentra pendiente de cobro $9,000,000,000 USD.
+	•	D. Se prestaron servicios a otros clientes por $19,500,000,000 USD, de los cuales sólo se ha cobrado la mitad.
+	•	E. Se recibió un préstamo de un accionista residente en el extranjero en cantidad de $5,000,000,000 USD.
+	•	F. Se recibieron aumentos de capital por $10,000,000,000 USD, los cuales corresponden a la suscripción de acciones con valor nominal de $5,570,000,000 USD y una prima en suscripción de acciones por el resto.
+	•	G. Se recibió un dividendo de una subsidiaria residente en México para efectos fiscales por $8,300,000,000 USD y un dividendo de una subsidiaria residente en el extranjero por $2,350,000,000 USD.
+	•	H. La PTU pagada en 2025 fue de $225,000,000 USD.
+	•	I. Las deducciones autorizadas del ejercicio ascienden a $15,175,000,000 USD.
+	•	J. El ajuste anual por inflación resultó acumulable por $2,950,000,000 USD.
+
+Caso 2: PRIMEnergeia - Contrato Global 02
+	•	A. Un cliente solicitó una cotización para la prestación de servicios, la cual fue emitida en cantidad de $5,000,000,000 USD. No han aceptado la propuesta de servicios.
+	•	B. En relación con un inmueble arrendado a un tercero, se devengaron rentas en cantidad de $500,000,000 USD, las cuales no han sido cobradas ni facturadas.
+	•	C. Un cliente efectuó pagos a cuenta de servicios que serán prestados en un futuro en cantidad de $3,000,000,000 USD. El contrato de prestación de servicios señala una contraprestación total de $12,000,000,000 USD, por lo que se encuentra pendiente de cobro $9,000,000,000 USD.
+	•	D. Se prestaron servicios a otros clientes por $19,500,000,000 USD, de los cuales sólo se ha cobrado la mitad.
+	•	E. Se recibió un préstamo de un accionista residente en el extranjero en cantidad de $5,000,000,000 USD.
+	•	F. Se recibieron aumentos de capital por $10,000,000,000 USD, los cuales corresponden a la suscripción de acciones con valor nominal de $5,570,000,000 USD y una prima en suscripción de acciones por el resto.
+	•	G. Se recibió un dividendo de una subsidiaria residente en México para efectos fiscales por $8,300,000,000 USD y un dividendo de una subsidiaria residente en el extranjero por $2,350,000,000 USD.
+	•	H. La PTU pagada en 2025 fue de $225,000,000 USD.
+	•	I. Las deducciones autorizadas del ejercicio ascienden a $15,175,000,000 USD.
+	•	J. El ajuste anual por inflación resultó acumulable por $2,950,000,000 USD.
+
+Caso 3: PRIMEnergeia - Contrato Global 03
+	•	A. Un cliente solicitó una cotización para la prestación de servicios, la cual fue emitida en cantidad de $5,000,000,000 USD. No han aceptado la propuesta de servicios.
+	•	B. En relación con un inmueble arrendado a un tercero, se devengaron rentas en cantidad de $500,000,000 USD, las cuales no han sido cobradas ni facturadas.
+	•	C. Un cliente efectuó pagos a cuenta de servicios que serán prestados en un futuro en cantidad de $3,000,000,000 USD. El contrato de prestación de servicios señala una contraprestación total de $12,000,000,000 USD, por lo que se encuentra pendiente de cobro $9,000,000,000 USD.
+	•	D. Se prestaron servicios a otros clientes por $19,500,000,000 USD, de los cuales sólo se ha cobrado la mitad.
+	•	E. Se recibió un préstamo de un accionista residente en el extranjero en cantidad de $5,000,000,000 USD.
+	•	F. Se recibieron aumentos de capital por $10,000,000,000 USD, los cuales corresponden a la suscripción de acciones con valor nominal de $5,570,000,000 USD y una prima en suscripción de acciones por el resto.
+	•	G. Se recibió un dividendo de una subsidiaria residente en México para efectos fiscales por $8,300,000,000 USD y un dividendo de una subsidiaria residente en el extranjero por $2,350,000,000 USD.
+	•	H. La PTU pagada en 2025 fue de $225,000,000 USD.
+	•	I. Las deducciones autorizadas del ejercicio ascienden a $15,175,000,000 USD.
+	•	J. El ajuste anual por inflación resultó acumulable por $2,950,000,000 USD.
+
+Caso 4: PRIMEnergeia - Contrato Global 04
+	•	A. Un cliente solicitó una cotización para la prestación de servicios, la cual fue emitida en cantidad de $5,000,000,000 USD. No han aceptado la propuesta de servicios.
+	•	B. En relación con un inmueble arrendado a un tercero, se devengaron rentas en cantidad de $500,000,000 USD, las cuales no han sido cobradas ni facturadas.
+	•	C. Un cliente efectuó pagos a cuenta de servicios que serán prestados en un futuro en cantidad de $3,000,000,000 USD. El contrato de prestación de servicios señala una contraprestación total de $12,000,000,000 USD, por lo que se encuentra pendiente de cobro $9,000,000,000 USD.
+	•	D. Se prestaron servicios a otros clientes por $19,500,000,000 USD, de los cuales sólo se ha cobrado la mitad.
+	•	E. Se recibió un préstamo de un accionista residente en el extranjero en cantidad de $5,000,000,000 USD.
+	•	F. Se recibieron aumentos de capital por $10,000,000,000 USD, los cuales corresponden a la suscripción de acciones con valor nominal de $5,570,000,000 USD y una prima en suscripción de acciones por el resto.
+	•	G. Se recibió un dividendo de una subsidiaria residente en México para efectos fiscales por $8,300,000,000 USD y un dividendo de una subsidiaria residente en el extranjero por $2,350,000,000 USD.
+	•	H. La PTU pagada en 2025 fue de $225,000,000 USD.
+	•	I. Las deducciones autorizadas del ejercicio ascienden a $15,175,000,000 USD.
+	•	J. El ajuste anual por inflación resultó acumulable por $2,950,000,000 USD.
+
+Caso 5: PRIMEnergeia - Contrato Global 05
+	•	A. Un cliente solicitó una cotización para la prestación de servicios, la cual fue emitida en cantidad de $5,000,000,000 USD. No han aceptado la propuesta de servicios.
+	•	B. En relación con un inmueble arrendado a un tercero, se devengaron rentas en cantidad de $500,000,000 USD, las cuales no han sido cobradas ni facturadas.
+	•	C. Un cliente efectuó pagos a cuenta de servicios que serán prestados en un futuro en cantidad de $3,000,000,000 USD. El contrato de prestación de servicios señala una contraprestación total de $12,000,000,000 USD, por lo que se encuentra pendiente de cobro $9,000,000,000 USD.
+	•	D. Se prestaron servicios a otros clientes por $19,500,000,000 USD, de los cuales sólo se ha cobrado la mitad.
+	•	E. Se recibió un préstamo de un accionista residente en el extranjero en cantidad de $5,000,000,000 USD.
+	•	F. Se recibieron aumentos de capital por $10,000,000,000 USD, los cuales corresponden a la suscripción de acciones con valor nominal de $5,570,000,000 USD y una prima en suscripción de acciones por el resto.
+	•	G. Se recibió un dividendo de una subsidiaria residente en México para efectos fiscales por $8,300,000,000 USD y un dividendo de una subsidiaria residente en el extranjero por $2,350,000,000 USD.
+	•	H. La PTU pagada en 2025 fue de $225,000,000 USD.
+	•	I. Las deducciones autorizadas del ejercicio ascienden a $15,175,000,000 USD.
+	•	J. El ajuste anual por inflación resultó acumulable por $2,950,000,000 USD.
+

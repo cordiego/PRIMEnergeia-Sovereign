@@ -1,0 +1,13 @@
+PRIMEnergeia S.A.S. | Propuesta de Valor Estratégico
+------------------------------------------------------
+A la atención de la Dirección de Operaciones de Engie:
+
+PRIMEnergeia S.A.S. ofrece una capa de inteligencia soberana basada en control 
+estocástico Hamilton-Jacobi-Bellman (HJB). Nuestra solución garantiza:
+
+- Estabilidad de Red: Mitigación proactiva de armónicos y cumplimiento de Código de Red.
+- Resiliencia de Activos: Reducción de entropía térmica en transformadores.
+- Arbitraje PML: Optimización del despacho de carga para captura de valor económico.
+
+Nuestra estructura legal S.A.S. está autorizada y lista para la integración
+técnica. Referencia de mercado: Nodo VZA-400 (datos públicos CENACE).
