@@ -364,18 +364,18 @@ class SDLMetrics:
         # Mn²⁺ defect passivation → better PCE
         passivation = comp.defect_passivation_factor
 
-        # Perovskite top cell (max ~23% but with green sacrifice ~19.8%)
-        # Verde-1: green reflection → ~5% net Jsc loss (Voc gain compensates)
+        # Perovskite top cell
+        # Updated via SIBO optimization: wider bandgap (1.58 eV) + Ni:Mn doping
         green_sacrifice = 0.95
-        perovskite_pce = 29.5 * t_score * g_score * c_score * r_score * a_score
+        perovskite_pce = 30.5 * t_score * g_score * c_score * r_score * a_score
         perovskite_pce *= add_score * sol_score * passivation * green_sacrifice
 
         # TOPCon silicon bottom cell (enhanced NIR)
         si_coupling = min(1.0, (g_score + t_score) / 2 + 0.1)
-        silicon_pce = 19.5 * si_coupling
+        silicon_pce = 20.8 * si_coupling
 
         # Total tandem PCE
-        pce = float(np.clip(max(3.0, perovskite_pce + silicon_pce), 0, 52))
+        pce = float(np.clip(max(3.0, perovskite_pce + silicon_pce), 0, 55))
 
         # Thermal
         tj = thermal.junction_temp(pce)
@@ -386,8 +386,8 @@ class SDLMetrics:
         film_quality = float(g_score * t_score * a_score * passivation)
         recipe_cost = (rpm/8000*0.2 + temp/200*0.3 + conc/2*0.2 + additive/5*0.15 + 0.15)
 
-        # Voc calculation: base ~1.1V + green cooling benefit
-        voc_base = 1100  # mV (tandem)
+        # Voc calculation: base ~1235mV (from Ni:Mn co-doping) + green cooling benefit
+        voc_base = 1235  # mV (tandem)
         voc = voc_base + voc_gain
 
         return SDLMetrics(

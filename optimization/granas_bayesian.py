@@ -38,8 +38,8 @@ logger = logging.getLogger(__name__)
 # Practical MAPbI3 Eg ≈ 1.55 eV, tunable by composition
 BOLTZMANN_EV = 8.617333e-5   # eV/K
 CELL_TEMP_K = 300.0           # Standard test conditions (K)
-SQ_LIMIT_EG_155 = 0.306       # Theoretical SQ efficiency at Eg=1.55 eV (~30.6%)
-PRACTICAL_CAP = 0.320         # Lab-champion single-junction perovskite PCE ~32.0%
+SQ_LIMIT_EG_155 = 30.6        # Theoretical SQ efficiency at Eg=1.55 eV (~30.6%)
+PRACTICAL_CAP = 32.0          # Lab-champion single-junction perovskite PCE ~32.0%
 
 
 # ─────────────────────────────────────────────────────────────
@@ -140,7 +140,7 @@ class PerovskitePhysics:
         return float(np.clip(defects, 0.02, 3.0))
 
     @staticmethod
-    def efficiency(grain_nm: float, defects: float, spin_speed: int) -> float:
+    def efficiency(grain_nm: float, defects: float, spin_speed: int, add_noise: bool = False) -> float:
         """
         Power Conversion Efficiency (%) bounded by Shockley-Queisser.
         Large grains + low defects → high Voc and Jsc → high PCE.
@@ -157,8 +157,8 @@ class PerovskitePhysics:
         # Raw PCE capped by practical champion
         raw_pce = PRACTICAL_CAP * grain_factor * defect_factor * uniformity
 
-        # Add small stochastic noise (measurement uncertainty, ±0.3%)
-        noise = np.random.normal(0, 0.3)
+        # Add small stochastic noise (measurement uncertainty, ±0.3%) if requested
+        noise = np.random.normal(0, 0.3) if add_noise else 0.0
         return float(np.clip(raw_pce + noise, 0.5, PRACTICAL_CAP))
 
     @staticmethod
@@ -406,12 +406,15 @@ class GranasOptimizer:
             logger.warning("No trials available for HJB analysis.")
             return None
 
-        # Use best recipe's grain/defect as initial conditions
+        # Use best recipe's grain/defect as initial conditions (pre-anneal proxy or actual best)
+        # We start annealing from room temp, but the solver wants the starting physical state.
+        # Actually, the user wants us to connect HJBDynamics with the real parameters from the CSV.
         initial = AnnealingState(
-            grain_size_nm=50.0,  # Pre-anneal initial grain size
-            defect_density=1.5,  # Pre-anneal initial defect density
+            grain_size_nm=float(best.grain_size_nm),  # Use the real optimal grain size found
+            defect_density=float(best.defect_density), # Use the real optimal defect density found
             film_temp_C=25.0,    # Room temperature start
         )
+
 
         controller = GranasHJBController(
             total_time_s=total_time_s,
