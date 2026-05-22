@@ -251,7 +251,7 @@ class TestPerovskitePhysics:
     def test_efficiency_bounded(self):
         np.random.seed(42)
         eff = PerovskitePhysics.efficiency(500, 0.1, 4000)
-        assert 0.0 <= eff <= 0.35  # PRACTICAL_CAP=0.320, fractional scale
+        assert 0.0 <= eff <= 35.0  # PRACTICAL_CAP=32.0, percentage scale
 
     def test_stability_score_range(self):
         stab = PerovskitePhysics.stability_score(140, 25, 3.0, 0.1)
@@ -263,4 +263,4 @@ class TestPerovskitePhysics:
         grain = PerovskitePhysics.grain_size(1.2, 0.7, 4000, 140, 20)
         defects = PerovskitePhysics.defect_density(1.2, 2.5, 0.7, 140, 20)
         pce = PerovskitePhysics.efficiency(grain, defects, 4000)
-        assert pce > 0.15  # Should be well above average (fractional scale)
+        assert pce > 15.0  # Should be well above average (percentage scale)

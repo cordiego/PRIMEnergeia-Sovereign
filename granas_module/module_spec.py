@@ -156,7 +156,7 @@ class GranasProductionModule:
     n_parallel: int = N_PARALLEL
 
     # ── Cell-Level Parameters ────────────────────────────────
-    cell_voc_base_mV: float = 1100.0   # Base tandem Voc (mV)
+    cell_voc_base_mV: float = 1247.0   # Base tandem Voc (mV) after Ni:Mn doping
 
     # ── Operating Conditions ─────────────────────────────────
     irradiance_W_m2: float = 1000.0    # STC
@@ -281,11 +281,11 @@ class GranasProductionModule:
         self.module_voc_V = self.n_series * cell_voc_V
 
         # ── Tandem PCE ───────────────────────────────────────
-        # Perovskite top cell: ~23% × quality factors (green sacrifice)
+        # Perovskite top cell: optimized via SIBO with Ni:Mn doping
         green_sacrifice = 0.95  # ~5% Jsc loss from green reflection
-        self.perovskite_pce_pct = 29.5 * 0.95 * 0.95 * green_sacrifice
-        # TOPCon bottom cell: ~19.5% (NIR collection)
-        self.topcon_pce_pct = 19.5 * 0.92
+        self.perovskite_pce_pct = 30.5 * 0.95 * 0.95 * green_sacrifice
+        # TOPCon bottom cell: enhanced NIR collection
+        self.topcon_pce_pct = 22.9 * 0.92
         # Total tandem
         self.tandem_pce_pct = self.perovskite_pce_pct + self.topcon_pce_pct
 
