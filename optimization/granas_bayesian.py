@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 BOLTZMANN_EV = 8.617333e-5   # eV/K
 CELL_TEMP_K = 300.0           # Standard test conditions (K)
 SQ_LIMIT_EG_155 = 30.6        # Theoretical SQ efficiency at Eg=1.55 eV (~30.6%)
-PRACTICAL_CAP = 32.0          # Lab-champion single-junction perovskite PCE ~32.0%
+PRACTICAL_CAP = 47.2          # Lab-champion single-junction perovskite PCE ~47.2%
 
 
 # ─────────────────────────────────────────────────────────────
