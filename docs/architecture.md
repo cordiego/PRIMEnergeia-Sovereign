@@ -64,6 +64,13 @@
 7. **Financial engine** — Market-specific pricing (PML/LMP/Pool) calculates capital recovery
 8. **Dashboard** — Unified 6-tab SCADA visualization renders all markets with dynamic theming
 
+## Core Unified Kernel (HJB Solver)
+
+The `prime_kernel/hjb_solver.py` acts as the mathematical heart of the PRIMEnergeia architecture, cross-linking the Grid and Granas operations:
+
+1. **Grid Frequency Regulation (`GridFrequencyDynamics`)** — Reacts to load disturbances (e.g., a sudden -1.5 Hz drop) by computing the optimal non-linear injection ramp rate to stabilize the swing equation within NERC/CENACE penalty thresholds.
+2. **Granas Annealing (`PerovskiteAnnealingDynamics`)** — Modulates the temperature trajectory to maximize grain growth and minimize defect density over the Bayesian-optimized process horizon.
+
 ## Granas Optimization Layer
 
 The `optimization/` module adds Bayesian Optimization for perovskite (Granas™) solar cell fabrication:
