@@ -1,0 +1,7 @@
+PARA: Pedro Paulo Baeza
+EMAIL: pedro.baeza@cenace.gob.mx
+ASUNTO: Validacion de Modelo Estocastico: Disipacion Proyectada de $105,330.12 USD en Nodo 03-GDL-400
+
+Estimado Pedro,
+
+Hemos corrido una simulacion para el nodo 03-GDL-400... [Cuerpo completo generado]

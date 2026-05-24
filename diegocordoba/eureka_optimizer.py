@@ -20,7 +20,7 @@ class SovereignOptimizer(nn.Module):
         return torch.softmax(w_raw / self.temp, dim=0)
 
 def run():
-    assets = ['AGQ', 'UGL', 'GEV', 'VGSH', 'VTIP']
+    assets = ['SNDK', 'SNXX', 'CASH']
     model = SovereignOptimizer()
     print("\n[+] Eureka 1.0: Sistema de Control Estocástico Iniciado.")
     

@@ -1,0 +1,7 @@
+PARA: Katya Somohano Silva
+EMAIL: katya.somohano@iberdrola.com
+ASUNTO: Validacion de Modelo Estocastico: Disipacion Proyectada de $98,450.30 USD en Nodo 06-SLP-400
+
+Estimado Katya,
+
+Hemos corrido una simulacion para el nodo 06-SLP-400... [Cuerpo completo generado]

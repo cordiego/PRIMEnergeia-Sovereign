@@ -1,0 +1,7 @@
+PARA: Luis Eduardo Quirazco
+EMAIL: luis.quirazco@cenace.gob.mx
+ASUNTO: Validacion de Modelo Estocastico: Disipacion Proyectada de $192,440.15 USD en Nodo 08-MXL-230
+
+Estimado Luis,
+
+Hemos corrido una simulacion para el nodo 08-MXL-230... [Cuerpo completo generado]

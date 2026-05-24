@@ -1,0 +1,7 @@
+PARA: Arantza Ezpeleta
+EMAIL: arantza.ezpeleta@acciona.com
+ASUNTO: Validacion de Modelo Estocastico: Disipacion Proyectada de $134,660.45 USD en Nodo 07-CUM-115
+
+Estimado Arantza,
+
+Hemos corrido una simulacion para el nodo 07-CUM-115... [Cuerpo completo generado]

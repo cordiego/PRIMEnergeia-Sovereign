@@ -3,7 +3,7 @@ import pandas as pd
 from scipy.optimize import minimize
 
 # --- CONFIGURACIÓN DEL NODO EUREKA 1.0 ---
-tickers = ['AGQ', 'UGL', 'GEV', 'VTIP', 'VGSH']
+tickers = ['SNDK', 'SNXX', 'CASH']
 precios_actuales = np.array([35.20, 72.10, 165.40, 48.15, 58.90]) # Simulación cierre
 capital_total = 550.0
 

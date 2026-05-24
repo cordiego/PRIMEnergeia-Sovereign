@@ -1,0 +1,7 @@
+PARA: Ricardo Octavio Mota
+EMAIL: ricardo.mota@cenace.gob.mx
+ASUNTO: Validacion de Modelo Estocastico: Disipacion Proyectada de $110,215.40 USD en Nodo 01-QRO-230
+
+Estimado Ricardo,
+
+Hemos corrido una simulacion para el nodo 01-QRO-230... [Cuerpo completo generado]

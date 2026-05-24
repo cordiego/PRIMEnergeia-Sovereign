@@ -1,0 +1,47 @@
+
+[⚡] EUREKA 1.0 | REPORTE DE SOBERANÍA | 12:34
+TICKER  | SHARPE  | DECAY    | ORDEN RECOMENDADA
+-----------------------------------------------------------------
+AGQ     |    0.23 | -3.3532 | HOLD
+UGL     |    0.43 | -0.9722 | HOLD
+GEV     |    0.54 | -0.1556 | HOLD
+VTIP    |    3.00 | -0.0050 | COMPRAR
+VGSH    |    7.50 | -0.0008 | HOLD
+
+[⚡] EUREKA 1.0 | REPORTE DE PESOS ÓPTIMOS | 2026-03-08 12:35
+TICKER  | W_OPT   | SHARPE  | DECAY    | ORDEN
+-----------------------------------------------------------------
+AGQ     |   20.0% |    0.23 | -3.3532 | HOLD
+UGL     |   20.0% |    0.43 | -0.9722 | VENDER
+GEV     |   25.0% |    0.54 | -0.1556 | HOLD
+VTIP    |   15.0% |    3.00 | -0.0050 | HOLD
+VGSH    |   20.0% |    7.50 | -0.0008 | HOLD
+
+[⚡] EUREKA 1.0 | MONTE CARLO & PESOS ÓPTIMOS | 2026-03-08 12:37
+TICKER  | W_OPT   | SHARPE  | DECAY    | ORDEN
+-----------------------------------------------------------------
+AGQ     |   20.0% |    0.23 | -3.3532 | COMPRAR
+UGL     |   20.0% |    0.34 | -0.9722 | HOLD
+GEV     |   25.0% |    0.36 | -0.1556 | COMPRAR
+VTIP    |   15.0% |    0.80 | -0.0050 | VENDER
+VGSH    |   20.0% |    1.50 | -0.0008 | HOLD
+-----------------------------------------------------------------
+[📊] PROYECCIÓN MONTE CARLO (1,000 Caminos):
+    Probabilidad de Retorno Positivo: 69.6%
+    Valor Mediano Proyectado (1y):   $598.95 USD
+    Escenario de Estrés (VaR 95%):   $465.85 USD
+-----------------------------------------------------------------
+
+[🚀] EUREKA 1.0 | MODO: MAX RETURN | 12:39
+TICKER  | W_OPT   | EXPECTED | ORDEN
+-------------------------------------------------------
+AGQ     |   30.0% |    22.0% | HOLD
+GEV     |   35.0% |    18.0% | AJUSTAR
+UGL     |   15.0% |    12.0% | AJUSTAR
+VTIP    |   10.0% |     4.0% | AJUSTAR
+VGSH    |   10.0% |     3.0% | AJUSTAR
+-------------------------------------------------------
+📈 PROYECCIÓN MAX RETURN (12 Meses):
+    Potencial Máximo (P95):   $925.27 USD
+    Sharpe Ratio Estimado:    0.69
+-------------------------------------------------------

@@ -1,0 +1,7 @@
+PARA: Eugenio García Macías
+EMAIL: eugenio.garcia@cenace.gob.mx
+ASUNTO: Validacion de Modelo Estocastico: Disipacion Proyectada de $215,900.67 USD en Nodo 04-MTY-400
+
+Estimado Eugenio,
+
+Hemos corrido una simulacion para el nodo 04-MTY-400... [Cuerpo completo generado]

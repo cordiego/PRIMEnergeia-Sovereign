@@ -22,7 +22,7 @@ class SovereignOptimizer(nn.Module):
         return torch.softmax(raw_weights / self.temp, dim=0)
 
 def run_optimization():
-    assets = ['AGQ', 'UGL', 'GEV', 'VGSH', 'VTIP']
+    assets = ['SNDK', 'SNXX', 'CASH']
     model = SovereignOptimizer()
     
     print("\n[+] Iniciando Optimizador LQR para Eureka 1.0...")
