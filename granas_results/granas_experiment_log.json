@@ -392,11 +392,11 @@
     "anneal_temp": 141.65831797391502,
     "anneal_time": 17.627596646008456,
     "trial_id": 25,
-    "pce": 30.31741000957907,
-    "voc_mV": 1299.4546207496085,
-    "stability_score": 0.918127066588441,
-    "grain_size_nm": 402.5206702804495,
-    "defect_density": 0.09770567282782726,
+    "pce": 30.3,
+    "voc_mV": 1299.0,
+    "stability_score": 0.918,
+    "grain_size_nm": 402.0,
+    "defect_density": 0.097,
     "timestamp": "2026-05-22T17:11:48.151703"
   },
   {

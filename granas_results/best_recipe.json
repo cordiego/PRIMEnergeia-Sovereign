@@ -8,11 +8,11 @@
     "anneal_temp": 141.65831797391502,
     "anneal_time": 17.627596646008456
   },
-  "predicted_pce_pct": 30.317,
-  "voc_mV": 1299.5,
+  "predicted_pce_pct": 30.3,
+  "voc_mV": 1299.0,
   "stability_score": 0.918,
-  "grain_size_nm": 402.5,
-  "defect_density": 0.0977,
+  "grain_size_nm": 402.0,
+  "defect_density": 0.097,
   "trial_id": 25,
   "optimization_config": {
     "n_calls": 30,
