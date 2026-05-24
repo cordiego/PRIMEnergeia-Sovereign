@@ -252,9 +252,9 @@ class GridFrequencyDynamics(HJBDynamics):
     def control_bounds(self) -> Tuple[float, float]:
         return (-10.0, 10.0)   # MW/s ramp rate
 
-    def step(self, state: np.ndarray, control: float, dt: float) -> np.ndarray:
+    def step(self, state: np.ndarray, control: float, dt: float, xi: float = 0.0) -> np.ndarray:
         df, P = state
-        ddf = (P - self.D * df) / (2.0 * self.H)
+        ddf = (P - self.D * df + xi) / (2.0 * self.H)
         new_df = np.clip(df + ddf * dt, -2.0, 2.0)
         new_P  = np.clip(P  + control * dt, 0.0, self.max_inj)
         return np.array([new_df, new_P])
@@ -806,10 +806,8 @@ class RobustHJBSolver(HJBSolver):
     """
     Worst-case robust value iteration under model ambiguity (thesis §3).
 
-    The robust Bellman operator enlarges the running cost by the
-    ambiguity-budget term  ε · ||g(x)||²  at each grid point,
-    where g(x) is the diffusion vector and ε is the Knightian
-    uncertainty radius calibrated from out-of-sample ECM.
+    Minimax (H∞-style) value iteration via an explicit grid over adversarial
+    disturbances ξ.
 
     V_rob(x) ≥ V_HJB(x) for all ε > 0 (Proposition 3.1).
 
@@ -823,18 +821,16 @@ class RobustHJBSolver(HJBSolver):
     def __init__(self, dynamics: HJBDynamics, epsilon: float = 0.00346, **kwargs):
         super().__init__(dynamics, **kwargs)
         self.epsilon = epsilon
-
-    def _robust_penalty(self, state: np.ndarray) -> float:
-        """Ambiguity penalty:  ε · ||g(x)||²  (Hansen-Sargent, 2001)."""
-        g = self.dynamics.diffusion(state)
-        return self.epsilon * float(np.dot(g, g))
+        # For minimax, we construct a disturbance grid over the OU diffusion noise
+        sigma_ou = dynamics.sigma_ou if hasattr(dynamics, 'sigma_ou') else 0.015
+        self.xi_grid = np.linspace(-3 * sigma_ou, 3 * sigma_ou, 7)
 
     def solve(self) -> "RobustHJBSolver":
         n_dims      = self.dynamics.state_dims()
         grid_shapes = [len(g) for g in self.state_grids]
 
         logger.info("=" * 64)
-        logger.info(" PRIME-Kernel Robust HJB Solver v2.0 — ε=%.5f", self.epsilon)
+        logger.info(" PRIME-Kernel Robust HJB Solver v2.0 — Minimax H∞ (ε=%.5f)", self.epsilon)
         logger.info("=" * 64)
 
         t0 = time.perf_counter()
@@ -852,18 +848,26 @@ class RobustHJBSolver(HJBSolver):
 
             for idx in np.ndindex(*grid_shapes):
                 state      = np.array([self.state_grids[d][idx[d]] for d in range(n_dims)])
-                rob_pen    = self._robust_penalty(state)
                 best_cost  = np.inf
                 best_iu    = 0
 
                 for iu, u in enumerate(self.control_grid):
-                    L          = self.dynamics.running_cost(state, u) + rob_pen
-                    next_state = self.dynamics.step(state, u, self.dt)
-                    V_next     = self._interpolate_V(next_state)
-                    total      = L * self.dt + V_next
+                    L = self.dynamics.running_cost(state, u)
+                    
+                    # Inner maximization over xi
+                    best_for_u = -np.inf
+                    for xi in self.xi_grid:
+                        if isinstance(self.dynamics, GridFrequencyDynamics):
+                            next_state = self.dynamics.step(state, u, self.dt, xi=xi)
+                        else:
+                            next_state = self.dynamics.step(state, u, self.dt)
+                        V_next = self._interpolate_V(next_state)
+                        total_xi = L * self.dt + V_next
+                        if total_xi > best_for_u:
+                            best_for_u = total_xi
 
-                    if total < best_cost:
-                        best_cost = total
+                    if best_for_u < best_cost:
+                        best_cost = best_for_u
                         best_iu   = iu
 
                 self.V[idx]      = best_cost
@@ -886,6 +890,29 @@ class RobustHJBSolver(HJBSolver):
         self._delta_history  = delta_history
         self._build_interpolator()
         return self
+
+    def optimal_control(self, state: np.ndarray) -> float:
+        """Extract u*(x) from the solved value function (online query) using minimax."""
+        if not self._solved:
+            raise RuntimeError("Call solve() first.")
+        best_cost, best_u = np.inf, 0.0
+        for u in self.control_grid:
+            L = self.dynamics.running_cost(state, u)
+            
+            best_for_u = -np.inf
+            for xi in self.xi_grid:
+                if isinstance(self.dynamics, GridFrequencyDynamics):
+                    next_state = self.dynamics.step(state, u, self.dt, xi=xi)
+                else:
+                    next_state = self.dynamics.step(state, u, self.dt)
+                V_next = self._interpolate_V(next_state)
+                total_xi = L * self.dt + V_next
+                if total_xi > best_for_u:
+                    best_for_u = total_xi
+
+            if best_for_u < best_cost:
+                best_cost, best_u = best_for_u, u
+        return best_u
 
 
 # ─────────────────────────────────────────────────────────────────────────────
