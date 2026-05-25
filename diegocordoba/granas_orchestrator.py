@@ -17,11 +17,16 @@ class GranasValueEngine:
         self.output_pdf = f"Manifiesto_Valor_{node}.pdf"
 
     def resolver(self):
-        if os.path.exists(self.client_file):
-            logging.info("MODO AUDITORÍA: Procesando telemetría real...")
-            df = pd.read_csv(self.client_file, parse_dates=['timestamp'])
-        else:
-            logging.info("MODO PROSPECCIÓN: Simulando dinámica de Sonora...")
+        import sys
+        sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        from fetch_sen_real import fetch_sen_data
+
+        try:
+            real_data_path = fetch_sen_data(node_id=self.node, days=7)
+            logging.info(f"MODO AUDITORÍA: Procesando telemetría real de CENACE para {self.node}...")
+            df = pd.read_csv(real_data_path, parse_dates=['timestamp'])
+        except Exception as e:
+            logging.warning(f"Error cargando datos reales: {e}. MODO PROSPECCIÓN sintética...")
             t = pd.date_range(start="2026-02-01", periods=30*96, freq='15min')
             hr = t.hour + t.minute / 60.0
             theo = np.maximum(0, np.sin((hr - 6) * np.pi / 12)) * self.capacity
@@ -96,4 +101,4 @@ class GranasValueEngine:
         logging.info(f"ÉXITO: Manifiesto de Valor generado en {self.output_pdf}")
 
 if __name__ == "__main__":
-    GranasValueEngine().resolver()
+    GranasValueEngine(node="05-VZA-400").resolver()

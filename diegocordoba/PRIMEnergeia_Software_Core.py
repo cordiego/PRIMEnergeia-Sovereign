@@ -19,25 +19,39 @@ class PRIMEnergeiaSoftware:
         self.royalty_rate = 0.20
 
     def generate_stochastic_vectors(self):
-        logging.info("Synthesizing market tensors and exergy vectors...")
-        t = pd.date_range(start="2026-03-01", periods=96*7, freq='15min')
-        hr = t.hour + t.minute / 60.0
-        
-        # Optimal Trajectory P*(t)
-        theo = np.maximum(0, np.sin((hr - 6) * np.pi / 12)) * self.capacity
-        
-        # Market Dynamics: Volatile Sonora PML (USD/MWh)
-        pml = 42 + 22 * np.sin((hr - 10) * np.pi / 12)
-        pml += np.cumsum(np.random.normal(0, 4, len(t))) * 0.12
-        pml = np.clip(pml + np.where(np.random.rand(len(t)) > 0.96, 480, 0), 28, 750)
-        
-        # Deterministic Failure (Current Client System)
-        act = theo * np.where(pml > 190, 0.74, 0.93)
-        act = np.clip(act * np.random.normal(1.0, 0.015, len(t)), 0, self.capacity)
-        
-        df = pd.DataFrame({'timestamp': t, 'Actual_MW': act, 'Theoretical_MW': theo, 'PML_USD': pml})
-        df.to_csv(self.data_file, index=False)
-        return df
+        logging.info("Ingestando telemetría real y precios PML del API CENACE para el nodo %s...", self.node)
+        try:
+            import sys
+            # Assuming fetch_sen_real is either in current dir or parent dir
+            sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            from fetch_sen_real import fetch_sen_data
+            
+            # Use real data fetcher
+            real_data_path = fetch_sen_data(node_id=self.node, days=7)
+            df = pd.read_csv(real_data_path)
+            logging.info(f"Telemetría real integrada exitosamente desde {real_data_path}. Filas: {len(df)}")
+            df.to_csv(self.data_file, index=False)
+            return df
+        except Exception as e:
+            logging.error(f"Fallo al conectar con nodo real {self.node}: {e}. Cayendo a generación sintética.")
+            t = pd.date_range(start="2026-03-01", periods=96*7, freq='15min')
+            hr = t.hour + t.minute / 60.0
+            
+            # Optimal Trajectory P*(t)
+            theo = np.maximum(0, np.sin((hr - 6) * np.pi / 12)) * self.capacity
+            
+            # Market Dynamics: Volatile Sonora PML (USD/MWh)
+            pml = 42 + 22 * np.sin((hr - 10) * np.pi / 12)
+            pml += np.cumsum(np.random.normal(0, 4, len(t))) * 0.12
+            pml = np.clip(pml + np.where(np.random.rand(len(t)) > 0.96, 480, 0), 28, 750)
+            
+            # Deterministic Failure (Current Client System)
+            act = theo * np.where(pml > 190, 0.74, 0.93)
+            act = np.clip(act * np.random.normal(1.0, 0.015, len(t)), 0, self.capacity)
+            
+            df = pd.DataFrame({'timestamp': t, 'Actual_MW': act, 'Theoretical_MW': theo, 'PML_USD': pml})
+            df.to_csv(self.data_file, index=False)
+            return df
 
     def create_elite_dashboard(self, df):
         plt.style.use('dark_background')
@@ -127,7 +141,7 @@ class PRIMEnergeiaSoftware:
         logging.info(f"Report Materialized: {self.output_pdf}")
 
 if __name__ == "__main__":
-    engine = PRIMEnergeiaSoftware()
+    engine = PRIMEnergeiaSoftware(node="05-VZA-400")
     data = engine.generate_stochastic_vectors()
     engine.create_elite_dashboard(data)
     engine.seal_manifesto(data)
