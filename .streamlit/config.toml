@@ -1,6 +1,24 @@
+# PRIMEnergeia Sovereign — Streamlit Cloud Configuration
+# ========================================================
+# This file configures the Streamlit Cloud deployment.
+# Docs: https://docs.streamlit.io/deploy/streamlit-community-cloud
+
 [theme]
 primaryColor = "#00d1ff"
-backgroundColor = "#0e1117"
-secondaryBackgroundColor = "#161b22"
-textColor = "#ffffff"
+backgroundColor = "#050810"
+secondaryBackgroundColor = "#0a0f1a"
+textColor = "#e0e6ed"
 font = "sans serif"
+
+[server]
+headless = true
+port = 8501
+enableXsrfProtection = true
+maxUploadSize = 50
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showErrorDetails = false
+toolbarMode = "minimal"

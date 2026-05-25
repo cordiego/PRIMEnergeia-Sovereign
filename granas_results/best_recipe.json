@@ -1,0 +1,22 @@
+{
+  "optimal_recipe": {
+    "molar_conc": 1.5,
+    "solvent_ratio": 1.0,
+    "spin_speed": 3874,
+    "additive_pct": 2.47630185155476,
+    "doping_pct": 4.8629903219917185,
+    "anneal_temp": 141.65831797391502,
+    "anneal_time": 17.627596646008456
+  },
+  "predicted_pce_pct": 30.3,
+  "voc_mV": 1299.0,
+  "stability_score": 0.918,
+  "grain_size_nm": 402.0,
+  "defect_density": 0.097,
+  "trial_id": 25,
+  "optimization_config": {
+    "n_calls": 30,
+    "acq_func": "EI",
+    "multi_objective": true
+  }
+}
