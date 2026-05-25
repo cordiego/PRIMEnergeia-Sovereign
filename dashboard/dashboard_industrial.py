@@ -1,41 +1,107 @@
-import sqlite3, time, os, sys
+import streamlit as st
+import numpy as np
+import time
+from datetime import datetime
 
-G, B, C, Y, R, BD, E = '\033[92m', '\033[94m', '\033[96m', '\033[93m', '\033[91m', '\033[1m', '\033[0m'
+# Configuración de la página (apariencia industrial/terminal)
+st.set_page_config(page_title="PRIMEnergeia Industrial Dashboard", layout="centered")
 
-def draw():
-    try:
-        conn = sqlite3.connect('soberania.db')
-        cursor = conn.cursor()
-        while True:
-            cursor.execute("SELECT inercia, rescate, ts FROM metrics WHERE id = 1")
-            row = cursor.fetchone()
-            if row:
-                inercia, rescate, ts = row
-                os.system('clear')
-                print(f"{BD}{B}======================================================================{E}")
-                print(f"{BD}{C}      PRIMEnergeia Granas | SISTEMA DE CONTROL DE ESTABILIDAD ACTIVE{E}")
-                print(f"{BD}{B}======================================================================{E}")
-                print(f"{BD} NODO REFERENCIA (datos públicos CENACE): {E} VZA-400 (Valle de México)")
-                print(f"{BD} STATUS SENSORIAL: {E} {G}SYNC OK{E} | {BD}ESTADO HJB:{E} {G}OPTIMIZED{E}")
-                print(f"{BD}{B}----------------------------------------------------------------------{E}")
-                bar_len = min(int(abs(inercia) * 50), 50)
-                bar = ("█" * bar_len).ljust(50)
-                color = G if abs(inercia) < 0.05 else Y
-                print(f"{BD} RESPUESTA DE INERCIA (MW): {E} {color}[{bar}] {inercia:+.4f}{E}")
-                print(f"{BD}{B}----------------------------------------------------------------------{E}")
-                print(f"{BD} {Y}MÉTRICAS DE CUMPLIMIENTO Y AHORRO (CLIENT VIEW):{E}")
-                print(f" > Capital Rescatado (CENACE):    {G}${rescate:,.2f} USD{E}")
-                print(f" > Mitigación de Fatiga Térmica:  {C}14.2% (Asset Protection){E}")
-                print(f" > Estabilidad de Fase:          {G}99.98% (Nominal){E}")
-                print(f"{BD}{B}----------------------------------------------------------------------{E}")
-                print(f"{BD} ÚLTIMA SINCRONIZACIÓN: {E} {ts}")
-                print(f"{BD}{B}======================================================================{E}")
-                print(f"{Y} [!] TRANSMITIENDO TELEMETRÍA EN TIEMPO REAL A ENGIE/ENEL{E}")
-            time.sleep(0.5)
-    except Exception:
-        print("Esperando motor...")
-        time.sleep(2)
-        draw()
+# CSS para recrear el entorno de terminal
+st.markdown("""
+<style>
+    /* Fondo oscuro y fuente de terminal */
+    .stApp {
+        background-color: #0d1117;
+        color: #00ff00;
+        font-family: 'Courier New', Courier, monospace;
+    }
+    
+    /* Ocultar elementos de UI de Streamlit para mayor inmersión */
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
+    
+    /* Contenedor principal de la terminal */
+    .terminal-box {
+        background-color: #000000;
+        border: 2px solid #00d1ff;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 209, 255, 0.2);
+    }
+    
+    /* Clases de colores ANSI simulados */
+    .ansi-green { color: #00ff00; font-weight: bold; }
+    .ansi-blue { color: #00d1ff; font-weight: bold; }
+    .ansi-cyan { color: #00ffff; font-weight: bold; }
+    .ansi-yellow { color: #ffd700; font-weight: bold; }
+    .ansi-red { color: #ff0000; font-weight: bold; }
+    .ansi-bold { font-weight: bold; color: #ffffff; }
+    
+    .divider {
+        color: #00d1ff;
+        font-weight: bold;
+        letter-spacing: 2px;
+    }
+    
+    /* Animación de pulso para estado en vivo */
+    .blinking-text {
+        animation: blinker 1.5s linear infinite;
+        color: #ffd700;
+        font-weight: bold;
+    }
+    @keyframes blinker {
+        50% { opacity: 0.3; }
+    }
+</style>
+""", unsafe_allow_html=True)
+
+def generate_simulated_data():
+    # Simula la lectura de la base de datos local
+    inercia = np.random.normal(0, 0.05)
+    rescate = 2540123.00 + (time.time() % 1000) * 1.5 # Crece lentamente
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    return inercia, rescate, ts
+
+def render_dashboard():
+    # Usamos un placeholder para actualizar la interfaz en tiempo real
+    placeholder = st.empty()
+    
+    while True:
+        inercia, rescate, ts = generate_simulated_data()
+        
+        # Lógica de la barra de inercia
+        bar_len = min(int(abs(inercia) * 500), 50) # Escalar para que se vea movimiento
+        bar = "█" * bar_len + " " * (50 - bar_len)
+        color_class = "ansi-green" if abs(inercia) < 0.05 else "ansi-yellow"
+        
+        with placeholder.container():
+            st.markdown(f"""
+            <div class="terminal-box">
+                <div class="divider">======================================================================</div>
+                <div align="center" class="ansi-cyan" style="font-size: 1.2em;">PRIMEnergeia Granas | SISTEMA DE CONTROL DE ESTABILIDAD ACTIVE</div>
+                <div class="divider">======================================================================</div>
+                <br>
+                <div><span class="ansi-bold"> NODO REFERENCIA (datos públicos CENACE): </span> VZA-400 (Valle de México)</div>
+                <div><span class="ansi-bold"> STATUS SENSORIAL: </span> <span class="ansi-green">SYNC OK</span> | <span class="ansi-bold">ESTADO HJB:</span> <span class="ansi-green">OPTIMIZED</span></div>
+                <br>
+                <div class="divider">----------------------------------------------------------------------</div>
+                <div><span class="ansi-bold"> RESPUESTA DE INERCIA (MW): </span> <span class="{color_class}">[{bar}] {inercia:+.4f}</span></div>
+                <div class="divider">----------------------------------------------------------------------</div>
+                <br>
+                <div><span class="ansi-bold ansi-yellow"> MÉTRICAS DE CUMPLIMIENTO Y AHORRO (CLIENT VIEW):</span></div>
+                <div> > Capital Rescatado (CENACE):    <span class="ansi-green">${rescate:,.2f} USD</span></div>
+                <div> > Mitigación de Fatiga Térmica:  <span class="ansi-cyan">14.2% (Asset Protection)</span></div>
+                <div> > Estabilidad de Fase:          <span class="ansi-green">99.98% (Nominal)</span></div>
+                <br>
+                <div class="divider">----------------------------------------------------------------------</div>
+                <div><span class="ansi-bold"> ÚLTIMA SINCRONIZACIÓN: </span> {ts}</div>
+                <div class="divider">======================================================================</div>
+                <br>
+                <div class="blinking-text"> [!] TRANSMITIENDO TELEMETRÍA EN TIEMPO REAL A ENGIE/ENEL</div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+        time.sleep(0.5)
 
 if __name__ == "__main__":
-    draw()
+    render_dashboard()
