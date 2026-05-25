@@ -103,7 +103,7 @@ class GranasVZA400Dynamics(HJBDynamics):
         # Only E_PV is stochastic in this formulation
         return np.array([self.sigma_pv, 0.0, 0.0, 0.0])
 
-    def running_cost(self, state: np.ndarray, control: float) -> float:
+    def running_cost(self, state: np.ndarray, control: float, t: float = 0.0) -> float:
         E_PV, T_r, P_r, S_H2 = state
         u_hb = float(np.clip(control, 0.0, E_PV))
         

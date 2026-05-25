@@ -25,6 +25,7 @@ from hjb_solver_fortified import (
     HJBSolver,
     ISOMarket
 )
+from prime_kernel.hopfield import HopfieldValueMemory
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - [Market Connector] - %(message)s")
 logger = logging.getLogger("market_connector")
@@ -70,6 +71,8 @@ def run_market_integrated_dispatch(market: ISOMarket = ISOMarket.CENACE, horizon
     
     # 3. Setup the HJB Solver
     logger.info("Configuring the HJB Solver...")
+    memory_bank = HopfieldValueMemory(beta=2.0)
+    
     solver = HJBSolver(
         dynamics=dynamics,
         total_time=horizon_s,
@@ -78,7 +81,8 @@ def run_market_integrated_dispatch(market: ISOMarket = ISOMarket.CENACE, horizon
         n_controls=7,
         max_sweeps=5,
         tol=0.05,
-        stochastic=False
+        stochastic=False,
+        hopfield_memory=memory_bank
     )
     
     # 4. Solve for the Value Function (Stationary approximation over the horizon)

@@ -27,6 +27,7 @@ from typing import Dict, List, Optional, Tuple, Callable
 
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
+from prime_kernel.hopfield import HopfieldValueMemory
 
 logger = logging.getLogger("prime_kernel.hjb")
 
@@ -856,6 +857,8 @@ class HJBSolver:
         max_sweeps:  int   = 8,
         tol:         float = 0.01,
         stochastic:  bool  = False,
+        hopfield_memory: Optional[HopfieldValueMemory] = None,
+        config_vector: Optional[np.ndarray] = None,
     ):
         self.dynamics    = dynamics
         self.total_time  = total_time
@@ -864,6 +867,13 @@ class HJBSolver:
         self.max_sweeps  = max_sweeps
         self.tol         = tol
         self.stochastic  = stochastic   # enable Itô correction
+        self.hopfield_memory = hopfield_memory
+        
+        # Build default config vector for the memory bank if not provided
+        if config_vector is None:
+            self.config_vector = np.array([total_time, dt, n_controls, max_sweeps])
+        else:
+            self.config_vector = config_vector
 
         n_dims      = dynamics.state_dims()
         bounds      = dynamics.state_bounds()
@@ -942,15 +952,26 @@ class HJBSolver:
 
         t0 = time.perf_counter()
 
-        # Terminal condition
-        for idx in np.ndindex(*grid_shapes):
-            state      = np.array([self.state_grids[d][idx[d]] for d in range(n_dims)])
-            self.V[idx] = self.dynamics.terminal_cost(state)
+        v_shape = tuple(grid_shapes)
+        V_warm = None
+        if self.hopfield_memory is not None:
+            V_warm = self.hopfield_memory.retrieve(self.config_vector, v_shape)
+
+        if V_warm is not None:
+            self.V = V_warm
+            logger.info(" [Hopfield] Warm-starting HJB from associative memory!")
+            actual_sweeps = 2  # fast-forward fine-tuning
+        else:
+            actual_sweeps = self.max_sweeps
+            # Terminal condition
+            for idx in np.ndindex(*grid_shapes):
+                state      = np.array([self.state_grids[d][idx[d]] for d in range(n_dims)])
+                self.V[idx] = self.dynamics.terminal_cost(state)
 
         delta_history = []
         converged     = False
 
-        for sweep in range(self.max_sweeps):
+        for sweep in range(actual_sweeps):
             self._build_interpolator()
             V_old = self.V.copy()
 
@@ -1029,6 +1050,10 @@ class HJBSolver:
 
         total_cost += self.dynamics.terminal_cost(state)
         logger.info(" Simulation complete | Total cost: %.3f", total_cost)
+        
+        if self.hopfield_memory is not None:
+            # We store the memory. Since HJB minimises cost, higher -cost is better.
+            self.hopfield_memory.store(self.config_vector, self.V.copy(), -total_cost)
 
         return HJBResult(
             time_grid          = t_grid,
