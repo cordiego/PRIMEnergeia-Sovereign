@@ -1,47 +1,35 @@
+--- Eureka Position Review ---
+SNDK: Price=1641.64, Prev=1589.94, P&L=3.25%
+SNXX: Price=206.66, Prev=196.00, P&L=5.44%
+State: notified={'OPENING': True, 'DRIFT': True, 'MOM_TP': True}
+Decay Cumulative=0.0
+Validation: Hedge unwound correctly via Momentum Take Profit (MOM_TP) triggered today.
 
-[⚡] EUREKA 1.0 | REPORTE DE SOBERANÍA | 12:34
-TICKER  | SHARPE  | DECAY    | ORDEN RECOMENDADA
------------------------------------------------------------------
-AGQ     |    0.23 | -3.3532 | HOLD
-UGL     |    0.43 | -0.9722 | HOLD
-GEV     |    0.54 | -0.1556 | HOLD
-VTIP    |    3.00 | -0.0050 | COMPRAR
-VGSH    |    7.50 | -0.0008 | HOLD
 
-[⚡] EUREKA 1.0 | REPORTE DE PESOS ÓPTIMOS | 2026-03-08 12:35
-TICKER  | W_OPT   | SHARPE  | DECAY    | ORDEN
------------------------------------------------------------------
-AGQ     |   20.0% |    0.23 | -3.3532 | HOLD
-UGL     |   20.0% |    0.43 | -0.9722 | VENDER
-GEV     |   25.0% |    0.54 | -0.1556 | HOLD
-VTIP    |   15.0% |    3.00 | -0.0050 | HOLD
-VGSH    |   20.0% |    7.50 | -0.0008 | HOLD
+--- Kelly QP Feedback Loop Audit ---
+Date: 2026-05-31 19:57:41 UTC
+Tuned Hyperparameters: {'lam': 0.10215756035752789, 'max_weight': 0.09930759099340095}
+Objective Value (Growth - Vol Drag): 0.4721
+Tuned QP Weights: [0.0993, 0.0993]
 
-[⚡] EUREKA 1.0 | MONTE CARLO & PESOS ÓPTIMOS | 2026-03-08 12:37
-TICKER  | W_OPT   | SHARPE  | DECAY    | ORDEN
------------------------------------------------------------------
-AGQ     |   20.0% |    0.23 | -3.3532 | COMPRAR
-UGL     |   20.0% |    0.34 | -0.9722 | HOLD
-GEV     |   25.0% |    0.36 | -0.1556 | COMPRAR
-VTIP    |   15.0% |    0.80 | -0.0050 | VENDER
-VGSH    |   20.0% |    1.50 | -0.0008 | HOLD
------------------------------------------------------------------
-[📊] PROYECCIÓN MONTE CARLO (1,000 Caminos):
-    Probabilidad de Retorno Positivo: 69.6%
-    Valor Mediano Proyectado (1y):   $598.95 USD
-    Escenario de Estrés (VaR 95%):   $465.85 USD
------------------------------------------------------------------
 
-[🚀] EUREKA 1.0 | MODO: MAX RETURN | 12:39
-TICKER  | W_OPT   | EXPECTED | ORDEN
--------------------------------------------------------
-AGQ     |   30.0% |    22.0% | HOLD
-GEV     |   35.0% |    18.0% | AJUSTAR
-UGL     |   15.0% |    12.0% | AJUSTAR
-VTIP    |   10.0% |     4.0% | AJUSTAR
-VGSH    |   10.0% |     3.0% | AJUSTAR
--------------------------------------------------------
-📈 PROYECCIÓN MAX RETURN (12 Meses):
-    Potencial Máximo (P95):   $925.27 USD
-    Sharpe Ratio Estimado:    0.69
--------------------------------------------------------
+--- Kelly QP Feedback Loop Audit ---
+Date: 2026-05-31 20:15:25 UTC
+Tuned Hyperparameters: {'lam': 0.10215756035752789, 'max_weight': 0.09930759099340095}
+Objective Value (Growth - Vol Drag): 0.4721
+Tuned QP Weights: [0.0993, 0.0993]
+
+--- Eureka Position Review ---
+SNDK: Price=1768.81, Prev=1694.98, P&L=4.36%
+SNXX: Price=239.93, Prev=220.00, P&L=9.06%
+State: notified={'OPENING': True, 'DRIFT': True, 'MOM_TP': True}
+Decay Cumulative=0.0
+Validation: Hedge unwound correctly via Momentum Take Profit (MOM_TP) triggered today.
+
+
+--- Kelly QP Feedback Loop Audit ---
+Date: 2026-06-04 01:10:24 UTC
+Tuned Hyperparameters: {'lam': 0.10067228164511337, 'max_weight': 0.31348606340319396}
+Objective Value (Growth - Vol Drag): 0.5235
+Tuned QP Weights: [0.3135, 0.0015]
+

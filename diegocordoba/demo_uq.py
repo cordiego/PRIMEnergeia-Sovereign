@@ -4,16 +4,17 @@ import numpy as np
 import logging
 
 from hjb_solver_fortified import HJBSolver
-from granas_vza400_dynamics import GranasVZA400Dynamics
+from granas_dynamics import GranasDynamics
 from uncertainty_layer import UncertaintyQuantifier
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
 def main():
+    np.random.seed(20462)
     print("🚀 Initializing Validated UQ Layer for 30.3% PCE + Hydrogen Back Contact...")
 
     # Initialize dynamics for PV-HB integration
-    dynamics = GranasVZA400Dynamics()
+    dynamics = GranasDynamics()
 
     # To keep the demo fast, we use a coarse grid (4D state space)
     # E_PV, T_r, P_r, S_H2

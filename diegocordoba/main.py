@@ -7,8 +7,8 @@ console = Console()
 
 class EurekaTerminal:
     def __init__(self):
-        self.assets = ["SNDK", "SNXX", "CASH"]
-        self.weights = {"SNDK": 0.40, "SNXX": 0.40, "CASH": 0.20}
+        self.assets = ["SNDK", "SNXX", "SCHD"]
+        self.weights = {"SNDK": 0.20, "SNXX": 0.50, "SCHD": 0.30}
         self.milestones = [
             ("2026-02-27", "Eureka 1.0 Initial Concept", "V1.0"),
             ("2026-03-04", "Cross-Entropy Arbitrage Logic", "V1.1"),

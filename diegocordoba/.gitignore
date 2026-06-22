@@ -1,0 +1,6 @@
+*.mp4
+*.HEIC
+*.heic
+*.db-wal
+*.db-shm
+Downloads/

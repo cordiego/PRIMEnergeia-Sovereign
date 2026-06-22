@@ -1,0 +1,56 @@
+
+[2026-05-30 10:23:53] 
+PRIMEnergeia S.A.S. — MASTER PROJECT MAP (mapped May 30, 2026)
+
+PRIMEnergeia S.A.S. is composed of DISTINCT, INDEPENDENT projects that Diego explicitly confirmed have NOTHING in common with each other at the individual project level. Each is a separate SBU/product. They are unified only at the parent company level.
+
+=== LAYER 0: SHARED INFRASTRUCTURE (not products, just IP foundations) ===
+- PRIME-Kernel: Shared Python library. HJB solver, quant signals, telemetry. Installed as pip package. Every SBU imports from it.
+- PRIME-PowerElectronics: Shared power electronics module (power_electronics.py). Reused across PRIMEngines and battery/wind simulators.
+- PRIME-Platform: Frontend web platform (index.html, app.js, style.css). Landing page / investor-facing UI.
+
+=== SBU 1: PRIMENERGEIA-SOVEREIGN (Grid Software) ===
+Product: Intelligent grid stabilization & control software
+Core tech: HJB stochastic optimal control + Deep RL auto-healing
+Markets: 17 global ISOs (ERCOT, PJM, CAISO, SEN, MIBEL, etc.) = 1,700+ GW
+Key asset: VZA-400 (CENACE node in Mexico, $231,243 USD capital recovered in demo)
+Revenue model: 25% fee on capital rescued from CENACE penalties
+Projected ARR: ~$48M USD
+Status: Live demo on Streamlit, backtest validated, deployment-ready
+Files: PRIMEnergeia-Sovereign/ (app.py, demo_vza400.py, adapters/, core/, etc.)
+
+=== SBU 2: GRANAS (Perovskite Solar Hardware) ===
+Product: High-efficiency perovskite-silicon tandem solar modules (>33% PCE target)
+Core tech: Proprietary module architecture (GHB back contact, TOPCon, ETFE, CFRP, Albedo)
+Optimizer: SIBO (Sol-Ink Bayesian Optimizer) — 4D/6D parameter space
+Key thesis: Granas module is a distinct hardware IP, NOT software, NOT the same as grid control
+Repos: Granas/, Granas-Sovereign/, Granas-Blueprint/, Granas-Module/, Granas-Albedo/, Granas-CFRP/, Granas-ETFE/, Granas-GHB/, Granas-H2/, Granas-Metrics/, Granas-Optics/, Granas-SDL/, Granas-Scale/, Granas-TOPCon/
+Recycling arm: PRIMEcycle — end-of-life perovskite module recovery (circular economy)
+
+=== SBU 3: PRIMENGINES (Green Propulsion Engines) ===
+These are COMPLETELY SEPARATE from Granas and from grid software. Three distinct engine products:
+- PRIMEngines-AICE (A-ICE-G1): Ammonia Internal Combustion Engine — burns green NH3 as fuel
+- PRIMEngines-HYP (HY-P100): 100 kW Hydrogen Gas Turbine — Brayton cycle, 100% H2 fuel, CHP capable
+- PRIMEngines-PEM (PEM-PB-50): 50 kW PEM Hydrogen Fuel Cell stack — stationary power, Nafion 212
+Parent folder: PRIMEngines™/ (also contains vehicle-specific builds: Car, F1, SUV, Aircraft, TGV, Drone, etc.)
+
+=== SBU 4: PRIMENERGEIA-BATTERY (Grid-Scale Storage) ===
+Product: BESS-400 — 100 MW / 400 MWh grid-scale battery energy storage system
+Chemistries: LFP, NMC, SSB, VRFB
+Features: Degradation modeling, dispatch optimizer, peak shaving, arbitrage, frequency regulation
+Repo: PRIMEnergeia-Battery/
+
+=== SBU 5: PRIM-WIND (Wind + Green H2) ===
+Product: PRIM-WT-15 — 15 MW offshore wind turbine farm simulator with green H2 coupling
+Features: IEC 61400 power curves, Jensen/Park wake model, PEM electrolyzer dispatch
+Repo: PRIM-Wind/
+
+=== INTEGRATOR ===
+- PRIMStack: Plant-level integrator that connects all SBUs (battery + wind + engines + grid) into a unified plant model
+
+=== VZA-400 ===
+VZA-400 is NOT a project — it is a CENACE grid node in Mexico used as the primary demo/deployment target for PRIMEnergeia-Sovereign. It is geographic/market data, not a separate SBU.
+
+=== EUREKA-SOVEREIGN ===
+Separate financial arm — algorithmic trading engine (SNDK/SNXX/SCHD portfolio). Funds R&D.
+

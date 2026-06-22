@@ -1,0 +1,2016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRIMEnergeia — HJB Optimal Grid Control | Recover Lost Capital</title>
+  <meta name="description" content="PRIMEnergeia solves the Hamilton-Jacobi-Bellman equation in real-time to eliminate grid frequency penalties. $231K projected recoverable at VZA-400 using public CENACE data. Zero hardware changes.">
+  <meta property="og:title" content="PRIMEnergeia — Intelligent Grid Control">
+  <meta property="og:description" content="Real-time HJB optimal control recovering $231K+ per node. 17 global markets covering 1,770+ GW across ERCOT, PJM, CAISO, MISO, SEN, MIBEL, EPEX, Nord Pool, NEM, and JEPX.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://primenergeia.com">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ═══════════════════════════════════════════════
+       DESIGN SYSTEM
+    ═══════════════════════════════════════════════ */
+    :root {
+      --bg-primary: #060a14;
+      --bg-secondary: #0c1222;
+      --bg-tertiary: #111b2e;
+      --bg-card: rgba(12, 18, 34, 0.65);
+      --bg-card-hover: rgba(15, 23, 42, 0.85);
+
+      --border-subtle: rgba(0, 209, 255, 0.08);
+      --border-hover: rgba(0, 209, 255, 0.25);
+      --border-glow: rgba(0, 209, 255, 0.4);
+
+      --cyan: #00d1ff;
+      --cyan-muted: #0891b2;
+      --cyan-dim: rgba(0, 209, 255, 0.1);
+      --cyan-glow: rgba(0, 209, 255, 0.35);
+
+      --gold: #fbbf24;
+      --gold-dim: rgba(251, 191, 36, 0.1);
+
+      --green: #34d399;
+      --green-dim: rgba(52, 211, 153, 0.1);
+
+      --purple: #a78bfa;
+      --purple-dim: rgba(167, 139, 250, 0.1);
+
+      --red: #f87171;
+      --orange: #fb923c;
+
+      --text-primary: #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      --text-dim: #475569;
+
+      --gradient-cyan: linear-gradient(135deg, #00d1ff 0%, #0891b2 100%);
+      --gradient-gold: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+      --gradient-hero: radial-gradient(ellipse at 30% 20%, rgba(0, 209, 255, 0.06) 0%, transparent 50%),
+                       radial-gradient(ellipse at 70% 80%, rgba(167, 139, 250, 0.04) 0%, transparent 50%);
+
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-xl: 24px;
+
+      --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+      --shadow-glow: 0 0 40px rgba(0, 209, 255, 0.15);
+
+      --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-spring: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── Particle Canvas ── */
+    #particles-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── Scroll Reveal ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ═══════════════════════════════════════════════
+       NAVIGATION
+    ═══════════════════════════════════════════════ */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 1000;
+      background: rgba(6, 10, 20, 0.6);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0 2rem;
+      transition: background var(--transition-base), box-shadow var(--transition-base);
+    }
+
+    nav.scrolled {
+      background: rgba(6, 10, 20, 0.92);
+      box-shadow: 0 2px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .nav-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 800;
+      font-size: 1.15rem;
+      color: var(--text-primary);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-brand span { color: var(--cyan); }
+
+    .nav-links {
+      display: flex;
+      gap: 2.25rem;
+      list-style: none;
+      align-items: center;
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color var(--transition-base);
+      position: relative;
+    }
+
+    .nav-links a:not(.nav-cta)::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: var(--cyan);
+      transition: width var(--transition-base);
+    }
+
+    .nav-links a:hover { color: var(--text-primary); }
+    .nav-links a:not(.nav-cta):hover::after { width: 100%; }
+
+    .nav-cta {
+      background: var(--gradient-cyan);
+      color: #000 !important;
+      padding: 0.55rem 1.4rem;
+      border-radius: var(--radius-sm);
+      font-weight: 700 !important;
+      font-size: 0.8rem !important;
+      letter-spacing: 0.02em;
+      transition: transform var(--transition-base), box-shadow var(--transition-base);
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px var(--cyan-glow);
+    }
+
+    /* ── Hamburger ── */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 8px;
+      z-index: 1001;
+      background: none;
+      border: none;
+    }
+
+    .hamburger span {
+      width: 24px;
+      height: 2px;
+      background: var(--text-primary);
+      transition: all var(--transition-base);
+      border-radius: 2px;
+    }
+
+    .hamburger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .hamburger.active span:nth-child(2) { opacity: 0; }
+    .hamburger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+
+    /* ── Mobile Nav ── */
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 72px;
+      left: 0; right: 0; bottom: 0;
+      background: rgba(6, 10, 20, 0.97);
+      backdrop-filter: blur(30px);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2.5rem;
+    }
+
+    .mobile-nav.open { display: flex; }
+
+    .mobile-nav a {
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 1.5rem;
+      font-weight: 600;
+      transition: color var(--transition-base);
+    }
+
+    .mobile-nav a:hover { color: var(--cyan); }
+
+    /* ═══════════════════════════════════════════════
+       SECTIONS
+    ═══════════════════════════════════════════════ */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 7rem 2rem;
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    /* ── Section Headers ── */
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: var(--cyan);
+      margin-bottom: 1rem;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .section-label::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--cyan);
+    }
+
+    h2 {
+      font-size: clamp(2rem, 3.5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      margin-bottom: 1rem;
+      line-height: 1.15;
+    }
+
+    .section-desc {
+      font-size: 1.1rem;
+      color: var(--text-secondary);
+      max-width: 650px;
+      margin-bottom: 3.5rem;
+      line-height: 1.7;
+    }
+
+    /* ═══════════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════════ */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding-top: 72px;
+      background: var(--gradient-hero);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 200px;
+      background: linear-gradient(to top, var(--bg-primary), transparent);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .hero-content {
+      text-align: center;
+      max-width: 920px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 3;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: rgba(0, 209, 255, 0.06);
+      border: 1px solid rgba(0, 209, 255, 0.2);
+      border-radius: 100px;
+      padding: 0.45rem 1.4rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 2.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      animation: fadeInDown 0.8s ease-out;
+    }
+
+    .hero-badge .pulse {
+      width: 8px; height: 8px;
+      background: var(--cyan);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+      box-shadow: 0 0 8px var(--cyan);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 209, 255, 0.5); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 10px rgba(0, 209, 255, 0); }
+    }
+
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: clamp(2.8rem, 6vw, 5rem);
+      font-weight: 900;
+      line-height: 1.05;
+      margin-bottom: 1.75rem;
+      letter-spacing: -0.04em;
+      animation: fadeInUp 0.9s ease-out 0.15s both;
+    }
+
+    h1 .gradient-text {
+      background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 50%, var(--cyan) 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: shimmer 4s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% center; }
+      100% { background-position: 200% center; }
+    }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      max-width: 680px;
+      margin: 0 auto 2rem;
+      font-weight: 400;
+      line-height: 1.7;
+      animation: fadeInUp 0.9s ease-out 0.3s both;
+    }
+
+    .hero-equation {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1rem;
+      color: var(--cyan);
+      background: rgba(0, 209, 255, 0.04);
+      border: 1px solid rgba(0, 209, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 2rem;
+      display: inline-block;
+      margin-bottom: 3rem;
+      animation: fadeInUp 0.9s ease-out 0.4s both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-equation::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 209, 255, 0.08), transparent);
+      animation: equationSweep 3s ease-in-out infinite;
+    }
+
+    @keyframes equationSweep {
+      0% { left: -100%; }
+      50% { left: 100%; }
+      100% { left: 100%; }
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeInUp 0.9s ease-out 0.5s both;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.9rem 2.25rem;
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all var(--transition-base);
+      cursor: pointer;
+      border: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn-primary {
+      background: var(--gradient-cyan);
+      color: #000;
+      box-shadow: 0 4px 20px rgba(0, 209, 255, 0.2);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 35px rgba(0, 209, 255, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+      border: 1px solid var(--border-hover);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+      background: var(--cyan-dim);
+      border-color: var(--cyan);
+      transform: translateY(-3px);
+    }
+
+    /* ── Stats Bar ── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 1px;
+      background: var(--border-subtle);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      margin-top: 4rem;
+      animation: fadeInUp 0.9s ease-out 0.6s both;
+      box-shadow: var(--shadow-card);
+    }
+
+    .stat {
+      background: var(--bg-secondary);
+      padding: 1.75rem 1rem;
+      text-align: center;
+      transition: background var(--transition-base);
+    }
+
+    .stat:hover { background: var(--bg-tertiary); }
+
+    .stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: var(--cyan);
+      letter-spacing: -0.02em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-value.gold { color: var(--gold); }
+    .stat-value.green { color: var(--green); }
+    .stat-value.purple { color: var(--purple); }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-top: 0.35rem;
+      font-weight: 500;
+    }
+
+    /* ═══════════════════════════════════════════════
+       PROBLEM / SOLUTION
+    ═══════════════════════════════════════════════ */
+    .problem-solution {
+      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    }
+
+    .ps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    .ps-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2.75rem;
+      backdrop-filter: blur(12px);
+      transition: all var(--transition-base);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .ps-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+
+    .ps-card.problem::before { background: linear-gradient(90deg, var(--red), var(--orange)); }
+    .ps-card.solution::before { background: linear-gradient(90deg, var(--green), var(--cyan)); }
+
+    .ps-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .ps-card:hover::before { opacity: 1; }
+
+    .ps-card h3 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .ps-card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+    }
+
+    .ps-card li {
+      color: var(--text-secondary);
+      padding-left: 1.75rem;
+      position: relative;
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .ps-card.problem li::before {
+      content: '✕';
+      position: absolute;
+      left: 0;
+      color: var(--red);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .ps-card.solution li::before {
+      content: '✓';
+      position: absolute;
+      left: 0;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    /* ═══════════════════════════════════════════════
+       PROOF
+    ═══════════════════════════════════════════════ */
+    .proof {
+      background: var(--bg-secondary);
+      position: relative;
+    }
+
+    .proof::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 600px; height: 600px;
+      background: radial-gradient(circle, rgba(0, 209, 255, 0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .proof-card {
+      background: linear-gradient(135deg, rgba(0, 209, 255, 0.04) 0%, rgba(167, 139, 250, 0.03) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-xl);
+      padding: 3.5rem;
+      max-width: 850px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+    }
+
+    .proof-card::after {
+      content: '';
+      position: absolute;
+      top: -50%; right: -50%;
+      width: 200%; height: 200%;
+      background: radial-gradient(circle at center, rgba(0, 209, 255, 0.02) 0%, transparent 50%);
+      animation: proofGlow 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes proofGlow {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(-5%, 5%); }
+    }
+
+    .proof-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .proof-node {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--gold);
+      background: var(--gold-dim);
+      padding: 0.4rem 1.2rem;
+      border-radius: 100px;
+      display: inline-block;
+      margin-bottom: 1.25rem;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+    }
+
+    .proof-amount {
+      font-size: clamp(2.5rem, 5vw, 4rem);
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--cyan), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.03em;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .proof-caption {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .proof-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-top: 2rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .proof-metric {
+      text-align: center;
+      padding: 1.5rem;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      transition: all var(--transition-base);
+    }
+
+    .proof-metric:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+
+    .proof-metric-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .proof-metric-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-top: 0.35rem;
+    }
+
+    .proof-note {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      margin-top: 2rem;
+      font-style: italic;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ═══════════════════════════════════════════════
+       TECHNOLOGY
+    ═══════════════════════════════════════════════ */
+    .technology {
+      background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+    }
+
+    .tech-stack {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .tech-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      backdrop-filter: blur(12px);
+      transition: all var(--transition-base);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tech-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent-gradient, var(--gradient-cyan));
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+
+    .tech-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .tech-card:hover::before { opacity: 1; }
+
+    .tech-icon {
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
+      width: 52px; height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius-md);
+      background: var(--icon-bg, var(--cyan-dim));
+    }
+
+    .tech-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .tech-card p {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    .tech-tag {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    /* ═══════════════════════════════════════════════
+       MARKETS
+    ═══════════════════════════════════════════════ */
+    .markets {
+      background: var(--bg-primary);
+    }
+
+    .market-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .market-card.region-header {
+      grid-column: 1 / -1;
+      background: linear-gradient(135deg, rgba(0, 209, 255, 0.04) 0%, rgba(167, 139, 250, 0.03) 100%);
+      border: 1px solid var(--border-hover);
+      border-radius: var(--radius-lg);
+      padding: 1rem 2rem;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .market-card.region-header h3 {
+      font-size: 1rem;
+      margin: 0;
+      font-weight: 600;
+    }
+
+    .market-card.region-header .region-gw {
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-left: auto;
+    }
+
+    .market-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      text-align: center;
+      transition: all var(--transition-base);
+      backdrop-filter: blur(10px);
+    }
+
+    .market-card:not(.region-header):hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .market-flag {
+      font-size: 2.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .market-card:not(.region-header) h3 {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .market-region {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .market-specs {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .market-specs li {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      justify-content: space-between;
+      padding: 0.35rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .market-specs li span:last-child {
+      color: var(--text-primary);
+      font-weight: 500;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+    }
+
+    /* ═══════════════════════════════════════════════
+       SBUs
+    ═══════════════════════════════════════════════ */
+    .sbus {
+      background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    }
+
+    .sbu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .sbu-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem;
+      transition: all var(--transition-base);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sbu-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+      opacity: 0;
+      transition: opacity var(--transition-base);
+    }
+
+    .sbu-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .sbu-card:hover::before { opacity: 1; }
+
+    .sbu-icon {
+      font-size: 1.5rem;
+      width: 52px; height: 52px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .sbu-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .sbu-card p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+      line-height: 1.6;
+    }
+
+    .sbu-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sbu-tam {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.35rem 0.85rem;
+      border-radius: var(--radius-sm);
+    }
+
+    .sbu-status {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding: 0.25rem 0.7rem;
+      border-radius: 6px;
+    }
+
+    /* ═══════════════════════════════════════════════
+       DOCUMENTATION
+    ═══════════════════════════════════════════════ */
+    .docs-section {
+      background: var(--bg-secondary);
+    }
+
+    .docs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 3rem;
+    }
+
+    .doc-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: all var(--transition-base);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .doc-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-card);
+    }
+
+    .doc-card h3 {
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .doc-card p {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+
+    .doc-icon {
+      font-size: 1.5rem;
+    }
+
+    .doc-arrow {
+      color: var(--cyan);
+      font-size: 0.85rem;
+      margin-top: auto;
+      opacity: 0;
+      transform: translateX(-8px);
+      transition: all var(--transition-base);
+    }
+
+    .doc-card:hover .doc-arrow {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    /* ═══════════════════════════════════════════════
+       FINAL CTA
+    ═══════════════════════════════════════════════ */
+    .final-cta {
+      background: var(--bg-primary);
+      text-align: center;
+      padding: 8rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .final-cta::before {
+      content: '';
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 800px; height: 800px;
+      background: radial-gradient(circle, rgba(0, 209, 255, 0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .final-cta h2 {
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-cta p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .final-cta .hero-actions {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ═══════════════════════════════════════════════
+       FOOTER
+    ═══════════════════════════════════════════════ */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border-subtle);
+      padding: 2.5rem 2rem;
+    }
+
+    .footer-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
+
+    .footer-brand {
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .footer-brand span { color: var(--cyan); }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: color var(--transition-base);
+    }
+
+    .footer-links a:hover { color: var(--cyan); }
+
+    .footer-copy {
+      color: var(--text-dim);
+      font-size: 0.75rem;
+    }
+
+    /* ═══════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════ */
+    @media (max-width: 1024px) {
+      .tech-stack {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
+
+      section { padding: 5rem 1.25rem; }
+
+      .ps-grid { grid-template-columns: 1fr; }
+      .tech-stack { grid-template-columns: 1fr; }
+      .market-grid { grid-template-columns: 1fr; }
+      .proof-metrics { grid-template-columns: 1fr; }
+      .sbu-grid { grid-template-columns: 1fr; }
+
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+
+      .proof-card { padding: 2rem 1.5rem; }
+      .proof-amount { font-size: 2.5rem; }
+
+      .footer-inner { flex-direction: column; text-align: center; }
+    }
+
+    @media (max-width: 480px) {
+      .stats-bar { grid-template-columns: 1fr; }
+      .hero-actions { flex-direction: column; align-items: center; }
+      h1 { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Particle Canvas ── -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- ── Navigation ── -->
+  <nav id="main-nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-brand">⚡ <span>PRIME</span>nergeia</a>
+      <ul class="nav-links">
+        <li><a href="#proof">Results</a></li>
+        <li><a href="#technology">Technology</a></li>
+        <li><a href="#markets">Markets</a></li>
+        <li><a href="#sbus">Solutions</a></li>
+        <li><a href="#docs">Documentation</a></li>
+        <li><a href="https://primenergeia-sovereign.streamlit.app" class="nav-cta" target="_blank">🔴 Live Dashboard</a></li>
+      </ul>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── Mobile Nav ── -->
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="#proof" onclick="closeMobile()">Results</a>
+    <a href="#technology" onclick="closeMobile()">Technology</a>
+    <a href="#markets" onclick="closeMobile()">Markets</a>
+    <a href="#sbus" onclick="closeMobile()">Solutions</a>
+    <a href="#docs" onclick="closeMobile()">Documentation</a>
+    <a href="https://primenergeia-sovereign.streamlit.app" target="_blank" style="color: var(--cyan);">🔴 Live Dashboard</a>
+  </div>
+
+  <!-- ══════════════════════════════════════════════
+       HERO
+  ══════════════════════════════════════════════ -->
+  <section class="hero" id="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="pulse"></span>
+          Operational across 17 international markets · 1,770 GW
+        </div>
+
+        <h1>
+          Recover Capital Lost to<br>
+          <span class="gradient-text">Grid Instability</span>
+        </h1>
+
+        <p class="hero-sub">
+          PRIMEnergeia solves the Hamilton-Jacobi-Bellman optimal control equation in real-time.
+          Eliminate frequency penalties and recover lost capital — with zero hardware changes.
+        </p>
+
+        <div class="hero-equation">
+          V<sub>t</sub> + min<sub>u</sub> { L(x, u) + ∇V · f(x, u) } = 0
+        </div>
+
+        <div class="hero-actions">
+          <a href="https://primenergeia-sovereign.streamlit.app" class="btn btn-primary" target="_blank">
+            🔴 Launch Live Dashboard
+          </a>
+          <a href="executive-brief.html" class="btn btn-secondary" target="_blank">
+            📋 Executive Brief
+          </a>
+          <a href="https://github.com/cordiego/PRIMEnergeia-Sovereign" class="btn btn-secondary" target="_blank">
+            ⚙️ View Source
+          </a>
+        </div>
+
+        <div class="stats-bar">
+          <div class="stat">
+            <div class="stat-value" data-target="231" data-prefix="$" data-suffix="K">$0K</div>
+            <div class="stat-label">Capital Rescued</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value gold" data-target="1770" data-suffix=" GW" data-separator="true">0 GW</div>
+            <div class="stat-label">Grid Coverage</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value green" data-target="99.96" data-suffix="%" data-decimals="2">0%</div>
+            <div class="stat-label">Frequency Stability</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value purple">&lt;0.5ms</div>
+            <div class="stat-label">Control Latency</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" data-target="17">0</div>
+            <div class="stat-label">Global ISOs</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       PROBLEM / SOLUTION
+  ══════════════════════════════════════════════ -->
+  <section class="problem-solution" id="problem">
+    <div class="container">
+      <span class="section-label reveal">Why PRIMEnergeia</span>
+      <h2 class="reveal">The Grid Is Bleeding Capital</h2>
+      <p class="section-desc reveal">
+        Every power injection node loses $150K–$400K USD monthly through suboptimal control.
+        Current systems react <em>after</em> instability — we prevent it.
+      </p>
+
+      <div class="ps-grid">
+        <div class="ps-card problem reveal">
+          <h3>🔴 The Problem</h3>
+          <ul>
+            <li>Frequency deviations trigger automatic penalties from CENACE, NERC, and ENTSO-E</li>
+            <li>Reactive control systems respond after disruptions, not before them</li>
+            <li>Exergy dissipation: the gap between optimal and actual power = evaporated capital</li>
+            <li>No competitor solves the HJB PDE for grid frequency at sub-millisecond latency</li>
+          </ul>
+        </div>
+        <div class="ps-card solution reveal reveal-delay-1">
+          <h3>🟢 Our Solution</h3>
+          <ul>
+            <li>Predict frequency excursions before they occur using stochastic grid dynamics</li>
+            <li>Inject synthetic inertia proactively via HJB optimal control law</li>
+            <li>Eliminate operator penalties through real-time Swing Equation solver (50/60 Hz)</li>
+            <li>Deep RL actor-critic network for autonomous self-healing post-disturbance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       PROOF
+  ══════════════════════════════════════════════ -->
+  <section class="proof" id="proof">
+    <div class="container">
+      <span class="section-label reveal">Market Reference (Public Data)</span>
+      <h2 class="reveal">Modeled at Node VZA-400</h2>
+      <p class="section-desc reveal">
+        Sistema Eléctrico Nacional (SEN), Valle de México — modeled using publicly available CENACE data. No proprietary work was performed at this node.
+      </p>
+
+      <div class="proof-card reveal">
+        <div class="proof-header">
+          <div class="proof-node">NODE VZA-400 · SEN · 🇲🇽 MEXICO · PUBLIC CENACE DATA</div>
+          <div class="proof-amount">$231,243 USD</div>
+          <div class="proof-caption">Projected recoverable capital from suboptimal power injection (public data model)</div>
+        </div>
+
+        <div class="proof-metrics">
+          <div class="proof-metric">
+            <div class="proof-metric-value">$173,432</div>
+            <div class="proof-metric-label">Client Net Savings (75%)</div>
+          </div>
+          <div class="proof-metric">
+            <div class="proof-metric-value">$57,811</div>
+            <div class="proof-metric-label">PRIMEnergeia Fee (25%)</div>
+          </div>
+          <div class="proof-metric">
+            <div class="proof-metric-value">99.96%</div>
+            <div class="proof-metric-label">Frequency Stability</div>
+          </div>
+        </div>
+
+        <p class="proof-note">
+          Proof of concept — single node, single market.<br>
+          17-market fleet projected across 1,770 GW global coverage.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       TECHNOLOGY
+  ══════════════════════════════════════════════ -->
+  <section class="technology" id="technology">
+    <div class="container">
+      <span class="section-label reveal">Technology Stack</span>
+      <h2 class="reveal">Seven-Layer Architecture</h2>
+      <p class="section-desc reveal">
+        From physics simulation to CEO-grade dashboards — a unified system designed for real-time grid control at industrial scale.
+      </p>
+
+      <div class="tech-stack">
+        <div class="tech-card reveal" style="--icon-bg: var(--cyan-dim); --accent-gradient: linear-gradient(135deg, var(--cyan), var(--cyan-muted));">
+          <div class="tech-icon">📡</div>
+          <h3>Dashboard Layer</h3>
+          <p>Unified Streamlit SCADA with market selector, real-time telemetry visualization, and CEO-grade analytics across 17 ISOs.</p>
+          <span class="tech-tag" style="background: var(--cyan-dim); color: var(--cyan);">Streamlit · Plotly</span>
+        </div>
+
+        <div class="tech-card reveal reveal-delay-1" style="--icon-bg: var(--purple-dim); --accent-gradient: linear-gradient(135deg, var(--purple), #7c3aed);">
+          <div class="tech-icon">🏭</div>
+          <h3>Market Engines</h3>
+          <p>Per-market physics adapters (50/60 Hz), pricing converters (PML/LMP/OMIE Pool), and regulatory compliance layers.</p>
+          <span class="tech-tag" style="background: var(--purple-dim); color: var(--purple);">17 ISOs</span>
+        </div>
+
+        <div class="tech-card reveal reveal-delay-2" style="--icon-bg: var(--green-dim); --accent-gradient: linear-gradient(135deg, var(--green), #059669);">
+          <div class="tech-icon">🧠</div>
+          <h3>HJB Core Solver</h3>
+          <p>Hamilton-Jacobi-Bellman PDE solver computing optimal control u*(x) at sub-millisecond latency with stochastic dynamics.</p>
+          <span class="tech-tag" style="background: var(--green-dim); color: var(--green);">NumPy · SciPy</span>
+        </div>
+
+        <div class="tech-card reveal" style="--icon-bg: rgba(249, 115, 22, 0.1); --accent-gradient: linear-gradient(135deg, var(--orange), #ea580c);">
+          <div class="tech-icon">⚡</div>
+          <h3>Physics Engine</h3>
+          <p>Swing Equation integration, synthetic inertia injection, harmonic distortion analysis, and CUDA/MPS acceleration.</p>
+          <span class="tech-tag" style="background: rgba(249, 115, 22, 0.1); color: var(--orange);">GPU-Accelerated</span>
+        </div>
+
+        <div class="tech-card reveal reveal-delay-1" style="--icon-bg: var(--gold-dim); --accent-gradient: var(--gradient-gold);">
+          <div class="tech-icon">🤖</div>
+          <h3>Deep RL Auto-Healing</h3>
+          <p>Actor-critic neural network for autonomous post-disturbance recovery and self-healing grid stabilization.</p>
+          <span class="tech-tag" style="background: var(--gold-dim); color: var(--gold);">PyTorch</span>
+        </div>
+
+        <div class="tech-card reveal reveal-delay-2" style="--icon-bg: rgba(244, 63, 94, 0.1); --accent-gradient: linear-gradient(135deg, #f43f5e, #e11d48);">
+          <div class="tech-icon">🔌</div>
+          <h3>Protocol Adapters</h3>
+          <p>Five industrial protocol adapters — CSV, REST API, OPC UA, Modbus TCP, and IEC 61850 — for universal telemetry ingestion.</p>
+          <span class="tech-tag" style="background: rgba(244, 63, 94, 0.1); color: #f43f5e;">5 Protocols</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       MARKETS
+  ══════════════════════════════════════════════ -->
+  <section class="markets" id="markets">
+    <div class="container">
+      <span class="section-label reveal">Global Coverage</span>
+      <h2 class="reveal">17 Global Markets · 1,770 GW</h2>
+      <p class="section-desc reveal">
+        Unified HJB optimal control across 17 global ISOs — adapting to each market's frequency standard, pricing mechanism, and regulatory regime.
+      </p>
+
+      <div class="market-grid">
+
+        <!-- ── US ISOs ── -->
+        <div class="market-card region-header reveal">
+          <span>🇺🇸</span>
+          <h3>United States — 7 ISOs</h3>
+          <span class="region-gw">665 GW</span>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇺🇸</div>
+          <h3>ERCOT</h3>
+          <div class="market-region">Texas — Electric Reliability Council</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>85 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LMP ($5k cap)</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇺🇸</div>
+          <h3>PJM</h3>
+          <div class="market-region">US East — 13 States</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>180 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇺🇸</div>
+          <h3>CAISO</h3>
+          <div class="market-region">California ISO</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>80 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇺🇸</div>
+          <h3>MISO</h3>
+          <div class="market-region">US Midwest — 15 States</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>190 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇺🇸</div>
+          <h3>SPP</h3>
+          <div class="market-region">US Central — Southwest Power Pool</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>65 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇺🇸</div>
+          <h3>NYISO</h3>
+          <div class="market-region">New York ISO</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>35 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LBMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇺🇸</div>
+          <h3>ISONE</h3>
+          <div class="market-region">New England — ISO-NE</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>30 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>LMP</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <!-- ── Canada ── -->
+        <div class="market-card region-header reveal">
+          <span>🇨🇦</span>
+          <h3>Canada — 2 ISOs</h3>
+          <span class="region-gw">55 GW</span>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇨🇦</div>
+          <h3>IESO</h3>
+          <div class="market-region">Ontario — Independent Electricity SO</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>38 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>HOEP (CAD)</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇨🇦</div>
+          <h3>AESO</h3>
+          <div class="market-region">Alberta — Electric System Operator</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>17 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>Pool Price (CAD)</span></li>
+            <li><span>Source</span><span>gridstatus</span></li>
+          </ul>
+        </div>
+
+        <!-- ── Mexico ── -->
+        <div class="market-card region-header reveal">
+          <span>🇲🇽</span>
+          <h3>México — CENACE</h3>
+          <span class="region-gw">75 GW</span>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇲🇽</div>
+          <h3>SEN</h3>
+          <div class="market-region">Mexico — Sistema Eléctrico Nacional</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>75 GW</span></li>
+            <li><span>Frequency</span><span>60 Hz</span></li>
+            <li><span>Pricing</span><span>PML / CENACE</span></li>
+            <li><span>Source</span><span>CENACE API</span></li>
+          </ul>
+        </div>
+
+        <!-- ── Europe ── -->
+        <div class="market-card region-header reveal">
+          <span>🇪🇺</span>
+          <h3>Europe — 5 Markets</h3>
+          <span class="region-gw">640 GW</span>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇪🇸🇵🇹</div>
+          <h3>MIBEL</h3>
+          <div class="market-region">Spain + Portugal — OMIE</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>110 GW</span></li>
+            <li><span>Frequency</span><span>50 Hz</span></li>
+            <li><span>Pricing</span><span>OMIE Pool (EUR)</span></li>
+            <li><span>Source</span><span>OMIE / ENTSO-E</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇩🇪</div>
+          <h3>EPEX</h3>
+          <div class="market-region">Germany — EPEX SPOT</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>220 GW</span></li>
+            <li><span>Frequency</span><span>50 Hz</span></li>
+            <li><span>Pricing</span><span>EPEX SPOT (EUR)</span></li>
+            <li><span>Source</span><span>ENTSO-E</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇫🇷</div>
+          <h3>EPEX FR</h3>
+          <div class="market-region">France — EPEX SPOT</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>130 GW</span></li>
+            <li><span>Frequency</span><span>50 Hz</span></li>
+            <li><span>Pricing</span><span>EPEX SPOT (EUR)</span></li>
+            <li><span>Source</span><span>ENTSO-E</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇳🇴🇸🇪🇫🇮🇩🇰</div>
+          <h3>Nord Pool</h3>
+          <div class="market-region">Nordics — NO/SE/FI/DK</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>100 GW</span></li>
+            <li><span>Frequency</span><span>50 Hz</span></li>
+            <li><span>Pricing</span><span>Nord Pool (EUR)</span></li>
+            <li><span>Source</span><span>ENTSO-E</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇬🇧</div>
+          <h3>Elexon</h3>
+          <div class="market-region">United Kingdom — BMRS</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>80 GW</span></li>
+            <li><span>Frequency</span><span>50 Hz</span></li>
+            <li><span>Pricing</span><span>BMRS (GBP)</span></li>
+            <li><span>Source</span><span>ENTSO-E</span></li>
+          </ul>
+        </div>
+
+        <!-- ── Asia-Pacific ── -->
+        <div class="market-card region-header reveal">
+          <span>🌏</span>
+          <h3>Asia-Pacific — 2 Markets</h3>
+          <span class="region-gw">335 GW</span>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇦🇺</div>
+          <h3>NEM</h3>
+          <div class="market-region">Australia — AEMO</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>55 GW</span></li>
+            <li><span>Frequency</span><span>50 Hz</span></li>
+            <li><span>Pricing</span><span>AEMO Pool (AUD)</span></li>
+            <li><span>Source</span><span>Proxy</span></li>
+          </ul>
+        </div>
+
+        <div class="market-card reveal">
+          <div class="market-flag">🇯🇵</div>
+          <h3>JEPX</h3>
+          <div class="market-region">Japan — Power Exchange</div>
+          <ul class="market-specs">
+            <li><span>Capacity</span><span>280 GW</span></li>
+            <li><span>Frequency</span><span>50/60 Hz</span></li>
+            <li><span>Pricing</span><span>JEPX Spot (JPY)</span></li>
+            <li><span>Source</span><span>Proxy</span></li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       SBUs
+  ══════════════════════════════════════════════ -->
+  <section class="sbus" id="sbus">
+    <div class="container">
+      <span class="section-label reveal">Strategic Business Units</span>
+      <h2 class="reveal">Five Revenue Engines</h2>
+      <p class="section-desc reveal">
+        A unified portfolio powered by the same HJB mathematical core — from grid control to advanced materials science.
+      </p>
+
+      <div class="sbu-grid">
+        <!-- PRIME Grid -->
+        <div class="sbu-card reveal" style="--accent: var(--cyan);">
+          <div class="sbu-icon" style="background: var(--cyan-dim);">🔌</div>
+          <h3>PRIME Grid</h3>
+          <p>Real-time HJB frequency control and exergy recovery across 17 global ISOs. 1,770 GW coverage. Turnkey software integration — no hardware changes required.</p>
+          <div class="sbu-footer">
+            <div class="sbu-tam" style="background: var(--cyan-dim); color: var(--cyan);">$48M TAM</div>
+            <div class="sbu-status" style="background: var(--green-dim); color: var(--green);">🟢 LIVE</div>
+          </div>
+        </div>
+
+        <!-- PRIME Power -->
+        <div class="sbu-card reveal reveal-delay-1" style="--accent: var(--orange);">
+          <div class="sbu-icon" style="background: rgba(249, 115, 22, 0.1);">⚡</div>
+          <h3>PRIME Power</h3>
+          <p>Zero-emission engine control: NH₃ combustion (AICE-G1), H₂ fuel cells (PEM-PB-50), H₂ turbines (HY-P100), BESS, and offshore wind optimization.</p>
+          <div class="sbu-footer">
+            <div class="sbu-tam" style="background: rgba(249, 115, 22, 0.1); color: var(--orange);">$25M TAM</div>
+            <div class="sbu-status" style="background: var(--green-dim); color: var(--green);">🟢 LIVE</div>
+          </div>
+        </div>
+
+        <!-- PRIME Quant -->
+        <div class="sbu-card reveal reveal-delay-2" style="--accent: var(--green);">
+          <div class="sbu-icon" style="background: var(--green-dim);">📈</div>
+          <h3>PRIME Quant</h3>
+          <p>VIX-regime volatility-targeted portfolio allocation with daily signals. GBM simulation, Markowitz optimization, and Kelly criterion sizing.</p>
+          <div class="sbu-footer">
+            <div class="sbu-tam" style="background: var(--green-dim); color: var(--green);">$15M TAM</div>
+            <div class="sbu-status" style="background: var(--green-dim); color: var(--green);">🟢 LIVE</div>
+          </div>
+        </div>
+
+        <!-- PRIME Circular -->
+        <div class="sbu-card reveal" style="--accent: var(--gold);">
+          <div class="sbu-icon" style="background: var(--gold-dim);">♻️</div>
+          <h3>PRIME Circular</h3>
+          <p>Weibull-based panel failure prediction, material recovery optimization (Si, Ag, Cu, glass), and carbon credit monetization.</p>
+          <div class="sbu-footer">
+            <div class="sbu-tam" style="background: var(--gold-dim); color: var(--gold);">$8M TAM</div>
+            <div class="sbu-status" style="background: var(--gold-dim); color: var(--gold);">🟡 ACTIVE</div>
+          </div>
+        </div>
+
+        <!-- PRIME Materials -->
+        <div class="sbu-card reveal reveal-delay-1" style="--accent: var(--purple);">
+          <div class="sbu-icon" style="background: var(--purple-dim);">🧪</div>
+          <h3>PRIME Materials</h3>
+          <p>Granas™ perovskite-Si tandem simulation suite: 11 repositories covering optics, structure, fabrication, and manufacturing economics.</p>
+          <div class="sbu-footer">
+            <div class="sbu-tam" style="background: var(--purple-dim); color: var(--purple);">$120M TAM</div>
+            <div class="sbu-status" style="background: var(--purple-dim); color: var(--purple);">🔵 R&D</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       DOCUMENTATION
+  ══════════════════════════════════════════════ -->
+  <section class="docs-section" id="docs">
+    <div class="container">
+      <span class="section-label reveal">Documentation</span>
+      <h2 class="reveal">Due Diligence Materials</h2>
+      <p class="section-desc reveal">
+        Technical briefs and financial projections for prospective clients and investors.
+      </p>
+
+      <div class="docs-grid">
+        <a href="executive-brief.html" class="doc-card reveal" target="_blank">
+          <div class="doc-icon">📋</div>
+          <h3>Executive Brief</h3>
+          <p>Value proposition for C-level decision makers. 17 global markets, certified results, revenue projections, and commercial model.</p>
+          <span class="doc-arrow">→ View Brief</span>
+        </a>
+        <a href="https://github.com/cordiego/PRIMEnergeia-Sovereign/blob/main/docs/PRODUCT_CATALOG.md" class="doc-card reveal reveal-delay-1" target="_blank">
+          <div class="doc-icon">💰</div>
+          <h3>Product Catalog</h3>
+          <p>Complete portfolio overview: 5 divisions, $5B+ total addressable market, pricing models, and technical specifications.</p>
+          <span class="doc-arrow">→ View Catalog</span>
+        </a>
+        <a href="https://github.com/cordiego/PRIMEnergeia-Sovereign/blob/main/docs/ROI_ANALYSIS.md" class="doc-card reveal reveal-delay-2" target="_blank">
+          <div class="doc-icon">📊</div>
+          <h3>ROI Analysis</h3>
+          <p>Multi-market revenue projections across 17 ISOs. Per-market breakdown with rescue estimates and 5-year rollout plan.</p>
+          <span class="doc-arrow">→ View Analysis</span>
+        </a>
+        <a href="https://github.com/cordiego/PRIMEnergeia-Sovereign/blob/main/docs/architecture.md" class="doc-card reveal reveal-delay-3" target="_blank">
+          <div class="doc-icon">🏗️</div>
+          <h3>System Architecture</h3>
+          <p>Seven-layer architecture from physics engine to dashboard. Control flow, data pipelines, and integration points.</p>
+          <span class="doc-arrow">→ View Architecture</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════
+       FINAL CTA
+  ══════════════════════════════════════════════ -->
+  <section class="final-cta">
+    <div class="container">
+      <h2 class="reveal">Ready to Recover Lost Capital?</h2>
+      <p class="reveal reveal-delay-1">
+        See the live optimization running across 17 global ISOs covering 1,770 GW.
+        Book a 15-minute demo to explore results for your portfolio.
+      </p>
+      <div class="hero-actions reveal reveal-delay-2">
+        <a href="https://primenergeia-sovereign.streamlit.app" class="btn btn-primary" target="_blank">
+          🔴 Launch Live Dashboard
+        </a>
+        <a href="https://github.com/cordiego" class="btn btn-secondary" target="_blank">
+          👤 View GitHub Profile
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-brand">⚡ <span>PRIME</span>nergeia S.A.S.</div>
+      <ul class="footer-links">
+        <li><a href="https://primenergeia-sovereign.streamlit.app" target="_blank">Dashboard</a></li>
+        <li><a href="https://github.com/cordiego/PRIMEnergeia-Sovereign" target="_blank">GitHub</a></li>
+        <li><a href="https://github.com/cordiego" target="_blank">Profile</a></li>
+        <li><a href="executive-brief.html" target="_blank">Brief</a></li>
+        <li><a href="https://github.com/cordiego/PRIMEnergeia-Sovereign/blob/main/docs/PRODUCT_CATALOG.md" target="_blank">Catalog</a></li>
+      </ul>
+      <div class="footer-copy">
+        © 2026 PRIMEnergeia S.A.S. — Soberanía Energética Global ⚡🇲🇽🇺🇸🇪🇺🇦🇺🇯🇵🇨🇦🇬🇧
+      </div>
+    </div>
+  </footer>
+
+  <!-- ═══════════════════════════════════════════════
+       JAVASCRIPT
+  ═══════════════════════════════════════════════ -->
+  <script>
+    /* ── Particle Constellation Background ── */
+    (function() {
+      const canvas = document.getElementById('particles-canvas');
+      const ctx = canvas.getContext('2d');
+      let particles = [];
+      let mouse = { x: null, y: null };
+      const PARTICLE_COUNT = 80;
+      const CONNECTION_DISTANCE = 150;
+      const MOUSE_RADIUS = 200;
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      class Particle {
+        constructor() {
+          this.x = Math.random() * canvas.width;
+          this.y = Math.random() * canvas.height;
+          this.vx = (Math.random() - 0.5) * 0.4;
+          this.vy = (Math.random() - 0.5) * 0.4;
+          this.radius = Math.random() * 1.5 + 0.5;
+          this.opacity = Math.random() * 0.5 + 0.1;
+        }
+
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+
+          if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+          if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+
+          /* subtle mouse interaction */
+          if (mouse.x !== null) {
+            const dx = this.x - mouse.x;
+            const dy = this.y - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < MOUSE_RADIUS) {
+              const force = (MOUSE_RADIUS - dist) / MOUSE_RADIUS * 0.003;
+              this.vx += dx * force;
+              this.vy += dy * force;
+            }
+          }
+
+          /* damping */
+          this.vx *= 0.999;
+          this.vy *= 0.999;
+        }
+
+        draw() {
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(0, 209, 255, ${this.opacity})`;
+          ctx.fill();
+        }
+      }
+
+      function init() {
+        resize();
+        particles = [];
+        for (let i = 0; i < PARTICLE_COUNT; i++) {
+          particles.push(new Particle());
+        }
+      }
+
+      function drawConnections() {
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < CONNECTION_DISTANCE) {
+              const opacity = (1 - dist / CONNECTION_DISTANCE) * 0.12;
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.strokeStyle = `rgba(0, 209, 255, ${opacity})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        drawConnections();
+        requestAnimationFrame(animate);
+      }
+
+      window.addEventListener('resize', () => { resize(); });
+      window.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+      window.addEventListener('mouseout', () => { mouse.x = null; mouse.y = null; });
+
+      init();
+      animate();
+    })();
+
+    /* ── Scroll-Triggered Reveal ── */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    /* ── Animated Stat Counters ── */
+    function animateCounter(el) {
+      const target = parseFloat(el.dataset.target);
+      if (isNaN(target)) return;
+
+      const prefix = el.dataset.prefix || '';
+      const suffix = el.dataset.suffix || '';
+      const decimals = parseInt(el.dataset.decimals) || 0;
+      const useSeparator = el.dataset.separator === 'true';
+      const duration = 2000;
+      const startTime = performance.now();
+
+      function update(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 4); /* ease-out quart */
+        let value = target * eased;
+
+        let formatted;
+        if (decimals > 0) {
+          formatted = value.toFixed(decimals);
+        } else {
+          formatted = Math.round(value).toString();
+        }
+
+        if (useSeparator) {
+          formatted = parseInt(formatted).toLocaleString();
+        }
+
+        el.textContent = prefix + formatted + suffix;
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting && !entry.target.dataset.counted) {
+          entry.target.dataset.counted = 'true';
+          animateCounter(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stat-value[data-target]').forEach(el => counterObserver.observe(el));
+
+    /* ── Nav Scroll Effect ── */
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 50);
+    });
+
+    /* ── Mobile Menu ── */
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      mobileNav.classList.toggle('open');
+      document.body.style.overflow = mobileNav.classList.contains('open') ? 'hidden' : '';
+    });
+
+    function closeMobile() {
+      hamburger.classList.remove('active');
+      mobileNav.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    /* ── Smooth Scroll for anchor links ── */
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

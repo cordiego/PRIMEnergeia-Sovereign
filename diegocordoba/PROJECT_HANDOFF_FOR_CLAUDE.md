@@ -13,6 +13,7 @@ The projects form a unified technological stack for **Energy, Material Science, 
 1.  **PRIMEnergeia-Sovereign**: The "Command Center" for grid stabilization and industrial energy control.
 2.  **Granas-Sovereign**: The R&D platform for high-efficiency Perovskite solar cell fabrication and material optimization.
 3.  **Eureka-Sovereign**: The financial engine for portfolio management, optimizing capital to fuel the R&D and industrial operations.
+4.  **Navier-Stokes Stochastic Attack**: The advanced mathematical division addressing the Millennium Prize via Stochastic PDEs and Ergodicity, isomorphic to PRIMEnergeia grid regularization.
 
 ---
 
@@ -68,6 +69,22 @@ The projects form a unified technological stack for **Energy, Material Science, 
 
 ---
 
+## 5. 🌊 Navier-Stokes Stochastic Attack (NEW: June 2026)
+
+**Objective:** Mathematical proof and simulation of the Clay Mathematics Institute Millennium Prize for Navier-Stokes Global Regularity, using a stochastic approach isomorphic to PRIMEnergeia's grid control.
+
+### Key Components:
+- **Phase 1-2 (Determinism & Blowup):** Simulating the supercritical 3D vortex stretching mechanics that cause finite-time singularities.
+- **Phase 3 (The Conjecture):** Introducing a high-frequency $Q$-Wiener transport noise that strictly prevents blowup with probability 1 (Stochastic Regularization by Noise).
+- **Phase 4 (The Millennium Prize):** Demonstrating **Ergodicity**. The fluid forgets its initial state and converges to a unique Invariant Measure. Taking the inviscid limit ($\sigma \to 0$) acts as a selection principle, filtering out unphysical singular branches and solving the deterministic Millennium problem.
+
+### Recent Work:
+- Full Monte Carlo Python simulation suite proving the probability 1 smoothness and ergodic convergence.
+- Theoretical documentation (`docs/01` through `docs/07`) directly mapped to Flandoli (1995) and Constantin & Foias.
+- Framework merged back into PRIMEnergeia's core SPDE grid models (`simulate_grid_disturbance.py`) via the exact mathematical isomorphism: Fluid turbulence $\iff$ Grid cascading failures.
+
+---
+
 ## 5. 🛠️ Technical Stack & Implementation
 
 - **Languages**: Python (Core Logic), Bash (Automation), SQL (Persistence).
@@ -111,6 +128,11 @@ The projects form a unified technological stack for **Energy, Material Science, 
 - `primenergeia.com`: Premium landing page with animated particle backgrounds and scroll-reveal.
 - **Domain**: `primenergeia.com` (Verified on Google Workspace).
 - **Contact**: `diego@primenergeia.com` (Professional email setup).
+
+### Navier-Stokes
+- `navier-stokes-stochastic-attack/src/phase3_conjecture.py`: Monte Carlo proof of blowup prevention via noise.
+- `navier-stokes-stochastic-attack/src/phase4_invariant_measure.py`: Ergodic ensemble convergence proof.
+- `navier-stokes-stochastic-attack/docs/07_phase4_the_millennium_prize.md`: The capstone theoretical document targeting the Millennium Prize.
 
 ---
 

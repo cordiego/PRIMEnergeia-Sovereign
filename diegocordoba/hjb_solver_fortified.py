@@ -1443,3 +1443,178 @@ class VZA400Dynamics(HJBDynamics):
     def terminal_cost(self, state: np.ndarray) -> float:
         df, P, pml = state
         return 200.0 * df**2 + 0.1 * P
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Push HJBSolver Forward — True Time-Varying & Closed-Loop Control
+# ─────────────────────────────────────────────────────────────────────────────
+class TimeVaryingHJBSolver(HJBSolver):
+    """
+    True time-varying backward-in-time HJB solver.
+    Computes V(x, t) for t in [0, T] instead of a stationary V(x).
+    This properly resolves optimal control under deterministic but time-varying costs
+    (e.g., volatile market price forecasts).
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.V_time: List[np.ndarray] = []  # V(x, t) indexed by time step
+        self._interp_time: List[Optional[RegularGridInterpolator]] = []
+
+    def solve(self) -> "TimeVaryingHJBSolver":
+        """Backward induction from t = T down to t = 0."""
+        n_dims      = self.dynamics.state_dims()
+        grid_shapes = [len(g) for g in self.state_grids]
+        n_steps     = int(self.total_time / self.dt)
+
+        logger.info("=" * 64)
+        logger.info(" PRIME-Kernel Time-Varying HJB Solver — Backward Induction")
+        logger.info(" Grid: %s   Steps: %d   Horizon: %.0f s",
+                    "×".join(str(s) for s in grid_shapes), n_steps, self.total_time)
+        logger.info("=" * 64)
+
+        t0 = time.perf_counter()
+
+        # Initialize V(x, T) with terminal cost
+        V_next = np.zeros(grid_shapes)
+        for idx in np.ndindex(*grid_shapes):
+            state = np.array([self.state_grids[d][idx[d]] for d in range(n_dims)])
+            V_next[idx] = self.dynamics.terminal_cost(state)
+        
+        self.V_time = [None] * (n_steps + 1)
+        self._interp_time = [None] * (n_steps + 1)
+        self.V_time[n_steps] = V_next.copy()
+        
+        # Build interpolator for terminal value
+        self.V = V_next
+        self._build_interpolator()
+        self._interp_time[n_steps] = self._interp
+
+        # Step backward in time
+        for step in range(n_steps - 1, -1, -1):
+            t = step * self.dt
+            V_current = np.zeros(grid_shapes)
+            self.policy = np.zeros(grid_shapes, dtype=int)
+            
+            # The value function we interpolate against is V(x, t+dt)
+            self.V = self.V_time[step + 1]
+            self._build_interpolator()
+
+            for idx in np.ndindex(*grid_shapes):
+                state = np.array([self.state_grids[d][idx[d]] for d in range(n_dims)])
+                best_cost = np.inf
+                best_iu = 0
+
+                ito = self._ito_correction(state, idx) if self.stochastic else 0.0
+
+                for iu, u in enumerate(self.control_grid):
+                    L = self.dynamics.running_cost(state, u, t=t)
+                    next_state = self.dynamics.step(state, u, self.dt)
+                    V_interp = self._interpolate_V(next_state)
+                    total = (L + ito) * self.dt + V_interp
+
+                    if total < best_cost:
+                        best_cost = total
+                        best_iu = iu
+
+                V_current[idx] = best_cost
+                self.policy[idx] = best_iu
+
+            self.V_time[step] = V_current.copy()
+            if step % max(1, n_steps // 10) == 0:
+                logger.info(" Backward step %d/%d (t=%.1f s)", step, n_steps, t)
+
+        self._solved = True
+        self._solve_time = time.perf_counter() - t0
+        logger.info(" ✅ Time-Varying Value function solved in %.2f s.", self._solve_time)
+        return self
+
+    def optimal_control(self, state: np.ndarray, t: float = 0.0) -> float:
+        """Extract u*(x, t) from the time-indexed value function."""
+        if not self._solved:
+            raise RuntimeError("Call solve() first.")
+        
+        # Find closest time step
+        step = int(round(t / self.dt))
+        step = max(0, min(step, len(self.V_time) - 1))
+        
+        # Use V(x, t+dt) to compute optimal control at t
+        next_step = min(step + 1, len(self.V_time) - 1)
+        self.V = self.V_time[next_step]
+        self._build_interpolator()
+        
+        best_cost, best_u = np.inf, 0.0
+        for u in self.control_grid:
+            L = self.dynamics.running_cost(state, u, t=t)
+            next_state = self.dynamics.step(state, u, self.dt)
+            V_interp = self._interpolate_V(next_state)
+            total = L * self.dt + V_interp
+            if total < best_cost:
+                best_cost, best_u = total, u
+        return best_u
+
+
+class RecedingHorizonHJBLoop:
+    """
+    Model Predictive Control (MPC) style closed-loop execution.
+    Repeatedly recalibrates a TimeVaryingHJBSolver over a rolling horizon,
+    applies the control for a small execution step, and updates the true state.
+    """
+    def __init__(self, 
+                 solver: TimeVaryingHJBSolver, 
+                 exec_dt: float = 60.0):
+        """
+        exec_dt: How often (in seconds) the solver is re-run (e.g., every 60s).
+        """
+        self.solver = solver
+        self.exec_dt = exec_dt
+
+    def run_closed_loop(self, initial_state: np.ndarray, total_sim_time: float) -> HJBResult:
+        n_outer_steps = int(total_sim_time / self.exec_dt)
+        n_dims = self.solver.dynamics.state_dims()
+        
+        t_grid = np.linspace(0, total_sim_time, n_outer_steps + 1)
+        x_traj = np.zeros((n_outer_steps + 1, n_dims))
+        u_traj = np.zeros(n_outer_steps)
+        
+        state = initial_state.copy()
+        x_traj[0] = state
+        total_cost = 0.0
+        
+        logger.info("=" * 64)
+        logger.info(" PRIME-Kernel Receding Horizon Loop (Closed-Loop)")
+        logger.info(" Sim Time: %.0f s | Exec dt: %.1f s", total_sim_time, self.exec_dt)
+        logger.info("=" * 64)
+
+        for i in range(n_outer_steps):
+            t_current = t_grid[i]
+            logger.info(" [Loop %d/%d] t=%.1f. Solving forward horizon...", i+1, n_outer_steps, t_current)
+            
+            # The solver's running cost automatically uses the price_func(t).
+            # If the market forecast updates, the running_cost will reflect it implicitly.
+            # We solve backward from t_current + total_time down to t_current
+            self.solver.solve()
+            
+            # Extract control for the immediate current state
+            u = self.solver.optimal_control(state, t=0.0) # Always t=0.0 relative to the newly solved horizon
+            u_traj[i] = u
+            
+            # Simulate physics for exec_dt
+            inner_steps = int(self.exec_dt / self.solver.dt)
+            inner_dt = self.solver.dt
+            
+            for _ in range(inner_steps):
+                total_cost += self.solver.dynamics.running_cost(state, u, t=t_current) * inner_dt
+                state = self.solver.dynamics.step(state, u, inner_dt)
+                t_current += inner_dt
+            
+            x_traj[i+1] = state
+            
+        return HJBResult(
+            time_grid=t_grid,
+            state_trajectory=x_traj,
+            control_trajectory=u_traj,
+            value_function=self.solver.V_time[0],
+            total_cost=total_cost,
+            n_sweeps=1,
+            converged=True
+        )

@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRIMEnergeia Sovereign</title>
+    <meta name="description" content="Intelligent Multi-Market Grid Control That Recovers Lost Capital. Predicting and preventing frequency deviations in real-time.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="ambient-background">
+        <div class="glow-orb orb-1"></div>
+        <div class="glow-orb orb-2"></div>
+        <div class="glow-orb orb-3"></div>
+    </div>
+
+    <header class="navbar glass">
+        <div class="container nav-content">
+            <div class="logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">PRIMEnergeia</span>
+            </div>
+            <nav class="nav-links">
+                <a href="#control">Grid Control</a>
+                <a href="#markets">Markets</a>
+                <a href="#granas">Granas</a>
+                <a href="#hydrogen">H₂ & NH₃</a>
+            </nav>
+            <a href="mailto:diego@primenergeia.com" class="btn btn-primary">Partner With Us</a>
+        </div>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container hero-content">
+                <h1 class="reveal fade-up">Soberanía Energética <br><span class="text-gradient">Global</span></h1>
+                <p class="subtitle reveal fade-up delay-1" style="margin-bottom: 2rem;">Institutional-grade predictive grid control. We protect generation assets from deviation penalties and provide ISOs with deterministic frequency stability.</p>
+                
+                <div class="hero-ctas reveal fade-up delay-1" style="margin-bottom: 3rem; display: flex; gap: 1rem;">
+                    <a href="#pilot" class="btn btn-primary">Request a Digital Twin Simulation</a>
+                    <a href="#solutions" class="btn" style="border: 1px solid var(--glass-border); color: var(--text-main); background: rgba(255,255,255,0.05);">Enterprise Solutions</a>
+                </div>
+
+                <div class="compliance-banner reveal fade-up delay-1" style="margin-bottom: 4rem; display: flex; gap: 2rem; align-items: center; opacity: 0.8; font-size: 0.9rem; flex-wrap: wrap;">
+                    <span style="color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Engineered for Compliance:</span>
+                    <span class="compliance-tag glass" style="padding: 0.25rem 0.75rem; border-radius: 4px;">NERC CIP</span>
+                    <span class="compliance-tag glass" style="padding: 0.25rem 0.75rem; border-radius: 4px;">Código de Red (CENACE)</span>
+                    <span class="compliance-tag glass" style="padding: 0.25rem 0.75rem; border-radius: 4px;">ENTSO-E</span>
+                    <span class="compliance-tag glass" style="padding: 0.25rem 0.75rem; border-radius: 4px;">FERC Order 841</span>
+                </div>
+                
+                <div class="stats-grid reveal fade-up delay-2">
+                    <div class="stat-card glass">
+                        <div class="stat-value text-cyan">$<span class="counter" data-target="231243">0</span></div>
+                        <div class="stat-label">Projected Recoverable Capital (Node VZA-400)</div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-value text-purple"><span class="counter" data-target="17">0</span></div>
+                        <div class="stat-label">Global Markets Active</div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-value text-blue"><span class="counter" data-target="1700">0</span>+ GW</div>
+                        <div class="stat-label">Total Grid Capacity Covered</div>
+                    </div>
+                    <div class="stat-card glass">
+                        <div class="stat-value text-green">~$<span class="counter" data-target="48">0</span>M</div>
+                        <div class="stat-label">Projected Annual Recurring Revenue</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enterprise Solutions Section -->
+        <section id="solutions" class="section alt-bg">
+            <div class="container">
+                <div class="section-header reveal fade-up">
+                    <h2 class="section-title">Built for <span class="text-gradient">Tier-1 Energy Players</span></h2>
+                    <p class="section-desc">Tailored predictive architectures to solve the most complex challenges facing modern utilities and system operators.</p>
+                </div>
+
+                <div class="persona-grid">
+                    <!-- Generators Card -->
+                    <div class="persona-card glass reveal fade-up">
+                        <div class="persona-icon text-cyan">⚡</div>
+                        <h3 class="persona-title">For Generators & Utilities</h3>
+                        <div class="persona-target text-muted">ENGIE · Iberdrola · Enel</div>
+                        <p class="persona-desc">Maximize PPA value and eliminate the risk of severe deviation penalties caused by intermittent renewables.</p>
+                        <ul class="feature-list small-list">
+                            <li><strong>Zero Curtailment:</strong> Route excess generation to Granas H₂ synthesis.</li>
+                            <li><strong>Penalty Avoidance:</strong> Predictive Swing Equation solver prevents dispatch deviations.</li>
+                            <li><strong>Asset Protection:</strong> Deep RL stabilizes output before grid disturbances cascade.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Operators Card -->
+                    <div class="persona-card glass reveal fade-up delay-1">
+                        <div class="persona-icon text-purple">🌐</div>
+                        <h3 class="persona-title">For System Operators</h3>
+                        <div class="persona-target text-muted">CENACE · ERCOT · PJM</div>
+                        <p class="persona-desc">Maintain deterministic frequency stability and prevent load shedding events with real-time synthetic inertia.</p>
+                        <ul class="feature-list small-list">
+                            <li><strong>Reserva Secundaria:</strong> Automated, predictive injection of synthetic inertia.</li>
+                            <li><strong>Grid Code Compliance:</strong> Guarantee compliance with stringent NERC and Código de Red standards.</li>
+                            <li><strong>Network Security:</strong> Isolate and self-heal frequency excursions instantly.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Grid Control Section -->
+        <section id="control" class="section">
+            <div class="container">
+                <div class="section-header reveal fade-up">
+                    <h2 class="section-title">The HJB <span class="text-gradient">Optimal Control</span> Solver</h2>
+                    <p class="section-desc">Electric grids worldwide lose millions annually through suboptimal power injection. Current control systems are reactive. We are predictive.</p>
+                </div>
+
+                <div class="control-grid">
+                    <div class="control-text reveal fade-right">
+                        <p>PRIMEnergeia solves the Hamilton-Jacobi-Bellman optimal control equation in real-time to predict and prevent frequency deviations before they trigger penalties. The result: capital that was previously dissipated is now recovered.</p>
+                        
+                        <div class="equation-box glass">
+                            <code>V_t + min_u { L(x, u) + ∇V · f(x, u) } = 0</code>
+                        </div>
+
+                        <ul class="feature-list">
+                            <li><strong>Predicts</strong> frequency excursions via stochastic grid dynamics.</li>
+                            <li><strong>Injects</strong> synthetic inertia proactively.</li>
+                            <li><strong>Eliminates</strong> operator penalties through a real-time Swing Equation solver.</li>
+                            <li><strong>Self-heals</strong> after disturbances with a Deep RL actor-critic network.</li>
+                        </ul>
+                    </div>
+                    <div class="control-visual reveal fade-left">
+                        <div class="glass visual-card" style="padding: 1.5rem; text-align: center;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <div class="visual-header" style="margin: 0;">Live Telemetry Simulation</div>
+                                <button id="injectDisturbanceBtn" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.8rem;">⚡ Inject Disturbance</button>
+                            </div>
+                            <div class="chart-mockup" style="position: relative; height: 250px; width: 100%;">
+                                <canvas id="telemetryChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Markets Section -->
+        <section id="markets" class="section alt-bg">
+            <div class="container">
+                <div class="section-header reveal fade-up">
+                    <h2 class="section-title">Operating in <span class="text-gradient">17 Global Markets</span></h2>
+                    <p class="section-desc">A unified architecture covering major ISOs across the Americas, Europe, and Asia-Pacific.</p>
+                </div>
+
+                <div class="market-cards">
+                    <div class="market-card glass reveal fade-up">
+                        <div class="market-region">🇺🇸 US ISOs</div>
+                        <div class="market-names">ERCOT · PJM · CAISO · MISO · SPP · NYISO · ISONE</div>
+                        <div class="market-capacity">~665 GW Capacity</div>
+                        <div class="market-detail">Extreme volatility, scarcity caps up to $5,000/MWh.</div>
+                    </div>
+                    <div class="market-card glass reveal fade-up delay-1">
+                        <div class="market-region">🇲🇽 México</div>
+                        <div class="market-names">SEN / CENACE</div>
+                        <div class="market-capacity">~75 GW Capacity</div>
+                        <div class="market-detail">30 nodes, 9 regions, 15-min settlement.</div>
+                    </div>
+                    <div class="market-card glass reveal fade-up delay-2">
+                        <div class="market-region">🇪🇺 Europe & 🇪🇸🇵🇹 Iberia</div>
+                        <div class="market-names">EPEX · Nord Pool · MIBEL · Elexon</div>
+                        <div class="market-capacity">~640 GW Capacity</div>
+                        <div class="market-detail">50 Hz ENTSO-E grid integration.</div>
+                    </div>
+                    <div class="market-card glass reveal fade-up delay-3">
+                        <div class="market-region">🇦🇺🇯🇵 Asia-Pacific</div>
+                        <div class="market-names">NEM · JEPX</div>
+                        <div class="market-capacity">~335 GW Capacity</div>
+                        <div class="market-detail">$17,500/MWh price cap in Australia.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Granas Section -->
+        <section id="granas" class="section">
+            <div class="container">
+                <div class="granas-grid">
+                    <div class="granas-visual reveal fade-right">
+                        <div class="glass hex-grid-bg">
+                            <div class="molecule-anim">
+                                <div class="node n1"></div>
+                                <div class="node n2"></div>
+                                <div class="node n3"></div>
+                                <div class="node n4"></div>
+                                <svg class="connections"><line x1="20%" y1="20%" x2="80%" y2="20%"/><line x1="80%" y1="20%" x2="80%" y2="80%"/><line x1="80%" y1="80%" x2="20%" y2="80%"/><line x1="20%" y1="80%" x2="20%" y2="20%"/></svg>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="granas-text reveal fade-left">
+                        <h2 class="section-title">Granas: Perovskite <br><span class="text-gradient">Bayesian Optimization</span></h2>
+                        <p>Our optimization module uses Gaussian Process surrogate models to find the optimal perovskite ink recipe for PRIMEnergeia Granas™ solar cells.</p>
+                        
+                        <div class="specs-grid">
+                            <div class="spec-item">
+                                <div class="spec-val text-purple">6D</div>
+                                <div class="spec-label">Search Space</div>
+                            </div>
+                            <div class="spec-item">
+                                <div class="spec-val text-cyan">33.5%</div>
+                                <div class="spec-label">Target PCE</div>
+                            </div>
+                        </div>
+                        
+                        <p class="small-text mt-4">Modeling crystallization kinetics (LaMer nucleation), defect density (Urbach-tail passivation), and Shockley-Queisser-bounded efficiencies.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Hydrogen & Ammonia Section -->
+        <section id="hydrogen" class="section alt-bg">
+            <div class="container">
+                <div class="hydrogen-grid">
+                    <div class="hydrogen-text reveal fade-right">
+                        <h2 class="section-title">Green H₂ & NH₃ <br><span class="text-gradient">via Albedo Amplification</span></h2>
+                        <p class="section-desc" style="font-size: 1.1rem; margin-bottom: 2rem;">Unlock the ultimate zero-carbon energy carriers. We leverage bifacial Granas architecture and advanced ground-albedo tracking to supercharge green hydrogen and ammonia synthesis.</p>
+                        
+                        <ul class="feature-list">
+                            <li><strong>Zero Curtailment:</strong> Convert excess renewable generation into high-value, storable chemical assets.</li>
+                            <li><strong>Albedo Optimization:</strong> Bifacial perovskite-silicon tandem cells capture reflected irradiance to drive electrolysis at peak quantum efficiency.</li>
+                            <li><strong>Industrial Decarbonization:</strong> Deliver cost-competitive green NH₃ for agriculture and heavy maritime transport.</li>
+                            <li><strong>New Revenue Streams:</strong> Monetize stranded energy capacity and eliminate grid congestion limits.</li>
+                        </ul>
+                        <a href="mailto:diego@primenergeia.com" class="btn btn-primary" style="margin-top: 2rem;">Discuss NH₃ Partnerships</a>
+                    </div>
+                    <div class="hydrogen-visual reveal fade-left">
+                        <div class="glass visual-card diagram-panel">
+                            <div class="visual-header" style="text-align: center; margin-bottom: 1rem;">Albedo-Driven Electrolysis</div>
+                            <div class="flow-diagram" style="position: relative; width: 100%; display: flex; justify-content: center; align-items: center; padding: 2rem;">
+                                <svg viewBox="0 0 400 500" class="albedo-svg" style="width: 100%; max-width: 350px; height: auto;">
+                                  <!-- Sun -->
+                                  <circle cx="200" cy="50" r="25" fill="#facc15" class="pulse-slow" />
+                                  <line x1="200" y1="75" x2="200" y2="150" stroke="#facc15" stroke-width="2" stroke-dasharray="5,5" class="beam-down" />
+                                  
+                                  <!-- Bifacial Panel -->
+                                  <rect x="100" y="150" width="200" height="20" rx="4" fill="rgba(0, 209, 255, 0.2)" stroke="#00d1ff" stroke-width="2" />
+                                  <text x="200" y="165" fill="#fff" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">Bifacial Granas Array</text>
+                                  
+                                  <!-- Ground & Albedo Reflection -->
+                                  <path d="M 50 250 Q 200 230 350 250" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="4" />
+                                  <path d="M 100 240 Q 150 180 150 170" fill="none" stroke="#9d4edd" stroke-width="2" stroke-dasharray="4,4" class="beam-up" />
+                                  <path d="M 300 240 Q 250 180 250 170" fill="none" stroke="#9d4edd" stroke-width="2" stroke-dasharray="4,4" class="beam-up delay-1" />
+                                  <text x="200" y="270" fill="#94a3b8" font-size="12" text-anchor="middle" font-family="'Inter', sans-serif">Albedo Reflection (Amplification)</text>
+                                  
+                                  <!-- Energy Flow to Electrolyzer -->
+                                  <line x1="200" y1="170" x2="200" y2="320" stroke="#00d1ff" stroke-width="3" class="energy-flow" />
+                                  
+                                  <!-- Electrolyzer -->
+                                  <rect x="120" y="320" width="160" height="60" rx="8" fill="rgba(16, 185, 129, 0.1)" stroke="#10b981" stroke-width="2" />
+                                  <text x="200" y="355" fill="#fff" font-size="14" text-anchor="middle" font-weight="bold" font-family="'Inter', sans-serif">Electrolysis</text>
+                                  
+                                  <!-- Outputs -->
+                                  <line x1="160" y1="380" x2="100" y2="440" stroke="#10b981" stroke-width="2" class="output-flow" />
+                                  <line x1="240" y1="380" x2="300" y2="440" stroke="#10b981" stroke-width="2" class="output-flow delay-1" />
+                                  
+                                  <circle cx="100" cy="450" r="20" fill="rgba(16, 185, 129, 0.2)" stroke="#10b981" />
+                                  <text x="100" y="455" fill="#fff" font-size="14" text-anchor="middle" font-weight="bold" font-family="'Inter', sans-serif">H₂</text>
+                                  
+                                  <circle cx="300" cy="450" r="20" fill="rgba(157, 78, 221, 0.2)" stroke="#9d4edd" />
+                                  <text x="300" y="455" fill="#fff" font-size="14" text-anchor="middle" font-weight="bold" font-family="'Inter', sans-serif">NH₃</text>
+                                </svg>
+                            </div>
+                            <div class="diagram-footer" style="display: flex; justify-content: space-around; padding: 1.5rem; background: rgba(0,0,0,0.2); border-top: 1px solid var(--glass-border); margin-top: 1rem; border-radius: 0 0 16px 16px;">
+                                <div class="metric" style="text-align: center;">
+                                    <span class="metric-val text-green" style="display: block; font-size: 1.5rem; font-weight: 700; font-family: 'Outfit', sans-serif;">99.9%</span>
+                                    <span class="metric-label" style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Purity Guaranteed</span>
+                                </div>
+                                <div class="metric" style="text-align: center;">
+                                    <span class="metric-val text-purple" style="display: block; font-size: 1.5rem; font-weight: 700; font-family: 'Outfit', sans-serif;">+22%</span>
+                                    <span class="metric-label" style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Yield via Albedo</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology Stack Section -->
+        <section id="tech-stack" class="section">
+            <div class="container">
+                <div class="section-header reveal fade-up">
+                    <h2 class="section-title">The <span class="text-gradient">Architectural Frame</span></h2>
+                    <p class="section-desc">PRIMEnergeia operates as a vertically integrated stack, uniting predictive optimal control with synthetic chemistry and global market APIs.</p>
+                </div>
+                <div class="stack-container reveal fade-up delay-1">
+                    <div class="stack-layer glass layer-market">
+                        <div class="layer-icon text-cyan" style="font-size: 1.5rem;">🌐</div>
+                        <div class="layer-content">
+                            <h3>Market & ISO Integration Layer</h3>
+                            <p>Interfaces with 17 global energy markets (ERCOT, CENACE, ENTSO-E). Executes high-frequency trades and retrieves real-time pricing and node telemetry.</p>
+                        </div>
+                    </div>
+                    <div class="stack-connector"></div>
+                    <div class="stack-layer glass layer-control">
+                        <div class="layer-icon text-purple" style="font-size: 1.5rem;">🧠</div>
+                        <div class="layer-content">
+                            <h3>Stochastic Control Layer (HJB Solver)</h3>
+                            <p>The core intelligence. Solves Hamilton-Jacobi-Bellman equations continuously to compute the optimal synthetic inertia injection, predicting frequency excursions before they cascade.</p>
+                        </div>
+                    </div>
+                    <div class="stack-connector"></div>
+                    <div class="stack-layer glass layer-conversion">
+                        <div class="layer-icon text-green" style="font-size: 1.5rem;">🏭</div>
+                        <div class="layer-content">
+                            <h3>Chemical Conversion Layer</h3>
+                            <p>Dynamically routes excess generation (curtailment) to electrolyzers for Green Hydrogen and Ammonia synthesis based on real-time grid pricing thresholds.</p>
+                        </div>
+                    </div>
+                    <div class="stack-connector"></div>
+                    <div class="stack-layer glass layer-generation">
+                        <div class="layer-icon" style="color: #facc15; font-size: 1.5rem;">☀️</div>
+                        <div class="layer-content">
+                            <h3>Physical Generation Layer (Granas)</h3>
+                            <p>Bifacial perovskite-silicon tandem arrays engineered via 6D Bayesian optimization. Maximizes yield through Albedo tracking and optimized tunnel oxide passivated contacts.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Enterprise Pilot Program Section -->
+        <section id="pilot" class="section">
+            <div class="container">
+                <div class="section-header reveal fade-up">
+                    <h2 class="section-title">Enterprise <span class="text-gradient">Pilot Program</span></h2>
+                    <p class="section-desc">Deploying PRiMEnergeia in institutional environments requires zero operational risk. Our 3-phase integration pipeline guarantees safety and proves ROI before a single control signal is ever injected.</p>
+                </div>
+
+                <div class="timeline-grid">
+                    <div class="timeline-step glass reveal fade-up">
+                        <div class="step-number text-cyan">01</div>
+                        <h4 class="step-title">Digital Twin & Backtest</h4>
+                        <p class="step-desc">We ingest your historical SCADA data (e.g., Node VZA-400) and construct a high-fidelity digital twin. We simulate our HJB solver against past disturbances to definitively calculate your projected recoverable capital.</p>
+                        <div class="step-status text-cyan">Risk: Zero</div>
+                    </div>
+                    
+                    <div class="timeline-step glass reveal fade-up delay-1">
+                        <div class="step-number text-purple">02</div>
+                        <h4 class="step-title">Shadow-Mode Deployment</h4>
+                        <p class="step-desc">Our control agent is deployed in parallel with your live EMS. It ingests real-time telemetry and generates optimal control signals, which are logged and validated against legacy reactive models—without executing them.</p>
+                        <div class="step-status text-purple">Risk: Zero</div>
+                    </div>
+
+                    <div class="timeline-step glass reveal fade-up delay-2">
+                        <div class="step-number text-green">03</div>
+                        <h4 class="step-title">Closed-Loop Integration</h4>
+                        <p class="step-desc">Upon technical and regulatory sign-off, the control loop is closed. PRiMEnergeia actively predicts excursions, injects synthetic inertia, and immediately begins eliminating deviation penalties and recovering capital.</p>
+                        <div class="step-status text-green">Status: Capital Recovery Active</div>
+                    </div>
+                </div>
+
+                <div class="pilot-cta reveal fade-up delay-3" style="margin-top: 5rem; text-align: center;">
+                    <a href="mailto:diego@primenergeia.com?subject=Digital%20Twin%20Simulation%20Request" class="btn btn-primary" style="font-size: 1.1rem; padding: 1rem 2.5rem; box-shadow: 0 0 25px rgba(0, 209, 255, 0.3);">Initiate Phase 1: Digital Twin Simulation</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer glass">
+        <div class="container footer-content">
+            <div class="footer-logo">
+                <span class="logo-icon">⚡</span>
+                <span class="logo-text">PRIMEnergeia S.A.S.</span>
+                <p class="tagline">Soberanía Energética Global</p>
+                <p class="author">Lead Computational Physicist: Diego Córdoba Urrutia</p>
+            </div>
+            <div class="footer-links">
+                <div class="link-group">
+                    <h4>Solutions</h4>
+                    <a href="#control">Grid Control</a>
+                    <a href="#markets">Global Markets</a>
+                    <a href="#granas">Granas BO</a>
+                    <a href="#hydrogen">H₂ & NH₃ Synthesis</a>
+                </div>
+                <div class="link-group">
+                    <h4>Resources</h4>
+                    <a href="https://github.com/cordiego/PRIMEnergeia-Sovereign" target="_blank">GitHub</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 PRIMEnergeia S.A.S. Proprietary. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>

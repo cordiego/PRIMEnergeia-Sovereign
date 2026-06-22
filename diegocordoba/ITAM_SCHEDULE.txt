@@ -1,0 +1,29 @@
+	Unnamed: 0	Unnamed: 1	Unnamed: 2	Unnamed: 3	Unnamed: 4	Unnamed: 5	Unnamed: 6	Unnamed: 7	Unnamed: 8	Unnamed: 9
+0				Sunday	Monday	Tuesday	Wednesday	Thursday	Friday	Saturday
+1		07:00:00						IMP		
+2		07:30:00					SIT/PULL/PUSH		SIT/PULL/PUSH	
+3		08:00:00				Eureka 				
+4		08:30:00					Fixed Income		Fixed Income	
+5		09:00:00				EXAM				
+6		09:30:00								
+7		10:00:00						Eureka		
+8		10:30:00							HW	
+9		11:00:00			INF		INF			
+10		11:30:00				ECO IV		ECO IV		
+11		12:00:00								
+12		12:30:00								
+13		13:00:00		MEDITATION	LUNCH	LUNCH	LUNCH	LUNCH		
+14		13:30:00								
+15		14:00:00			COFFEE		READING	Chill		
+16		14:30:00			EXAM					
+17		15:00:00				GOLF		GOLF		
+18		15:30:00					COFFEE			
+19		16:00:00			COM		COM		Primenergeia 	Primenergeia
+20		16:30:00								
+21		17:00:00								
+22		17:30:00								
+23		18:00:00			MEDITATION	HW	Chill	MEDITATION		
+24		18:30:00								
+25		19:00:00								
+26		19:30:00								
+27		20:00:00								

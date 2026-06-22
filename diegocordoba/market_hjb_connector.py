@@ -22,7 +22,8 @@ from typing import Callable
 # Import the fortified HJB components
 from hjb_solver_fortified import (
     BESSFrequencyDynamics,
-    HJBSolver,
+    TimeVaryingHJBSolver,
+    RecedingHorizonHJBLoop,
     ISOMarket
 )
 from prime_kernel.hopfield import HopfieldValueMemory
@@ -69,36 +70,32 @@ def run_market_integrated_dispatch(market: ISOMarket = ISOMarket.CENACE, horizon
     # Inject the time-varying price function into the dynamics
     dynamics.price_func = market_feed.get_price
     
-    # 3. Setup the HJB Solver
-    logger.info("Configuring the HJB Solver...")
-    memory_bank = HopfieldValueMemory(beta=2.0)
+    # 3. Setup the Time-Varying HJB Solver
+    logger.info("Configuring the Time-Varying HJB Solver...")
     
-    solver = HJBSolver(
+    # We use a shorter lookahead horizon for the MPC loop to keep it tractable
+    lookahead_horizon_s = 600.0  # 10 minutes lookahead
+    
+    solver = TimeVaryingHJBSolver(
         dynamics=dynamics,
-        total_time=horizon_s,
-        dt=4.0, # 4-second dispatch intervals
+        total_time=lookahead_horizon_s,
+        dt=10.0, # 10-second intervals for the lookahead
         grid_points=[10, 5, 10, 5, 5], # Reduced grid resolution for fast demo execution
         n_controls=7,
-        max_sweeps=5,
-        tol=0.05,
-        stochastic=False,
-        hopfield_memory=memory_bank
+        stochastic=False
     )
     
-    # 4. Solve for the Value Function (Stationary approximation over the horizon)
-    # Note: For true time-varying HJB, we solve backward in time. 
-    # Here, we use the average/expected price for V(x), but the greedy optimal_control query will use the exact t.
-    logger.info("Solving HJB Value Function (Iterative Sweep)...")
-    t0 = time.time()
-    solver.solve()
-    logger.info(f"HJB Solved in {time.time() - t0:.2f} seconds.")
+    # 4. Setup the Receding Horizon Loop (Closed-Loop MPC)
+    logger.info("Configuring Receding Horizon Loop (Closed-Loop MPC)...")
+    exec_dt = 60.0  # Recalibrate and apply control every 60 seconds
+    loop = RecedingHorizonHJBLoop(solver=solver, exec_dt=exec_dt)
     
-    # 5. Simulate Real-time Dispatch
+    # 5. Simulate Real-time Closed-Loop Dispatch
     # Initial state: df=0.0, ROCOF=0.0, SoC=0.5, T_cell=25.0, DoH=0.0
     initial_state = np.array([0.0, 0.0, 0.5, 25.0, 0.0])
     
-    logger.info("Starting Forward Simulation with Time-Varying Market Prices...")
-    result = solver.simulate(initial_state)
+    logger.info("Starting Receding Horizon Simulation with Time-Varying Market Prices...")
+    result = loop.run_closed_loop(initial_state, total_sim_time=horizon_s)
     
     # Extract results
     avg_soc = np.mean(result.state_trajectory[:, 2])

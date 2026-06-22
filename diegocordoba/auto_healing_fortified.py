@@ -496,7 +496,7 @@ if __name__ == "__main__":
     agent = PRIMEnergeia_SAC(cfg)
     env   = GridEnv()
 
-    np.random.seed(42)
+    np.random.seed(20462)
     stats_log = []
     for ep in range(5):
         env.reset(disturbance_mw=np.random.uniform(-30, 30))

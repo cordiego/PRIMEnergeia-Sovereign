@@ -5,10 +5,11 @@ import logging
 
 from hjb_solver_fortified import GridFrequencyDynamics, HJBSolver
 from prime_kernel.hopfield import HopfieldValueMemory
-from granas_vza400_dynamics import GranasVZA400Dynamics
+from granas_dynamics import GranasDynamics
 from uncertainty_layer import UncertaintyQuantifier
 
 def run_benchmark():
+    np.random.seed(20462)
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     
     print("\n" + "="*70)
@@ -54,28 +55,28 @@ def run_benchmark():
     print(" Validated UQ Layer for 30.3% PCE + Hydrogen Back Contact")
     print("="*70)
 
-    dynamics_vza400 = GranasVZA400Dynamics()
-    grid_points_vza400 = [4, 4, 4, 4]
+    dynamics_granas = GranasDynamics()
+    grid_points_granas = [4, 4, 4, 4]
 
     print("\n🧠 Solving Central HJB Optimal Control (Stochastic)...")
-    solver_vza400 = HJBSolver(
-        dynamics_vza400, 
+    solver_granas = HJBSolver(
+        dynamics_granas, 
         dt=2.0, 
         total_time=60.0, 
-        grid_points=grid_points_vza400, 
+        grid_points=grid_points_granas, 
         max_sweeps=3,
         stochastic=True
     )
-    solver_vza400.solve()
+    solver_granas.solve()
 
     print("\n📈 Initializing Uncertainty Quantifier...")
-    uq = UncertaintyQuantifier(solver_vza400)
+    uq = UncertaintyQuantifier(solver_granas)
 
     # High PV output (80 MW), Temp 400C, Pressure 200 bar, 50% H2 buffer
-    initial_state_vza = np.array([80.0, 400.0, 200.0, 0.5])
+    initial_state_granas = np.array([80.0, 400.0, 200.0, 0.5])
 
     print("\nGenerating UQ Report (Monte Carlo + Robust HJB Bounds)...")
-    report = uq.generate_report(initial_state_vza, epsilon=0.0035, n_paths=2000)
+    report = uq.generate_report(initial_state_granas, epsilon=0.0035, n_paths=2000)
 
     # -------------------------------------------------------------------------
     # RESULTS

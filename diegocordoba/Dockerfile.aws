@@ -1,0 +1,31 @@
+# PRIMEngine — AWS ECS Deployment
+# Multi-stage build for production deployment
+
+FROM python:3.11-slim AS base
+
+WORKDIR /app
+
+# System deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python deps
+COPY requirements.txt requirements-api.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-api.txt
+
+# App code
+COPY . .
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8081/v1/health')" || exit 1
+
+# Expose API port
+EXPOSE 8081
+
+# Run PRIMEngine API
+ENV PRIMENGINE_DATA_DIR=/data/primengine
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python", "-m", "uvicorn", "api.primengine_api:app", "--host", "0.0.0.0", "--port", "8081", "--workers", "2"]

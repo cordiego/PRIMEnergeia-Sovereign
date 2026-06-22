@@ -1,0 +1,11 @@
+{
+    "ticker_leveraged": "SNXX",
+    "ticker_underlying": "SNDK",
+    "period": "2y",
+    "data_points": 88,
+    "lambda": 0.002250455117726642,
+    "half_life_days": 308.00311239272645,
+    "avg_21d_tracking_error": 0.9862751603885835,
+    "p5_decay": -0.012057738540269147,
+    "recommended_threshold": -0.02
+}

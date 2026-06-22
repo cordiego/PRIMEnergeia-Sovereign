@@ -1,18 +1,1 @@
-{
-  "f": 60.001,
-  "v": 115.08,
-  "status": "NOMINAL",
-  "timestamp": 1775837210.865203,
-  "granas_solar": {
-    "irradiance_w_m2": 257.0,
-    "source": "virtualized_granas_topcon_tandem",
-    "spectrum": "AM1.5G_scaled",
-    "scale_factor": 0.257,
-    "perovskite_bandgap_eV": 1.578,
-    "topcon_bandgap_eV": 1.12,
-    "estimated_pce_pct": 27.4,
-    "power_output_w_m2": 70.4,
-    "agent": "antigravity",
-    "handshake": "verified"
-  }
-}
+{"f": 59.989, "v": 115.23, "status": "NOMINAL", "timestamp": 1776023268.826831}

@@ -39,7 +39,7 @@ if __name__ == "__main__":
     print("\n[+] Inicializando PRIMEnergeia Auto-Healing Core v2.0 en MacBook Pro...")
     agent = PRIMEnergeia_DRL_Core(state_dim=4, action_dim=1)
     
-    np.random.seed(42)
+    np.random.seed(20462)
     time_steps = 1000
     base_freq = 60.0 + np.random.normal(0, 0.3, time_steps)
     base_freq[400:450] -= 0.8

@@ -2,5 +2,5 @@
     "project": "PRIMEnergeia",
     "author": "Diego Cordoba",
     "default_rho": 2.0,
-    "assets": ["SNDK", "SNXX", "CASH"]
+    "assets": ["SNDK", "SNXX", "SCHD"]
 }
