@@ -31,8 +31,24 @@ except ImportError:
 
 # Add parent directory for imports
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../PRIME-Kernel')))
 
 from core.eureka_markov import MarkovDayChain, build_full_history_chain
+try:
+    from prime_kernel.quant_signals import regime_velocity_lock
+except ImportError:
+    # Inline fallback for CI — identical to PRIME-Kernel/prime_kernel/quant_signals.py
+    def regime_velocity_lock(vix_now: float, vix_prev: float, config: dict = None) -> dict:
+        """VIX rate-of-change detector. ≥15% d/d → DEFENSIVE."""
+        cfg = config or {}
+        spike_pct = cfg.get("vix_spike_threshold", 0.15)
+        if vix_prev and vix_prev > 0:
+            roc = (vix_now - vix_prev) / vix_prev
+        else:
+            roc = 0.0
+        if roc >= spike_pct:
+            return {"mode": "DEFENSIVE", "roc": roc, "action": "PROTECT_NOT_HARVEST"}
+        return {"mode": "NORMAL", "roc": roc, "action": "HARVEST_OK"}
 
 logging.basicConfig(
     level=logging.INFO,
@@ -331,8 +347,30 @@ def generate_premarket_signal() -> dict:
         "signal_correct": None,
     }
 
+    # 7. VIX Velocity Lock — detect overnight VIX acceleration
+    vix_now = pm_data.get(VIX_TICKER, {}).get("price")
+    vix_yesterday_close = pm_data.get(VIX_TICKER, {}).get("yesterday_close")
+    vix_velocity = {"mode": "NORMAL", "roc": 0.0, "action": "HARVEST_OK"}
+
+    if vix_now and vix_yesterday_close:
+        vix_velocity = regime_velocity_lock(vix_now, vix_yesterday_close)
+        if vix_velocity["mode"] == "DEFENSIVE":
+            logger.warning(
+                f"🚨 VIX VELOCITY SPIKE: +{vix_velocity['roc']*100:.1f}% overnight "
+                f"({vix_yesterday_close:.1f} → {vix_now:.1f}) — overriding to AVOID"
+            )
+            pm_signal = "AVOID"
+            kelly_adj = 0.00
+
+    signal["vix_velocity_mode"] = vix_velocity["mode"]
+    signal["vix_velocity_roc"] = vix_velocity["roc"]
+    signal["vix_yesterday_close"] = vix_yesterday_close
+    signal["pm_signal"] = pm_signal
+    signal["kelly_adj"] = kelly_adj
+
     logger.info(f"Pre-market signal: {pm_signal} (conviction={pm_conviction:+.3f}, "
-                f"regime={regime}, kelly={kelly_adj:.0%})")
+                f"regime={regime}, kelly={kelly_adj:.0%}, "
+                f"vix_velocity={vix_velocity['mode']})")
     return signal
 
 
@@ -410,6 +448,23 @@ def format_premarket_message(signal: dict) -> str:
 
     lines.append("")
     lines.append("\u2500" * 59)
+
+    # VIX Velocity Alert
+    vix_vel_mode = signal.get("vix_velocity_mode", "NORMAL")
+    vix_vel_roc = signal.get("vix_velocity_roc", 0.0)
+    if vix_vel_mode == "DEFENSIVE":
+        lines.append("")
+        lines.append("\U0001f6a8 VIX VELOCITY SPIKE DETECTED")
+        lines.append(f"   VIX accelerating +{vix_vel_roc*100:.1f}% overnight")
+        vix_yc = signal.get("vix_yesterday_close", 0)
+        vix_now = signal.get("vix_price", 0)
+        if vix_yc and vix_now:
+            lines.append(f"   {vix_yc:.1f} \u2192 {vix_now:.1f}")
+        lines.append("   \U0001f6d1 PROTECT MODE: Do NOT enter SNXX today")
+        lines.append("   \U0001f4a1 If holding: FULL EXIT at open")
+        lines.append("")
+        lines.append("\u2500" * 59)
+
     lines.append(f"\U0001f3af  PRE-MARKET SIGNAL: {sig_emoji} {sig}")
     lines.append(f"\U0001f4b0  Kelly Sizing: {signal.get('kelly_adj', 0.5) * 100:.0f}% of full block")
     lines.append(f"\U0001f4ca  Conviction: {signal.get('pm_conviction', 0):+.3f}")
