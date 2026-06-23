@@ -120,7 +120,12 @@ ASSET_META = {
     "SCHD": {"desc": "US Dividend Equity", "category": "Yield", "color": "#a78bfa"}
 }
 
-def classify_vix(vix_level):
+def classify_vix(vix_level, vix_prev=None, spike_threshold=0.15):
+    if vix_prev is not None and vix_prev > 0:
+        roc = (vix_level - vix_prev) / vix_prev
+        if roc >= spike_threshold:
+            return "HIGH"
+            
     if vix_level < 18: return "LOW"
     elif vix_level <= 28: return "ELEVATED"
     else: return "HIGH"
@@ -258,7 +263,8 @@ def load_market_data():
     prices_full = prices_full.astype(np.float64)
     
     current_vix = float(prices_full[VIX_TICKER].iloc[-1])
-    vix_label = classify_vix(current_vix)
+    vix_prev = float(prices_full[VIX_TICKER].iloc[-2]) if len(prices_full[VIX_TICKER]) > 1 else None
+    vix_label = classify_vix(current_vix, vix_prev)
 
     mom_crash_flags = {}
     for tk in FULL_UNIVERSE:
@@ -307,7 +313,8 @@ def load_market_data():
     alpha = float(total_return - spy_return)
 
     current_vix = float(vix_series.iloc[-1])
-    vix_label = classify_vix(current_vix)
+    vix_prev = float(vix_series.iloc[-2]) if len(vix_series) > 1 else None
+    vix_label = classify_vix(current_vix, vix_prev)
 
     # Individual asset stats
     asset_stats = {}
