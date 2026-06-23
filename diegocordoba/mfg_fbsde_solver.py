@@ -179,8 +179,106 @@ class MFG_FBSDE_System:
             if epoch % 100 == 0:
                 logger.info(f"Epoch {epoch} | Loss: {loss.item():.6f} | Y0 (Price): {self.Y0.item():.4f}")
 
+class NegentropicMFG_FBSDE_System(MFG_FBSDE_System):
+    """
+    Deep FBSDE MFG solver with negentropic running cost.
+    
+    Replaces the heuristic quadratic L = q1·Δf² + q2·ROCOF² + r·u²
+    with the Esposito-Seifert entropy production rate:
+        L_neg = Σ̇(x, u) + ½·r·u² + F_MFG(x, m_t)
+    
+    where Σ̇ = (1/T) · ||f_irrev||²_{D⁻¹} is the thermodynamic cost.
+    
+    The MFG interaction F(x, m_t) = λ · (E[Δf] - Δf) is preserved:
+    each provider's entropy production depends on the mean field.
+    
+    Physical interpretation: N → ∞ providers competing for frequency
+    regulation, each acting as a Maxwell demon with budget r.
+    """
+    
+    def __init__(self, *args, 
+                 effective_temperature: float = None,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Compute T_eff = σ²/(2κ) from OU parameters
+        # Using kappa ≈ D/(2H) for the swing equation
+        kappa_eff = self.D / (2.0 * self.H)
+        if effective_temperature is not None:
+            self.T_eff = effective_temperature
+        else:
+            self.T_eff = self.sigma_ou**2 / (2.0 * max(kappa_eff, 1e-8))
+        
+        # D⁻¹ for entropy norm (only frequency dimension has noise)
+        self.D_diff = self.sigma_ou**2 / 2.0 + 1e-12  # scalar diffusion coeff
+        self.D_diff_inv = 1.0 / self.D_diff
+        
+        logger.info(f"NegentropicMFG: T_eff={self.T_eff:.6e}, D_diff={self.D_diff:.6e}")
+    
+    def _entropy_production_rate(self, X: torch.Tensor, u: torch.Tensor) -> torch.Tensor:
+        """
+        Compute Σ̇(x, u) in batch for the FBSDE forward pass.
+        
+        Σ̇ = (1/T) · ||f_total - f_rev||²_{D⁻¹}
+        
+        For the swing equation:
+            f_total = [ROCOF, (-D·Δf - u) / (2H)]
+            f_rev ≈ -κ·x (OU equilibrium drift)
+            
+        Since only Δf carries noise (σ_OU on dim 0):
+            Σ̇ ≈ (1/T) · (f_total[0] - f_rev[0])² / D_diff
+        """
+        X_1 = X[:, 0:1]  # Δf
+        X_2 = X[:, 1:2]  # ROCOF
+        
+        # Total drift (first component = ROCOF)
+        f_total_1 = X_2
+        
+        # Reversible drift for OU: f_rev = -κ·(x - μ), with μ=0
+        kappa_eff = self.D / (2.0 * self.H)
+        f_rev_1 = -kappa_eff * X_1
+        
+        # Irreversible drift
+        f_irrev_1 = f_total_1 - f_rev_1
+        
+        # Σ̇ = (1/T) · |f_irrev|² · D⁻¹  (scalar for 1D noise)
+        sigma_dot = (1.0 / self.T_eff) * f_irrev_1**2 * self.D_diff_inv
+        
+        return sigma_dot
+    
+    def _running_cost_and_mfg(self, X: torch.Tensor, u: torch.Tensor) -> torch.Tensor:
+        """
+        Negentropic running cost with MFG interaction:
+            L_neg(X, u, m) = Σ̇(X, u) + ½·r·u² + F_MFG(X, m_t)
+        
+        The 2nd Law IS the integrando. The MFG term captures the
+        competition between providers.
+        """
+        X_1 = X[:, 0:1]
+        
+        # Entropy production rate (replaces q1·Δf² + q2·ROCOF²)
+        sigma_dot = self._entropy_production_rate(X, u)
+        
+        # Control penalty (Maxwell demon budget)
+        control_cost = self.r * u**2
+        
+        # MFG interaction (preserved from parent)
+        mean_f = torch.mean(X_1).detach()
+        F_mfg = self.lambda_mfg * (mean_f - X_1)
+        
+        return sigma_dot + control_cost + F_mfg
+
+
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - [MFG FBSDE] - %(message)s')
+    
+    # Classic MFG
     solver = MFG_FBSDE_System(num_steps=50, batch_size=512, lambda_mfg=200.0)
     solver.train(epochs=1000)
-    print(f"Final Contract Equilibrium Price (Y0): {solver.Y0.item():.4f}")
+    print(f"Classic MFG Equilibrium Price (Y0): {solver.Y0.item():.4f}")
+    
+    # Negentropic MFG
+    print("\n--- Negentropic MFG ---")
+    neg_solver = NegentropicMFG_FBSDE_System(num_steps=50, batch_size=512, lambda_mfg=200.0)
+    neg_solver.train(epochs=1000)
+    print(f"Negentropic MFG Equilibrium Price (Y0): {neg_solver.Y0.item():.4f}")
