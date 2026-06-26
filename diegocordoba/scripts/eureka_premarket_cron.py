@@ -3,7 +3,8 @@
 EUREKA PRE-MARKET CRON — Standalone Scheduler Entry Point
 ==========================================================
 Designed to run at 7:30 AM ET (11:30 UTC) Mon-Fri via GitHub Actions.
-Generates pre-market intelligence signal and dispatches to Telegram.
+Generates pre-market intelligence signal and dispatches to Telegram
+via BOTH DoctorPRIME and Eureka bots.
 
 Usage:
     python eureka_premarket_cron.py
@@ -12,8 +13,12 @@ Usage:
 
 import os
 import sys
+import json
 import argparse
 import logging
+import time
+import urllib.request
+import urllib.error
 from datetime import datetime
 
 # Add parent directory to path for imports
@@ -24,6 +29,68 @@ logging.basicConfig(
     format='%(asctime)s - [PreMarket-Cron] - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
+# ─── Telegram Configuration ───────────────────────────────────────
+# Both bots send to the same chat_id
+CHAT_ID = os.environ.get("PRIME_TELEGRAM_CHAT_ID", "")
+
+BOTS = {
+    "DoctorPRIME": os.environ.get("PRIME_TELEGRAM_BOT_TOKEN", ""),
+    "Eureka":      os.environ.get("EUREKA_TELEGRAM_BOT_TOKEN", ""),
+}
+
+MAX_RETRIES = 3
+RETRY_DELAY = 2  # seconds
+
+
+def send_telegram(text: str, bot_name: str = None) -> bool:
+    """Send message via Telegram Bot API with retry logic.
+    
+    If bot_name is specified, sends from that bot only.
+    If bot_name is None, sends from ALL configured bots.
+    """
+    if not CHAT_ID:
+        logger.error("PRIME_TELEGRAM_CHAT_ID not set — cannot send Telegram messages")
+        return False
+
+    bots_to_use = {}
+    if bot_name and bot_name in BOTS:
+        bots_to_use = {bot_name: BOTS[bot_name]}
+    else:
+        bots_to_use = BOTS
+
+    any_success = False
+    for name, token in bots_to_use.items():
+        if not token:
+            logger.warning(f"[{name}] Bot token not set — skipping")
+            continue
+
+        url = f"https://api.telegram.org/bot{token}/sendMessage"
+        payload = json.dumps({
+            "chat_id": CHAT_ID,
+            "text": text,
+        }).encode("utf-8")
+
+        for attempt in range(1, MAX_RETRIES + 1):
+            try:
+                req = urllib.request.Request(
+                    url, data=payload,
+                    headers={"Content-Type": "application/json"}
+                )
+                with urllib.request.urlopen(req, timeout=15) as response:
+                    if response.status == 200:
+                        logger.info(f"[✓] [{name}] Telegram message delivered")
+                        any_success = True
+                        break
+            except (urllib.error.URLError, urllib.error.HTTPError, OSError) as e:
+                logger.warning(f"[{name}] Send attempt {attempt}/{MAX_RETRIES} failed: {e}")
+                if attempt < MAX_RETRIES:
+                    time.sleep(RETRY_DELAY * attempt)
+
+        else:
+            logger.error(f"[{name}] Telegram delivery FAILED after {MAX_RETRIES} retries")
+
+    return any_success
 
 
 def is_market_day() -> bool:
@@ -59,6 +126,7 @@ def run_premarket_cron(dry_run: bool = False):
         import eureka_schd_premarket as schd_engine
     except ImportError as e:
         logger.error(f"Failed to import engines: {e}")
+        send_telegram(f"⚠️ EUREKA PRE-MARKET IMPORT ERROR\n{e}")
         sys.exit(1)
 
     # ---------------------------------------------------------
@@ -71,29 +139,15 @@ def run_premarket_cron(dry_run: bool = False):
         error_msg = sndk_signal.get("error", "Unknown error") if sndk_signal else "Signal generation returned None"
         logger.error(f"SNDK Pre-market signal failed: {error_msg}")
         if not dry_run:
-            try:
-                from core.alerts import PRIMAlerts
-                alerts = PRIMAlerts()
-                alerts._send_telegram(f"⚠️ EUREKA PRE-MARKET ERROR (SNDK)\n{error_msg}")
-            except Exception:
-                pass
+            send_telegram(f"⚠️ EUREKA PRE-MARKET ERROR (SNDK)\n{error_msg}")
     else:
         # Format and send SNDK message
         sndk_message = sndk_engine.format_premarket_message(sndk_signal)
         print(sndk_message)
         if not dry_run:
             logger.info("Sending Telegram notification for SNDK...")
-            try:
-                from core.alerts import PRIMAlerts
-                alerts = PRIMAlerts()
-                success = alerts._send_telegram(sndk_message)
-                if success:
-                    logger.info("[✓] SNDK Pre-market notification delivered.")
-                else:
-                    logger.warning("[!] SNDK Telegram delivery failed.")
-            except Exception as e:
-                logger.error(f"Telegram send error: {e}")
-        
+            send_telegram(sndk_message)
+
         try:
             sndk_engine.save_premarket_history(sndk_signal)
             logger.info("[✓] SNDK Pre-market history saved.")
@@ -110,29 +164,15 @@ def run_premarket_cron(dry_run: bool = False):
         error_msg = schd_signal.get("error", "Unknown error") if schd_signal else "Signal generation returned None"
         logger.error(f"SCHD Pre-market signal failed: {error_msg}")
         if not dry_run:
-            try:
-                from core.alerts import PRIMAlerts
-                alerts = PRIMAlerts()
-                alerts._send_telegram(f"⚠️ EUREKA PRE-MARKET ERROR (SCHD)\n{error_msg}")
-            except Exception:
-                pass
+            send_telegram(f"⚠️ EUREKA PRE-MARKET ERROR (SCHD)\n{error_msg}")
     else:
         # Format and send SCHD message
         schd_message = schd_engine.format_premarket_message(schd_signal)
         print(schd_message)
         if not dry_run:
             logger.info("Sending Telegram notification for SCHD...")
-            try:
-                from core.alerts import PRIMAlerts
-                alerts = PRIMAlerts()
-                success = alerts._send_telegram(schd_message)
-                if success:
-                    logger.info("[✓] SCHD Pre-market notification delivered.")
-                else:
-                    logger.warning("[!] SCHD Telegram delivery failed.")
-            except Exception as e:
-                logger.error(f"Telegram send error: {e}")
-        
+            send_telegram(schd_message)
+
         try:
             schd_engine.save_premarket_history(schd_signal)
             logger.info("[✓] SCHD Pre-market history saved.")

@@ -32,6 +32,7 @@ jobs:
       - name: Run Pre-Market Engine
         env:
           PRIME_TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          EUREKA_TELEGRAM_BOT_TOKEN: ${{ secrets.EUREKA_TELEGRAM_BOT_TOKEN }}
           PRIME_TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
           cd ${{ github.workspace }}
