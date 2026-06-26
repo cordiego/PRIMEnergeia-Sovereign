@@ -2,11 +2,16 @@ name: Eureka Pre-Market Intelligence
 
 on:
   schedule:
-    # 7:30 AM ET = 11:30 UTC (Mon-Fri)
-    # During EDT (Mar-Nov), 7:30 AM ET = 11:30 UTC
-    # During EST (Nov-Mar), 7:30 AM ET = 12:30 UTC
-    # Using 11:30 UTC to cover EDT; adjust if needed for EST
+    # 7:30 AM ET = 11:30 UTC (Morning pre-market)
     - cron: '30 11 * * 1-5'
+    # 2:00 PM ET = 18:00 UTC (Intraday lookahead)
+    - cron: '0 18 * * 1-5'
+    # 3:00 PM ET = 19:00 UTC (Intraday lookahead)
+    - cron: '0 19 * * 1-5'
+    # 3:55 PM ET = 19:55 UTC (Power Hour / MOC prediction)
+    - cron: '55 19 * * 1-5'
+    # 4:15 PM ET = 20:15 UTC (Post-Market Close / NEXT DAY FORECAST)
+    - cron: '15 20 * * 1-5'
   workflow_dispatch:  # Allow manual trigger
 
 jobs:

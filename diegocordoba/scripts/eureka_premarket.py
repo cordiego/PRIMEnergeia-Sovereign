@@ -424,13 +424,19 @@ def format_premarket_message(signal: dict) -> str:
     streak_len = signal.get("current_streak_length", 0)
     streak_dir = signal.get("current_streak_direction", "?")
 
+    hour_utc = datetime.utcnow().hour
+    is_pm = hour_utc >= 17  # After 1 PM ET
+    
+    title = "🔮  EUREKA TOMORROW'S FORECAST" if is_pm else "🌅  EUREKA PRE-MARKET INTELLIGENCE"
+    price_label = "Latest/Close" if is_pm else "Pre-Market"
+
     lines = []
     lines.append("=" * 59)
-    lines.append("\U0001f305  EUREKA PRE-MARKET INTELLIGENCE")
+    lines.append(title)
     lines.append("=" * 59)
-    lines.append(f"\U0001f4c5  {ts}")
-    lines.append(f"\U0001f4ca  SNDK Pre-Market: {signal.get('sndk_gap_pct', 0):+.2f}% "
-                 f"\u2192 SNXX Projected: ~{signal.get('snxx_projected_gap_pct', 0):+.2f}%")
+    lines.append(f"📅  {ts}")
+    lines.append(f"📊  SNDK {price_label}: {signal.get('sndk_gap_pct', 0):+.2f}% "
+                 f"→ SNXX Projected: ~{signal.get('snxx_projected_gap_pct', 0):+.2f}%")
 
     lines.append(f"\U0001f52e  Sector Pulse: {sector_label} "
                  f"(MU {signal.get('mu_gap_pct', 0):+.1f}%, "
