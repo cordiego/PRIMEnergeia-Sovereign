@@ -1,0 +1,46 @@
+name: Eureka Pre-Market Intelligence
+
+on:
+  schedule:
+    # 7:30 AM ET = 11:30 UTC (Mon-Fri)
+    # During EDT (Mar-Nov), 7:30 AM ET = 11:30 UTC
+    # During EST (Nov-Mar), 7:30 AM ET = 12:30 UTC
+    # Using 11:30 UTC to cover EDT; adjust if needed for EST
+    - cron: '30 11 * * 1-5'
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  premarket-signal:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install yfinance numpy pandas scipy hmmlearn pandas-market-calendars pandas-datareader statsmodels
+
+      - name: Run Pre-Market Engine
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: |
+          cd ${{ github.workspace }}
+          python scripts/eureka_premarket_cron.py
+
+      - name: Upload pre-market history
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: premarket-signal-${{ github.run_id }}
+          path: ~/.quantum_portfolio/premarket_history.json
+          retention-days: 90
