@@ -1,80 +1,0 @@
-This Cooperative Research and Development Agreement (CRADA) is established between PRIMEnergeia Granas (hereinafter "the Participant") and the [Insert Research Institution/National Laboratory Name] (hereinafter "the Laboratory") to advance the state of the art in high-efficiency tandem photovoltaic architectures.
-
-I. Statement of Purpose and Scope
-The primary objective of this collaboration is the optimization of Near-Infrared (NIR) spectral responsivity in silicon bottom cells, specifically utilizing the proprietary Granas-TOPCon architecture. As the thermodynamic limits of single-junction silicon solar cells are approached, the transition to perovskite/silicon tandem configurations is necessitated. This agreement focuses on the fundamental re-engineering of the silicon substrate to act as a dedicated infrared converter within the 800–1200 nm regime.
-+4
-
-The research will specifically target the mitigation of parasitic free-carrier absorption (FCA) in rear polysilicon layers and the implementation of advanced light-trapping geometries to maximize internal quantum efficiency (IQE).
-+1
-
-
-II. Technical Objectives and Theoretical Framework
-The parties shall collaborate to refine the theoretical framework governing the optical and recombination dynamics of the rear contact stack. The research will be guided by the Drude model, which predicts that absorption cross-sections for free carriers increase quadratically with wavelength, necessitating a reduction in either doping concentration ($N$) or physical layer thickness ($d_{poly}$).
-+3
-
-To achieve these objectives, the Laboratory and the Participant will utilize the following governing equations to model carrier lifetime and absorption:
-
-$$\frac{1}{\tau_{eff}} = \frac{1}{\tau_{int}} + \frac{J_{0s}(N_A + \Delta n)}{q n_i^2 W}$$
-This formula allows the researchers to describe the effective minority carrier lifetime ($\tau_{eff}$) by accounting for intrinsic lifetime ($\tau_{int}$) and surface saturation current density ($J_{0s}$). Furthermore, the collaboration will seek to maximize the path length enhancement factor ($Z$) to approach the Yablonovitch limit:
-
-$$Z = \frac{\int_0^W I(z) dz}{I_0 W (1 - R_f)}$$
-Where $I(z)$ represents the intensity distribution and $R_f$ is the front reflectance.
-+1
-
-
-III. Experimental Design: The Granas-TOPCon Architecture
-The Participant shall provide the specific architectural specifications for the Granas-TOPCon cell, which deviates from standard industrial "planar rear" designs. The collaboration will focus on the Bifacial-Optimized Rear Contact (BORC) configuration. Key technical specifications include:
-+1
- 
-	•	Substrate: n-type Czochralski (Cz) wafer, 140 $\mu m$ thickness, resistivity 1–3 $\Omega\cdot cm$.  
-	•	Rear Interface: Replacement of 150 nm LPCVD polysilicon with a 30 nm ultra-thin nanocrystalline silicon (nc-Si) layer.  
-	•	Passivation: Implementation of a hydrogen-rich aluminum oxide ($AlO_x$) capping layer to act as a hydrogen reservoir.  
-	•	Optical Buffer: Integration of a low-index dielectric buffer ($MgF_2$ or porous $SiO_2$) before the silver rear reflector to induce Total Internal Reflection (TIR).  
-
-IV. Lab Test Simulation and Empirical Validation
-The parties shall conduct coupled optical-electrical simulations utilizing Sentaurus TCAD. These simulations will solve the Poisson equation alongside continuity equations for electrons and holes, using a Ray-Tracing Transfer Matrix Method (RT-TMM) for optical profiling.
-+1
-
-Simulation Results & Prototyping Data
-Based on initial prototyping at the PRIMEnergeia Granas facility, the following performance indicators have been established as the baseline for this CRADA:
-+1
-
-Parameter
-Unit
-Reference TOPCon
-Granas-TOPCon
-Rear Reflectance (1100 nm)
-%
-91.2
-98.4
-+3
-
-EQE (1100 nm)
-%
-52.0
-78.5
-+3
-
-$J_{sc}$ (Filtered AM1.5G)
-$mA/cm^2$
-14.2
-15.4
-+3
-
-Implied $V_{oc}$
-$mV$
-728
-724
-+3
-
-The simulation data indicates that while the thinning of the polysilicon layer results in a marginal increase in saturation current density ($J_{0,rear}$) from 4.5 to 5.8 $fA/cm^2$, the net gain in short-circuit current density ($J_{sc}$) of 1.2 $mA/cm^2$ provides a superior trade-off for tandem integration.
-+3
-
-
-V. Intellectual Property and Deliverables
-All data, simulations, and prototypes generated under this CRADA regarding the "passivation-transparent" design philosophy shall be documented to secure a competitive advantage in the high-efficiency tandem market. The final deliverable will be a validated process flow for the 30 nm nc-Si layer transition on the Granas pilot line.
-+2
-
-Would you like me to draft the specific "Terms and Conditions" section regarding IP ownership, or should I expand the simulation parameters to include different perovskite top-cell bandgaps?
-
-

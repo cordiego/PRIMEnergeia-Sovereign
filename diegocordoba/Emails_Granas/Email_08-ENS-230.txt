@@ -1,7 +1,0 @@
-PARA: Ernesto Razo Ramos
-EMAIL: ernesto.razo@cenace.gob.mx
-ASUNTO: Validacion de Modelo Estocastico: Disipacion Proyectada de $87,120.90 USD en Nodo 08-ENS-230
-
-Estimado Ernesto,
-
-Hemos corrido una simulacion para el nodo 08-ENS-230... [Cuerpo completo generado]

@@ -1,4 +1,0 @@
-
-[2026-05-27 14:06:20] CRITICAL DISTINCTION — Never confuse these two:
-1. VZA-400 = CENACE grid node (100 MW, Centro-Occidente Mexico). It is the empirical data source for the HJB/Granas grid frequency thesis. It is a POWER GRID concept.
-2. Granas H2 = PRIMEnergeia SBU focused on green hydrogen via PEM electrolysis. Solar-powered electrolyzer that splits water into H2. Completely separate product from VZA-400. Never reference VZA-400 when talking about Granas H2.

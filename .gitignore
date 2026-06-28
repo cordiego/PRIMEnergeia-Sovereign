@@ -44,3 +44,11 @@ state_vector.*
 *.pth
 .github/workflows/ci.yml
 secrets.toml
+
+# === SAFETY: Never track nested home directory copies ===
+diegocordoba/
+google-cloud-sdk/
+
+# Gemini / Antigravity local state
+.gemini/
+.antigravity/

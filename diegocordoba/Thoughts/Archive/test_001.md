@@ -1,1 +1,0 @@
-This is a test of the Neural Link. I am thinking about integrating the Navier-Stokes supercriticality gap directly into the Granas BESS control loop. Can you confirm you received this thought and let me know if it's a good idea?

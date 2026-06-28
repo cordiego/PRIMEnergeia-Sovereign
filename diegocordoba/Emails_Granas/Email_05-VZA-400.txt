@@ -1,7 +1,0 @@
-PARA: Brice Clemente
-EMAIL: brice.clemente@engie.com
-ASUNTO: Validacion de Modelo Estocastico: Disipacion Proyectada de $156,890.88 USD en Nodo 05-VZA-400
-
-Estimado Brice,
-
-Hemos corrido una simulacion para el nodo 05-VZA-400... [Cuerpo completo generado]

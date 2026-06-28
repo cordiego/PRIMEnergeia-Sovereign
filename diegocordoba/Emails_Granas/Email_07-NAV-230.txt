@@ -1,7 +1,0 @@
-PARA: Tania Ortiz Mena
-EMAIL: tania.ortiz@semplainfrastructure.com
-ASUNTO: Validacion de Modelo Estocastico: Disipacion Proyectada de $125,780.22 USD en Nodo 07-NAV-230
-
-Estimado Tania,
-
-Hemos corrido una simulacion para el nodo 07-NAV-230... [Cuerpo completo generado]
