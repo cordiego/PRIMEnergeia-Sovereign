@@ -278,6 +278,7 @@ st.sidebar.markdown("### 🚀 Quick Launch")
 _quick = {
     "⚡ Co-Optimization": "pages/25_⚡_Co_Optimization.py",
     "⚡ Grid Control":    "pages/1_⚡_Grid_Control.py",
+    "🔋 HJB Arbitrage":   "pages/30_🔋_Arbitrage_HJB_Granas.py",
     "🔌 Grid Outputs":    "pages/27_🔌_Grid_Outputs.py",
     "🧪 Granas Optimizer":"pages/3_🧪_Granas_Optimizer.py",
     "📐 Granas Module":   "pages/28_📐_Granas_Module.py",
@@ -285,6 +286,7 @@ _quick = {
     "🏭 PRIMStack":       "pages/22_🏭_PRIMStack.py",
     "🔬 Engine Research":  "pages/21_🔬_Engine_Research.py",
     "📂 Data Upload":     "pages/26_📂_Data_Upload.py",
+    "📄 Paper Analyzer":  "pages/29_📄_Paper_Analyzer.py",
 }
 for _label, _page in _quick.items():
     st.sidebar.page_link(_page, label=_label)
@@ -397,7 +399,7 @@ with c6:
     """, unsafe_allow_html=True)
     st.page_link("pages/26_📂_Data_Upload.py", label="Open →", icon="📂")
 
-c7_go, _, _ = st.columns(3)
+c7_go, c8_arb, _ = st.columns(3)
 
 with c7_go:
     st.markdown("""
@@ -412,6 +414,20 @@ with c7_go:
     </div>
     """, unsafe_allow_html=True)
     st.page_link("pages/27_🔌_Grid_Outputs.py", label="Open →", icon="🔌")
+
+with c8_arb:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #FFD700;'>🔋 HJB Arbitrage</div>
+        <div class='product-desc'>HJB vs Heuristic battery dispatch. Stochastic SDE modeling + Granas H2 synergy (Negative pricing).</div>
+        <div>
+            <span class='product-badge'>HJB</span>
+            <span class='product-badge'>SDE</span>
+            <span class='product-badge'>GRANAS H2</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/30_🔋_Arbitrage_HJB_Granas.py", label="Open →", icon="🔋")
 
 # ── Flagship CTA — Co-Optimization ──
 st.markdown("")
@@ -769,6 +785,20 @@ with g18:
     st.page_link("pages/24_📊_CEO_Dashboard.py", label="Open →", icon="📊")
 
 st.markdown("")
+g19, g20, g21 = st.columns(3)
+with g19:
+    st.markdown("""
+    <div class='product-card'>
+        <div class='product-title' style='color: #00d1ff;'>📄 Paper Analyzer</div>
+        <div class='product-desc'>Deep scientific reading. Claude-powered HJB extraction & analysis.</div>
+        <div>
+            <span class='product-badge'>CLAUDE</span>
+            <span class='product-badge'>HJB</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.page_link("pages/29_📄_Paper_Analyzer.py", label="Open →", icon="📄")
+
 st.divider()
 
 # ============================================================
@@ -777,7 +807,7 @@ st.divider()
 st.markdown("### Platform Metrics")
 m1, m2, m3, m4, m5, m6 = st.columns(6)
 m1.metric("MARKETS", "17", "1,700+ GW Global")
-m2.metric("PAGES", "28", "Full Product Suite")
+m2.metric("PAGES", "29", "Full Product Suite")
 m3.metric("DIVISIONS", "3", "Grid · Eureka · Research")
 m4.metric("ENGINES", "6", "NH₃ · H₂ · Turbine")
 m5.metric("REPOS", "22", "Enterprise Fleet")
